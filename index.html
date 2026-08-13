@@ -168,6 +168,33 @@
   .cs-switch-btn:disabled { opacity: .45; cursor: not-allowed; }
   .cs-iframe-wrap { width: 100%; border-radius: 12px; overflow: hidden; border: 1px solid var(--border); background: #05090f; }
   .cs-iframe { width: 100%; height: 640px; border: none; display: block; }
+  .cs-tweet-editor { display: flex; flex-direction: column; gap: 10px; margin-bottom: 12px; }
+  .cs-tweet-slide-edit { background: var(--panel); border: 1px solid var(--border); border-radius: 10px; padding: 12px; display: flex; flex-direction: column; gap: 8px; }
+  .cs-tweet-slide-edit textarea { width: 100%; min-height: 70px; background: var(--panel-2); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-family: inherit; font-size: 12.5px; padding: 8px; resize: vertical; }
+  .cs-tweet-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+  .cs-tweet-thumb { width: 52px; height: 52px; border-radius: 8px; object-fit: cover; background: var(--panel-2); flex: 0 0 auto; }
+  .cs-tweet-rail-wrap { border-radius: 12px; overflow: hidden; border: 1px solid var(--border); background: #05090f; padding: 16px; margin-top: 4px; }
+  .cs-tweet-rail { display: flex; gap: 20px; overflow-x: auto; padding-bottom: 8px; }
+  .tw-frame { flex: 0 0 auto; width: 302px; height: 378px; overflow: hidden; position: relative; border-radius: 6px; box-shadow: 0 8px 30px rgba(0,0,0,.45); background: #fff; }
+  .tw-card { width: 1080px; height: 1350px; transform: scale(.2796); transform-origin: top left; box-sizing: border-box; padding: 56px; display: flex; flex-direction: column; background: #ffffff; font-family: 'Inter', Arial, sans-serif; color: #0f1419; }
+  .tw-header { display: flex; align-items: flex-start; gap: 20px; padding-bottom: 24px; }
+  .tw-avatar { width: 88px; height: 88px; border-radius: 50%; object-fit: cover; flex: 0 0 auto; background: #eee; }
+  .tw-namecol { display: flex; flex-direction: column; gap: 4px; padding-top: 6px; }
+  .tw-name-row { display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 32px; color: #0f1419; }
+  .tw-check { width: 26px; height: 26px; flex: 0 0 auto; }
+  .tw-handle { font-size: 26px; color: #697077; }
+  .tw-body { font-size: 34px; line-height: 1.5; color: #0f1419; white-space: pre-wrap; padding-bottom: 28px; }
+  .tw-image-wrap { position: relative; flex: 1; border-radius: 22px; overflow: hidden; background: #e8ebee; min-height: 0; }
+  .tw-image-wrap img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .tw-bubble { position: absolute; left: 20px; bottom: 20px; background: rgba(20,23,26,.85); color: #fff; font-size: 22px; padding: 10px 18px 10px 10px; border-radius: 24px; display: flex; align-items: center; gap: 10px; }
+  .tw-bubble-avatar { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; }
+  .tw-dots { position: absolute; bottom: 18px; left: 50%; transform: translateX(-50%); display: flex; gap: 6px; }
+  .tw-dot { width: 8px; height: 8px; border-radius: 50%; background: rgba(255,255,255,.55); }
+  .tw-dot.active { background: #fff; width: 20px; border-radius: 5px; }
+  .tw-arrow { position: absolute; top: 50%; transform: translateY(-50%); width: 44px; height: 44px; border-radius: 50%; background: rgba(255,255,255,.92); display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 10px rgba(0,0,0,.25); font-size: 24px; color: #0f1419; font-weight: 700; }
+  .tw-arrow.left { left: 16px; }
+  .tw-arrow.right { right: 16px; }
+  .tw-noimg { display: flex; align-items: center; justify-content: center; height: 100%; color: #9aa5b1; font-size: 26px; text-align: center; padding: 40px; }
   .chat-messages { display: flex; flex-direction: column; gap: 8px; margin-top: 14px; max-height: 50vh; overflow-y: auto; padding-right: 2px; }
   .bubble { padding: 10px 12px; border-radius: 10px; font-size: 13px; line-height: 1.5; white-space: pre-wrap; }
   .bubble.user { background: var(--accent); color: #16130a; align-self: flex-end; max-width: 85%; font-weight: 600; }
@@ -247,24 +274,41 @@
       <h2>Carousel Studio</h2>
       <div class="cs-switcher">
         <button class="cs-switch-btn active" id="csBtnModel1" data-cs-target="model1">Padrão Tecnológico</button>
-        <button class="cs-switch-btn" id="csBtnModel2" data-cs-target="model2" disabled title="Aguardando o arquivo do modelo Tweet/X">Estilo Tweet/X</button>
+        <button class="cs-switch-btn" id="csBtnModel2" data-cs-target="model2">Estilo Tweet/X</button>
       </div>
-      <div class="cs-iframe-wrap">
-        <iframe id="csFrameModel1" class="cs-iframe" title="Modelo — Padrão Tecnológico"></iframe>
-        <iframe id="csFrameModel2" class="cs-iframe" title="Modelo — Estilo Tweet/X" style="display:none;"></iframe>
+
+      <div id="csModel1Wrap">
+        <div class="cs-iframe-wrap">
+          <iframe id="csFrameModel1" class="cs-iframe" title="Modelo — Padrão Tecnológico"></iframe>
+        </div>
+        <div class="note" style="margin-top:12px;">
+          Modelo trazido do <b>B4 Carousel Studio</b> original, agora vivendo
+          aqui como mais uma aba do B4 Studio Edition. O logo usado nos slides
+          é o mesmo que você envia na aba <b>Roteiro</b> — suba o logo lá e
+          ele aparece automaticamente aqui também.
+        </div>
+        <div class="note" style="margin-top:8px;">
+          Algumas imagens de fundo dos slides vêm de links do Canva
+          (temporários, com expiração) e do Unsplash. Se algum fundo aparecer
+          só como gradiente escuro, é porque o link do Canva expirou —
+          exporte a imagem de novo e me envie que eu incorporo de forma
+          permanente.
+        </div>
       </div>
-      <div class="note" style="margin-top:12px;">
-        Modelos trazidos do <b>B4 Carousel Studio</b> original, agora vivendo
-        aqui como mais uma aba do B4 Studio Edition. O logo usado nos slides é
-        o mesmo que você envia na aba <b>Roteiro</b> — suba o logo lá e ele
-        aparece automaticamente aqui também. O modelo "Estilo Tweet/X" entra
-        assim que você enviar o arquivo original dele.
-      </div>
-      <div class="note" style="margin-top:8px;">
-        Algumas imagens de fundo dos slides vêm de links do Canva
-        (temporários, com expiração) e do Unsplash. Se algum fundo aparecer
-        só como gradiente escuro, é porque o link do Canva expirou — exporte
-        a imagem de novo e me envie que eu incorporo de forma permanente.
+
+      <div id="csModel2Wrap" style="display:none;">
+        <div class="cs-tweet-editor" id="csTweetEditor"></div>
+        <button class="btn" id="btnAddTweetSlide">+ Adicionar página</button>
+        <div class="cs-tweet-rail-wrap">
+          <div class="cs-tweet-rail" id="csTweetRail"></div>
+        </div>
+        <div class="note" style="margin-top:12px;">
+          Perfil fixo neste modelo: foto, nome e selo de verificado de
+          <b>Matheus Serpa | Consórcio</b> (@matheushserpa), a partir do print
+          que você enviou. Escreva o texto de cada página ao lado e, se
+          quiser, envie sua própria imagem por página — sem imagem enviada,
+          uso uma foto de banco (Unsplash) como referência até você trocar.
+        </div>
       </div>
     </div>
 
@@ -698,13 +742,34 @@
 </html>
 `;
 
-  const CAROUSEL_MODEL_TWEET_HTML = null; // "Estilo Tweet/X" — aguardando o arquivo b4_business_carrossel_credito_tweet.html
+  // ---------------------------------------------------------------------
+  // Carousel Studio — Estilo Tweet/X: modelo próprio (o arquivo original
+  // nunca foi enviado / se perdeu), recriado do zero a partir dos prints
+  // de referência que você mandou. Perfil fixo (foto real, recortada do
+  // print que você enviou de Matheus Serpa), com texto e imagem editáveis
+  // por página — veja renderTweetEditor()/renderTweetRail() mais abaixo.
+  // ---------------------------------------------------------------------
+  const TWEET_PROFILE = {
+    name: 'Matheus Serpa | Consórcio',
+    handle: '@matheushserpa',
+    avatar: 'data:image/jpeg;base64,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',
+  };
+  const TWEET_CHECK_SVG = '<svg viewBox="0 0 24 24" class="tw-check"><path fill="#1d9bf0" d="M12 0l2.3 2.1 3.1-.9.9 3.1 3.1.9-.4 3.2L24 12l-2.9 2.6.4 3.2-3.1.9-.9 3.1-3.1-.9L12 24l-2.3-2.1-3.1.9-.9-3.1-3.1-.9.4-3.2L0 12l2.9-2.6-.4-3.2 3.1-.9.9-3.1 3.1.9z"/><path fill="#fff" d="M9.6 16.2 6 12.6l1.4-1.4 2.2 2.2 5-5L16 9.8z"/></svg>';
+  // Imagens padrão (Unsplash) usadas até você anexar as suas em cada página.
+  const TWEET_DEFAULT_IMAGES = [
+    'https://images.unsplash.com/photo-1608303588026-884930af2559?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080',
+    'https://images.unsplash.com/photo-1729855637715-99192904aac5?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080',
+    'https://images.unsplash.com/photo-1512531123205-560f5974e686?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080',
+    'https://images.unsplash.com/photo-1591759220700-f791b2ea6db4?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080',
+  ];
 
   // ---------------------------------------------------------------------
   // Estado
   // ---------------------------------------------------------------------
   let idCounter = 1;
   function nextId() { return 'part-' + (idCounter++); }
+  let tweetIdCounter = 1;
+  function nextTweetId() { return 'tw-' + (tweetIdCounter++); }
 
   const state = {
     theme: 'b4-blue',
@@ -735,6 +800,30 @@
         brollDataUrl: null, brollImg: null, audioDataUrl: null, audioFileName: null,
       },
     ],
+    tweetCarousel: {
+      slides: [
+        {
+          id: nextTweetId(),
+          text: 'O carro parado na garagem não é o único que perde valor com o tempo.\n\nSeu dinheiro parado na poupança também está perdendo poder de compra todo mês — só que ninguém fala sobre isso.',
+          imageUrl: TWEET_DEFAULT_IMAGES[0], imageDataUrl: null, bubble: 'Qual sua opinião?',
+        },
+        {
+          id: nextTweetId(),
+          text: 'Em 2021 te venderam a ideia de que esperar era a jogada mais segura.\n\nHoje, quem começou um plano de consórcio naquela época já está com a carta em mãos — e quem esperou, ainda está esperando.',
+          imageUrl: TWEET_DEFAULT_IMAGES[1], imageDataUrl: null, bubble: 'Qual sua opinião?',
+        },
+        {
+          id: nextTweetId(),
+          text: 'Não é sobre ter sorte no sorteio.\n\nÉ sobre ter uma estratégia clara pra usar o consórcio a seu favor — com lances planejados e visão de longo prazo.',
+          imageUrl: TWEET_DEFAULT_IMAGES[2], imageDataUrl: null, bubble: 'Qual sua opinião?',
+        },
+        {
+          id: nextTweetId(),
+          text: 'A pergunta não é "quando vou conseguir comprar".\n\nA pergunta é: você tem um plano rodando agora, ou ainda está só pensando nele?',
+          imageUrl: TWEET_DEFAULT_IMAGES[3], imageDataUrl: null, bubble: 'Qual sua opinião?',
+        },
+      ],
+    },
   };
 
   // ---------------------------------------------------------------------
@@ -1372,8 +1461,11 @@
   });
 
   // ---------------------------------------------------------------------
-  // Carousel Studio — aba (renderiza os modelos de carrossel embutidos em
-  // <iframe srcdoc>, injetando o logo compartilhado da aba Roteiro).
+  // Carousel Studio — aba. Modelo 1 (Padrão Tecnológico) renderiza o HTML
+  // embutido num <iframe srcdoc>, injetando o logo compartilhado da aba
+  // Roteiro. Modelo 2 (Estilo Tweet/X) é montado ao vivo no próprio
+  // documento (não num iframe) porque cada página é editável — texto e
+  // imagem por página, vindos do state.tweetCarousel.
   // ---------------------------------------------------------------------
   function logoMarkHtml() {
     if (state.logoDataUrl) {
@@ -1383,32 +1475,130 @@
   }
 
   const csFrameModel1 = document.getElementById('csFrameModel1');
-  const csFrameModel2 = document.getElementById('csFrameModel2');
 
   function renderCarouselTab() {
     const mark = logoMarkHtml();
     if (CAROUSEL_MODEL_APOSENTADORIA_HTML) {
       csFrameModel1.srcdoc = CAROUSEL_MODEL_APOSENTADORIA_HTML.replaceAll('{{LOGO_MARK}}', mark);
     }
-    if (CAROUSEL_MODEL_TWEET_HTML) {
-      csFrameModel2.srcdoc = CAROUSEL_MODEL_TWEET_HTML.replaceAll('{{LOGO_MARK}}', mark);
-    }
   }
   renderCarouselTab();
 
   const csSwitchButtons = [document.getElementById('csBtnModel1'), document.getElementById('csBtnModel2')];
-  const csFrames = { model1: csFrameModel1, model2: csFrameModel2 };
+  const csWraps = { model1: document.getElementById('csModel1Wrap'), model2: document.getElementById('csModel2Wrap') };
   csSwitchButtons.forEach(function (btn) {
     btn.addEventListener('click', function () {
-      if (btn.disabled) return;
       csSwitchButtons.forEach(function (b) { b.classList.remove('active'); });
       btn.classList.add('active');
       const target = btn.getAttribute('data-cs-target');
-      Object.keys(csFrames).forEach(function (key) {
-        csFrames[key].style.display = key === target ? 'block' : 'none';
+      Object.keys(csWraps).forEach(function (key) {
+        csWraps[key].style.display = key === target ? 'block' : 'none';
       });
     });
   });
+
+  // ---- Estilo Tweet/X — editor de páginas + preview ao vivo ----
+  function escapeHtml(str) {
+    return String(str == null ? '' : str)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+
+  function tweetSlideImageSrc(slide) {
+    return slide.imageDataUrl || slide.imageUrl || '';
+  }
+
+  function renderTweetSlideCardHtml(slide, index, total) {
+    const imgSrc = tweetSlideImageSrc(slide);
+    const imageHtml = imgSrc ? '<img src="' + imgSrc + '" alt="Imagem da página ' + (index + 1) + '">' : '';
+    const noImgHtml = imgSrc ? '' : '<div class="tw-noimg">Sem imagem nesta página<br>(adicione uma ao lado)</div>';
+    const dotsHtml = Array.from({ length: total }).map(function (_, i) {
+      return '<div class="tw-dot' + (i === index ? ' active' : '') + '"></div>';
+    }).join('');
+    const bodyHtml = escapeHtml(slide.text || 'Escreva o texto desta página ao lado...').replace(/\n/g, '<br>');
+    return (
+      '<div class="tw-card">' +
+        '<div class="tw-header">' +
+          '<img class="tw-avatar" src="' + TWEET_PROFILE.avatar + '" alt="Matheus Serpa">' +
+          '<div class="tw-namecol">' +
+            '<div class="tw-name-row">' + escapeHtml(TWEET_PROFILE.name) + ' ' + TWEET_CHECK_SVG + '</div>' +
+            '<div class="tw-handle">' + escapeHtml(TWEET_PROFILE.handle) + '</div>' +
+          '</div>' +
+        '</div>' +
+        '<div class="tw-body">' + bodyHtml + '</div>' +
+        '<div class="tw-image-wrap">' +
+          imageHtml + noImgHtml +
+          (imgSrc ? '<div class="tw-bubble"><img class="tw-bubble-avatar" src="' + TWEET_PROFILE.avatar + '" alt="">' + escapeHtml(slide.bubble || 'Qual sua opinião?') + '</div>' : '') +
+          (total > 1 ? '<div class="tw-dots">' + dotsHtml + '</div>' : '') +
+        '</div>' +
+        (total > 1 ? '<div class="tw-arrow left">‹</div><div class="tw-arrow right">›</div>' : '') +
+      '</div>'
+    );
+  }
+
+  const csTweetRail = document.getElementById('csTweetRail');
+  const csTweetEditor = document.getElementById('csTweetEditor');
+
+  function renderTweetRail() {
+    const slides = state.tweetCarousel.slides;
+    csTweetRail.innerHTML = slides.map(function (slide, i) {
+      return '<div class="tw-frame">' + renderTweetSlideCardHtml(slide, i, slides.length) + '</div>';
+    }).join('');
+  }
+
+  function renderTweetEditor() {
+    const slides = state.tweetCarousel.slides;
+    csTweetEditor.innerHTML = '';
+    slides.forEach(function (slide, i) {
+      const row = document.createElement('div');
+      row.className = 'cs-tweet-slide-edit';
+      row.innerHTML =
+        '<div class="cs-tweet-row"><b>Página ' + (i + 1) + '</b>' +
+        (slides.length > 1 ? '<button type="button" class="btn btn-sm btn-tweet-remove" data-id="' + slide.id + '">Remover</button>' : '') +
+        '</div>' +
+        '<textarea data-id="' + slide.id + '" placeholder="Texto desta página...">' + escapeHtml(slide.text || '') + '</textarea>' +
+        '<div class="cs-tweet-row">' +
+          '<img class="cs-tweet-thumb" src="' + tweetSlideImageSrc(slide) + '" alt="">' +
+          '<input type="file" accept="image/*" class="tweet-image-input" data-id="' + slide.id + '">' +
+        '</div>';
+      csTweetEditor.appendChild(row);
+    });
+
+    csTweetEditor.querySelectorAll('textarea').forEach(function (ta) {
+      ta.addEventListener('input', function () {
+        const slide = state.tweetCarousel.slides.find(function (s) { return s.id === ta.getAttribute('data-id'); });
+        if (slide) { slide.text = ta.value; renderTweetRail(); }
+      });
+    });
+    csTweetEditor.querySelectorAll('.tweet-image-input').forEach(function (input) {
+      input.addEventListener('change', function () {
+        const file = input.files[0];
+        if (!file) return;
+        const id = input.getAttribute('data-id');
+        const reader = new FileReader();
+        reader.onload = function () {
+          const slide = state.tweetCarousel.slides.find(function (s) { return s.id === id; });
+          if (slide) { slide.imageDataUrl = reader.result; renderTweetEditor(); renderTweetRail(); }
+        };
+        reader.readAsDataURL(file);
+      });
+    });
+    csTweetEditor.querySelectorAll('.btn-tweet-remove').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        const id = btn.getAttribute('data-id');
+        state.tweetCarousel.slides = state.tweetCarousel.slides.filter(function (s) { return s.id !== id; });
+        renderTweetEditor(); renderTweetRail();
+      });
+    });
+  }
+
+  document.getElementById('btnAddTweetSlide').addEventListener('click', function () {
+    const nextImg = TWEET_DEFAULT_IMAGES[state.tweetCarousel.slides.length % TWEET_DEFAULT_IMAGES.length];
+    state.tweetCarousel.slides.push({ id: nextTweetId(), text: '', imageUrl: nextImg, imageDataUrl: null, bubble: 'Qual sua opinião?' });
+    renderTweetEditor(); renderTweetRail();
+  });
+
+  renderTweetEditor();
+  renderTweetRail();
 
   // ---------------------------------------------------------------------
   // UI — lista de partes do roteiro
@@ -1592,6 +1782,14 @@
           brollDataUrl: p.brollDataUrl || null, audioDataUrl: p.audioDataUrl || null, audioFileName: p.audioFileName || null,
         };
       }),
+      tweetCarousel: {
+        slides: state.tweetCarousel.slides.map(function (s) {
+          return {
+            id: s.id, text: s.text, imageUrl: s.imageUrl || null,
+            imageDataUrl: s.imageDataUrl || null, bubble: s.bubble || 'Qual sua opinião?',
+          };
+        }),
+      },
     };
     const blob = new Blob([JSON.stringify(data)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
@@ -1638,6 +1836,18 @@
           }
           return part;
         });
+        const savedTweetSlides = (data.tweetCarousel && data.tweetCarousel.slides) || [];
+        state.tweetCarousel.slides = savedTweetSlides.length
+          ? savedTweetSlides.map(function (s) {
+              return {
+                id: s.id || nextTweetId(), text: s.text || '',
+                imageUrl: s.imageUrl || TWEET_DEFAULT_IMAGES[0],
+                imageDataUrl: s.imageDataUrl || null, bubble: s.bubble || 'Qual sua opinião?',
+              };
+            })
+          : state.tweetCarousel.slides;
+        renderTweetEditor();
+        renderTweetRail();
         syncGlobalControls();
         renderPartsList();
         currentTime = 0; lastPerf = null; currentAudioKey = null; isPlaying = false;
