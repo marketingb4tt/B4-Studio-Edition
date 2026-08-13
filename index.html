@@ -176,18 +176,27 @@
   .cs-tweet-rail-wrap { border-radius: 12px; overflow: hidden; border: 1px solid var(--border); background: #05090f; padding: 16px; margin-top: 4px; }
   .cs-tweet-rail { display: flex; gap: 20px; overflow-x: auto; padding-bottom: 8px; }
   .tw-frame { flex: 0 0 auto; width: 302px; height: 378px; overflow: hidden; position: relative; border-radius: 6px; box-shadow: 0 8px 30px rgba(0,0,0,.45); background: #fff; }
-  .tw-card { width: 1080px; height: 1350px; transform: scale(.2796); transform-origin: top left; box-sizing: border-box; padding: 56px; display: flex; flex-direction: column; background: #ffffff; font-family: 'Inter', Arial, sans-serif; color: #0f1419; }
-  .tw-header { display: flex; align-items: flex-start; gap: 20px; padding-bottom: 24px; }
+  /* Regras de borda do card Tweet/X (padrão pra todos os posts deste modelo):
+     64px de margem segura nos 4 lados. De cima pra baixo: cabeçalho (perfil),
+     texto (com altura máxima — encolhe a fonte pra caber, nunca invade a
+     área da imagem) e imagem (ocupa o resto até a margem inferior, cantos
+     arredondados nos 4 lados). Sem imagem, o texto usa livremente o espaço
+     que sobraria pra ela. */
+  .tw-card { width: 1080px; height: 1350px; transform: scale(.2796); transform-origin: top left; box-sizing: border-box; padding: 64px; display: flex; flex-direction: column; background: #ffffff; font-family: 'Inter', Arial, sans-serif; color: #0f1419; }
+  .tw-header { display: flex; align-items: flex-start; gap: 20px; padding-bottom: 32px; flex: 0 0 auto; }
   .tw-avatar { width: 88px; height: 88px; border-radius: 50%; object-fit: cover; flex: 0 0 auto; background: #eee; }
   .tw-namecol { display: flex; flex-direction: column; gap: 4px; padding-top: 6px; }
   .tw-name-row { display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 32px; color: #0f1419; }
   .tw-check { width: 26px; height: 26px; flex: 0 0 auto; }
   .tw-handle { font-size: 26px; color: #697077; }
-  .tw-body { font-size: 34px; line-height: 1.5; color: #0f1419; white-space: pre-wrap; padding-bottom: 28px; }
-  .tw-image-wrap { position: relative; flex: 1; border-radius: 22px; overflow: hidden; background: #e8ebee; min-height: 0; }
-  .tw-image-wrap img { width: 100%; height: 100%; object-fit: cover; display: block; }
-  .tw-bubble { position: absolute; left: 20px; bottom: 20px; background: rgba(20,23,26,.85); color: #fff; font-size: 22px; padding: 10px 18px 10px 10px; border-radius: 24px; display: flex; align-items: center; gap: 10px; }
-  .tw-bubble-avatar { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; }
+  .tw-body-wrap { flex: 0 1 auto; overflow: hidden; padding-bottom: 32px; }
+  .tw-body-wrap.no-image { flex: 1 1 auto; padding-bottom: 0; }
+  .tw-body { font-size: 34px; line-height: 1.5; color: #0f1419; white-space: pre-wrap; }
+  .tw-image-wrap { position: relative; flex: 1; border-radius: 24px; overflow: hidden; background: #e8ebee; min-height: 0; }
+  .tw-image-wrap img { width: 100%; height: 100%; object-fit: cover; display: block; transform-origin: center; }
+  .tw-credit { font-size: 20px; font-weight: 700; line-height: 1.35; color: #0b8f79; max-width: 90%; }
+  .tw-credit.on-image { position: absolute; left: 20px; bottom: 20px; color: #eafff9; text-shadow: 0 1px 6px rgba(0,0,0,.55); }
+  .tw-credit.below-text { margin-top: 12px; }
   .tw-dots { position: absolute; bottom: 18px; left: 50%; transform: translateX(-50%); display: flex; gap: 6px; }
   .tw-dot { width: 8px; height: 8px; border-radius: 50%; background: rgba(255,255,255,.55); }
   .tw-dot.active { background: #fff; width: 20px; border-radius: 5px; }
@@ -280,6 +289,27 @@
       <div id="csModel1Wrap">
         <div class="cs-iframe-wrap">
           <iframe id="csFrameModel1" class="cs-iframe" title="Modelo — Padrão Tecnológico"></iframe>
+        </div>
+        <div class="card" style="margin-top:12px;">
+          <div style="font-size:11.5px;color:var(--text-dim);margin-bottom:10px;">
+            Zoom das fotos de fundo (slides 1, 2 e 5) — amplia a imagem dentro
+            do quadro pra você corrigir o enquadramento.
+          </div>
+          <div class="cs-tweet-row" style="margin-bottom:8px;">
+            <label style="font-size:11.5px;color:var(--text-dim);flex:0 0 90px;">Slide 1 (capa)</label>
+            <input type="range" id="cs1Zoom1" min="100" max="250" step="5" value="100" style="flex:1;">
+            <span id="cs1Zoom1Label" style="font-size:11.5px;color:var(--text-dim);flex:0 0 auto;">100%</span>
+          </div>
+          <div class="cs-tweet-row" style="margin-bottom:8px;">
+            <label style="font-size:11.5px;color:var(--text-dim);flex:0 0 90px;">Slide 2</label>
+            <input type="range" id="cs1Zoom2" min="100" max="250" step="5" value="100" style="flex:1;">
+            <span id="cs1Zoom2Label" style="font-size:11.5px;color:var(--text-dim);flex:0 0 auto;">100%</span>
+          </div>
+          <div class="cs-tweet-row">
+            <label style="font-size:11.5px;color:var(--text-dim);flex:0 0 90px;">Slide 5</label>
+            <input type="range" id="cs1Zoom5" min="100" max="250" step="5" value="100" style="flex:1;">
+            <span id="cs1Zoom5Label" style="font-size:11.5px;color:var(--text-dim);flex:0 0 auto;">100%</span>
+          </div>
         </div>
         <div class="note" style="margin-top:12px;">
           Modelo trazido do <b>B4 Carousel Studio</b> original, agora vivendo
@@ -471,6 +501,11 @@
     background: linear-gradient(180deg, rgba(8,17,36,.55) 0%, rgba(8,17,36,.35) 35%, rgba(8,17,36,.92) 78%, #0a1730 100%);
     pointer-events: none;
   }
+  .photo-layer {
+    position: absolute; inset: 0;
+    background-size: cover; background-position: center;
+    transform-origin: center;
+  }
   .photo-credit {
     position: absolute; bottom: 8px; right: 12px;
     font-family: 'Inter'; font-size: 9px; color: rgba(255,255,255,.35);
@@ -600,7 +635,8 @@
 
 <div class="rail">
 
-  <div class="frame"><div class="slide" style="background-image:url('https://export-download.canva.com/ASTLs/DAHSCUASTLs/-1/0/0001-8839952674640892778.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&amp;X-Amz-Credential=AKIAQYCGKMUH5AO7UJ26%2F20260812%2Fus-east-1%2Fs3%2Faws4_request&amp;X-Amz-Date=20260812T202913Z&amp;X-Amz-Expires=18549&amp;X-Amz-Signature=0c576e1dd72700d760c3078f07e31b570cbad7788c3bba5f0e2f0b2446bc0d6b&amp;X-Amz-SignedHeaders=host%3Bx-amz-expected-bucket-owner&amp;response-expires=Thu%2C%2013%20Aug%202026%2001%3A38%3A22%20GMT'); background-size:cover; background-position:center;">
+  <div class="frame"><div class="slide">
+    <div class="photo-layer" style="background-image:url('https://export-download.canva.com/ASTLs/DAHSCUASTLs/-1/0/0001-8839952674640892778.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&amp;X-Amz-Credential=AKIAQYCGKMUH5AO7UJ26%2F20260812%2Fus-east-1%2Fs3%2Faws4_request&amp;X-Amz-Date=20260812T202913Z&amp;X-Amz-Expires=18549&amp;X-Amz-Signature=0c576e1dd72700d760c3078f07e31b570cbad7788c3bba5f0e2f0b2446bc0d6b&amp;X-Amz-SignedHeaders=host%3Bx-amz-expected-bucket-owner&amp;response-expires=Thu%2C%2013%20Aug%202026%2001%3A38%3A22%20GMT'); transform:scale({{ZOOM_1}});"></div>
     <div class="photo-overlay"></div>
     <div class="grid-overlay"></div><div class="scanline"></div>
     <div class="bracket tl"></div><div class="bracket br"></div>
@@ -620,7 +656,8 @@
     </div>
   </div></div>
 
-  <div class="frame"><div class="slide" style="background-image:url('https://export-download.canva.com/bE3dY/DAHSGRbE3dY/-1/0/0001-4990500895234276463.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&amp;X-Amz-Credential=AKIAQYCGKMUH5AO7UJ26%2F20260812%2Fus-east-1%2Fs3%2Faws4_request&amp;X-Amz-Date=20260812T221205Z&amp;X-Amz-Expires=12202&amp;X-Amz-Signature=60314481265c42d9dbf2dbb1b538f69067be4e10693b6a9688c49d6ea23b17e5&amp;X-Amz-SignedHeaders=host%3Bx-amz-expected-bucket-owner&amp;response-expires=Thu%2C%2013%20Aug%202026%2001%3A35%3A27%20GMT'); background-size:cover; background-position:center;">
+  <div class="frame"><div class="slide">
+    <div class="photo-layer" style="background-image:url('https://export-download.canva.com/bE3dY/DAHSGRbE3dY/-1/0/0001-4990500895234276463.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&amp;X-Amz-Credential=AKIAQYCGKMUH5AO7UJ26%2F20260812%2Fus-east-1%2Fs3%2Faws4_request&amp;X-Amz-Date=20260812T221205Z&amp;X-Amz-Expires=12202&amp;X-Amz-Signature=60314481265c42d9dbf2dbb1b538f69067be4e10693b6a9688c49d6ea23b17e5&amp;X-Amz-SignedHeaders=host%3Bx-amz-expected-bucket-owner&amp;response-expires=Thu%2C%2013%20Aug%202026%2001%3A35%3A27%20GMT'); transform:scale({{ZOOM_2}});"></div>
     <div class="photo-overlay"></div>
     <div class="grid-overlay"></div><div class="scanline" style="animation-delay:-1s"></div>
     <div class="bracket tl"></div><div class="bracket br"></div>
@@ -692,7 +729,8 @@
     </div>
   </div></div>
 
-  <div class="frame"><div class="slide" style="background-image:url('https://images.unsplash.com/photo-1752007085312-6894a6afb19c?crop=entropy&amp;cs=tinysrgb&amp;fit=max&amp;fm=jpg&amp;q=80&amp;w=1080'); background-size:cover; background-position:center;">
+  <div class="frame"><div class="slide">
+    <div class="photo-layer" style="background-image:url('https://images.unsplash.com/photo-1752007085312-6894a6afb19c?crop=entropy&amp;cs=tinysrgb&amp;fit=max&amp;fm=jpg&amp;q=80&amp;w=1080'); transform:scale({{ZOOM_5}});"></div>
     <div class="photo-overlay"></div>
     <div class="photo-credit">Foto: Benjamin Chambon / Unsplash</div>
     <div class="grid-overlay"></div><div class="scanline" style="animation-delay:-4s"></div>
@@ -777,6 +815,11 @@
     brollStyle: 'ken-burns',
     logoDataUrl: null,
     logoImg: null,
+    // Zoom das 3 fotos de fundo do modelo Padrão Tecnológico (slides 1, 2 e 5
+    // — os únicos com foto). 1 = tamanho normal (cover); acima disso amplia
+    // a imagem dentro do quadro, cortando as bordas — útil pra recentralizar
+    // o que importa na foto quando o enquadramento padrão corta errado.
+    carousel1Zoom: { 1: 1, 2: 1, 5: 1 },
     parts: [
       {
         id: nextId(),
@@ -805,22 +848,22 @@
         {
           id: nextTweetId(),
           text: 'O carro parado na garagem não é o único que perde valor com o tempo.\n\nSeu dinheiro parado na poupança também está perdendo poder de compra todo mês — só que ninguém fala sobre isso.',
-          imageUrl: TWEET_DEFAULT_IMAGES[0], imageDataUrl: null, bubble: 'Qual sua opinião?',
+          imageUrl: TWEET_DEFAULT_IMAGES[0], imageDataUrl: null, imageZoom: 1, credit: 'Fonte: inserir fonte da informação aqui',
         },
         {
           id: nextTweetId(),
           text: 'Em 2021 te venderam a ideia de que esperar era a jogada mais segura.\n\nHoje, quem começou um plano de consórcio naquela época já está com a carta em mãos — e quem esperou, ainda está esperando.',
-          imageUrl: TWEET_DEFAULT_IMAGES[1], imageDataUrl: null, bubble: 'Qual sua opinião?',
+          imageUrl: TWEET_DEFAULT_IMAGES[1], imageDataUrl: null, imageZoom: 1, credit: 'Fonte: inserir fonte da informação aqui',
         },
         {
           id: nextTweetId(),
           text: 'Não é sobre ter sorte no sorteio.\n\nÉ sobre ter uma estratégia clara pra usar o consórcio a seu favor — com lances planejados e visão de longo prazo.',
-          imageUrl: TWEET_DEFAULT_IMAGES[2], imageDataUrl: null, bubble: 'Qual sua opinião?',
+          imageUrl: TWEET_DEFAULT_IMAGES[2], imageDataUrl: null, imageZoom: 1, credit: 'Fonte: inserir fonte da informação aqui',
         },
         {
           id: nextTweetId(),
           text: 'A pergunta não é "quando vou conseguir comprar".\n\nA pergunta é: você tem um plano rodando agora, ou ainda está só pensando nele?',
-          imageUrl: TWEET_DEFAULT_IMAGES[3], imageDataUrl: null, bubble: 'Qual sua opinião?',
+          imageUrl: TWEET_DEFAULT_IMAGES[3], imageDataUrl: null, imageZoom: 1, credit: 'Fonte: inserir fonte da informação aqui',
         },
       ],
     },
@@ -1479,10 +1522,26 @@
   function renderCarouselTab() {
     const mark = logoMarkHtml();
     if (CAROUSEL_MODEL_APOSENTADORIA_HTML) {
-      csFrameModel1.srcdoc = CAROUSEL_MODEL_APOSENTADORIA_HTML.replaceAll('{{LOGO_MARK}}', mark);
+      csFrameModel1.srcdoc = CAROUSEL_MODEL_APOSENTADORIA_HTML
+        .replaceAll('{{LOGO_MARK}}', mark)
+        .replaceAll('{{ZOOM_1}}', state.carousel1Zoom[1])
+        .replaceAll('{{ZOOM_2}}', state.carousel1Zoom[2])
+        .replaceAll('{{ZOOM_5}}', state.carousel1Zoom[5]);
     }
   }
   renderCarouselTab();
+
+  // ---- Sliders de zoom das fotos do Padrão Tecnológico ----
+  ['1', '2', '5'].forEach(function (slideNum) {
+    const range = document.getElementById('cs1Zoom' + slideNum);
+    const label = document.getElementById('cs1Zoom' + slideNum + 'Label');
+    if (!range) return;
+    range.addEventListener('input', function () {
+      state.carousel1Zoom[slideNum] = Number(range.value) / 100;
+      if (label) label.textContent = range.value + '%';
+      renderCarouselTab();
+    });
+  });
 
   const csSwitchButtons = [document.getElementById('csBtnModel1'), document.getElementById('csBtnModel2')];
   const csWraps = { model1: document.getElementById('csModel1Wrap'), model2: document.getElementById('csModel2Wrap') };
@@ -1507,14 +1566,32 @@
     return slide.imageDataUrl || slide.imageUrl || '';
   }
 
+  // Regra de "texto se adapta ao espaço amarelo": sem medir o DOM (o card é
+  // renderizado escalado várias vezes na esteira), estimamos o tamanho da
+  // fonte pelo comprimento do texto. Com imagem, a caixa de texto é menor
+  // (tem que sobrar espaço pra imagem); sem imagem, o texto pode usar quase
+  // o cartão inteiro, então aceita bem mais caracteres antes de encolher.
+  function tweetBodyFontSize(text, hasImage) {
+    const len = (text || '').length;
+    const steps = hasImage
+      ? [[140, 34], [220, 28], [320, 24], [Infinity, 20]]
+      : [[300, 34], [500, 28], [750, 24], [Infinity, 20]];
+    for (let i = 0; i < steps.length; i++) {
+      if (len <= steps[i][0]) return steps[i][1];
+    }
+    return 20;
+  }
+
   function renderTweetSlideCardHtml(slide, index, total) {
     const imgSrc = tweetSlideImageSrc(slide);
-    const imageHtml = imgSrc ? '<img src="' + imgSrc + '" alt="Imagem da página ' + (index + 1) + '">' : '';
-    const noImgHtml = imgSrc ? '' : '<div class="tw-noimg">Sem imagem nesta página<br>(adicione uma ao lado)</div>';
+    const zoom = slide.imageZoom || 1;
+    const imageHtml = imgSrc ? '<img src="' + imgSrc + '" alt="Imagem da página ' + (index + 1) + '" style="transform:scale(' + zoom + ');">' : '';
     const dotsHtml = Array.from({ length: total }).map(function (_, i) {
       return '<div class="tw-dot' + (i === index ? ' active' : '') + '"></div>';
     }).join('');
     const bodyHtml = escapeHtml(slide.text || 'Escreva o texto desta página ao lado...').replace(/\n/g, '<br>');
+    const fontSize = tweetBodyFontSize(slide.text, !!imgSrc);
+    const creditText = escapeHtml(slide.credit || 'Fonte: inserir fonte da informação aqui');
     return (
       '<div class="tw-card">' +
         '<div class="tw-header">' +
@@ -1524,13 +1601,18 @@
             '<div class="tw-handle">' + escapeHtml(TWEET_PROFILE.handle) + '</div>' +
           '</div>' +
         '</div>' +
-        '<div class="tw-body">' + bodyHtml + '</div>' +
-        '<div class="tw-image-wrap">' +
-          imageHtml + noImgHtml +
-          (imgSrc ? '<div class="tw-bubble"><img class="tw-bubble-avatar" src="' + TWEET_PROFILE.avatar + '" alt="">' + escapeHtml(slide.bubble || 'Qual sua opinião?') + '</div>' : '') +
-          (total > 1 ? '<div class="tw-dots">' + dotsHtml + '</div>' : '') +
+        '<div class="tw-body-wrap' + (imgSrc ? '' : ' no-image') + '">' +
+          '<div class="tw-body" style="font-size:' + fontSize + 'px;">' + bodyHtml + '</div>' +
+          (imgSrc ? '' : '<div class="tw-credit below-text">' + creditText + '</div>') +
         '</div>' +
-        (total > 1 ? '<div class="tw-arrow left">‹</div><div class="tw-arrow right">›</div>' : '') +
+        (imgSrc ?
+          '<div class="tw-image-wrap">' +
+            imageHtml +
+            '<div class="tw-credit on-image">' + creditText + '</div>' +
+            (total > 1 ? '<div class="tw-dots">' + dotsHtml + '</div>' : '') +
+          '</div>'
+          : '') +
+        (total > 1 && imgSrc ? '<div class="tw-arrow left">‹</div><div class="tw-arrow right">›</div>' : '') +
       '</div>'
     );
   }
@@ -1549,6 +1631,8 @@
     const slides = state.tweetCarousel.slides;
     csTweetEditor.innerHTML = '';
     slides.forEach(function (slide, i) {
+      const hasImg = !!tweetSlideImageSrc(slide);
+      const zoomPct = Math.round((slide.imageZoom || 1) * 100);
       const row = document.createElement('div');
       row.className = 'cs-tweet-slide-edit';
       row.innerHTML =
@@ -1559,7 +1643,14 @@
         '<div class="cs-tweet-row">' +
           '<img class="cs-tweet-thumb" src="' + tweetSlideImageSrc(slide) + '" alt="">' +
           '<input type="file" accept="image/*" class="tweet-image-input" data-id="' + slide.id + '">' +
-        '</div>';
+          (hasImg ? '<button type="button" class="btn btn-sm btn-tweet-remove-img" data-id="' + slide.id + '" title="Remover imagem desta página">Remover imagem</button>' : '') +
+        '</div>' +
+        '<div class="cs-tweet-row" style="' + (hasImg ? '' : 'display:none;') + '" data-zoom-row="' + slide.id + '">' +
+          '<label style="font-size:11.5px;color:var(--text-dim);flex:0 0 auto;">Zoom da imagem</label>' +
+          '<input type="range" class="tweet-zoom-input" data-id="' + slide.id + '" min="100" max="250" step="5" value="' + zoomPct + '" style="flex:1;">' +
+          '<span class="tweet-zoom-label" style="font-size:11.5px;color:var(--text-dim);flex:0 0 auto;">' + zoomPct + '%</span>' +
+        '</div>' +
+        '<input type="text" class="tweet-credit-input" data-id="' + slide.id + '" placeholder="Fonte / crédito da informação..." value="' + escapeHtml(slide.credit || '') + '" style="width:100%;background:var(--panel-2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:inherit;font-size:11.5px;padding:7px 8px;">';
       csTweetEditor.appendChild(row);
     });
 
@@ -1567,6 +1658,24 @@
       ta.addEventListener('input', function () {
         const slide = state.tweetCarousel.slides.find(function (s) { return s.id === ta.getAttribute('data-id'); });
         if (slide) { slide.text = ta.value; renderTweetRail(); }
+      });
+    });
+    csTweetEditor.querySelectorAll('.tweet-credit-input').forEach(function (inp) {
+      inp.addEventListener('input', function () {
+        const slide = state.tweetCarousel.slides.find(function (s) { return s.id === inp.getAttribute('data-id'); });
+        if (slide) { slide.credit = inp.value; renderTweetRail(); }
+      });
+    });
+    csTweetEditor.querySelectorAll('.tweet-zoom-input').forEach(function (range) {
+      range.addEventListener('input', function () {
+        const id = range.getAttribute('data-id');
+        const slide = state.tweetCarousel.slides.find(function (s) { return s.id === id; });
+        if (!slide) return;
+        slide.imageZoom = Number(range.value) / 100;
+        const row = range.closest('.cs-tweet-row');
+        const lbl = row ? row.querySelector('.tweet-zoom-label') : null;
+        if (lbl) lbl.textContent = range.value + '%';
+        renderTweetRail();
       });
     });
     csTweetEditor.querySelectorAll('.tweet-image-input').forEach(function (input) {
@@ -1577,7 +1686,11 @@
         const reader = new FileReader();
         reader.onload = function () {
           const slide = state.tweetCarousel.slides.find(function (s) { return s.id === id; });
-          if (slide) { slide.imageDataUrl = reader.result; renderTweetEditor(); renderTweetRail(); }
+          if (slide) {
+            slide.imageDataUrl = reader.result;
+            if (!slide.imageZoom) slide.imageZoom = 1;
+            renderTweetEditor(); renderTweetRail();
+          }
         };
         reader.readAsDataURL(file);
       });
@@ -1589,11 +1702,22 @@
         renderTweetEditor(); renderTweetRail();
       });
     });
+    csTweetEditor.querySelectorAll('.btn-tweet-remove-img').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        const id = btn.getAttribute('data-id');
+        const slide = state.tweetCarousel.slides.find(function (s) { return s.id === id; });
+        if (slide) {
+          slide.imageUrl = null;
+          slide.imageDataUrl = null;
+          renderTweetEditor(); renderTweetRail();
+        }
+      });
+    });
   }
 
   document.getElementById('btnAddTweetSlide').addEventListener('click', function () {
     const nextImg = TWEET_DEFAULT_IMAGES[state.tweetCarousel.slides.length % TWEET_DEFAULT_IMAGES.length];
-    state.tweetCarousel.slides.push({ id: nextTweetId(), text: '', imageUrl: nextImg, imageDataUrl: null, bubble: 'Qual sua opinião?' });
+    state.tweetCarousel.slides.push({ id: nextTweetId(), text: '', imageUrl: nextImg, imageDataUrl: null, imageZoom: 1, credit: 'Fonte: inserir fonte da informação aqui' });
     renderTweetEditor(); renderTweetRail();
   });
 
@@ -1776,6 +1900,7 @@
       captionStyle: state.captionStyle,
       brollStyle: state.brollStyle,
       logoDataUrl: state.logoDataUrl || null,
+      carousel1Zoom: { 1: state.carousel1Zoom[1], 2: state.carousel1Zoom[2], 5: state.carousel1Zoom[5] },
       parts: state.parts.map(function (p) {
         return {
           id: p.id, chapterTitle: p.chapterTitle, text: p.text, keywords: p.keywords,
@@ -1786,7 +1911,8 @@
         slides: state.tweetCarousel.slides.map(function (s) {
           return {
             id: s.id, text: s.text, imageUrl: s.imageUrl || null,
-            imageDataUrl: s.imageDataUrl || null, bubble: s.bubble || 'Qual sua opinião?',
+            imageDataUrl: s.imageDataUrl || null, imageZoom: s.imageZoom || 1,
+            credit: s.credit || 'Fonte: inserir fonte da informação aqui',
           };
         }),
       },
@@ -1813,6 +1939,19 @@
         state.brollStyle = data.brollStyle || 'ken-burns';
         state.logoDataUrl = data.logoDataUrl || null;
         state.logoImg = null;
+        state.carousel1Zoom = {
+          1: (data.carousel1Zoom && data.carousel1Zoom[1]) || 1,
+          2: (data.carousel1Zoom && data.carousel1Zoom[2]) || 1,
+          5: (data.carousel1Zoom && data.carousel1Zoom[5]) || 1,
+        };
+        ['1', '2', '5'].forEach(function (n) {
+          const range = document.getElementById('cs1Zoom' + n);
+          const label = document.getElementById('cs1Zoom' + n + 'Label');
+          const pct = Math.round(state.carousel1Zoom[n] * 100);
+          if (range) range.value = pct;
+          if (label) label.textContent = pct + '%';
+        });
+        renderCarouselTab();
         if (state.logoDataUrl) {
           const limg = new Image();
           limg.onload = function () { state.logoImg = limg; };
@@ -1842,7 +1981,8 @@
               return {
                 id: s.id || nextTweetId(), text: s.text || '',
                 imageUrl: s.imageUrl || TWEET_DEFAULT_IMAGES[0],
-                imageDataUrl: s.imageDataUrl || null, bubble: s.bubble || 'Qual sua opinião?',
+                imageDataUrl: s.imageDataUrl || null, imageZoom: s.imageZoom || 1,
+                credit: s.credit || 'Fonte: inserir fonte da informação aqui',
               };
             })
           : state.tweetCarousel.slides;
