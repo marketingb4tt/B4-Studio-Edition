@@ -196,6 +196,29 @@
   }
   .cs-switch-btn.active { background: linear-gradient(135deg,#17e6c9,#0b8f79); color: #04342c; }
   .cs-switch-btn:disabled { opacity: .45; cursor: not-allowed; }
+  .mb-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+  .mb-chip {
+    background: var(--panel-2); border: 1px solid var(--border); color: var(--text-dim);
+    border-radius: 999px; padding: 5px 12px; font-size: 12px; font-weight: 600;
+    cursor: pointer; font-family: inherit;
+  }
+  .mb-chip.active { background: var(--accent); color: #16130a; border-color: var(--accent); }
+  .mb-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; margin-top: 12px; }
+  .mb-card { background: var(--panel); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; display: flex; flex-direction: column; }
+  .mb-thumb-wrap { position: relative; width: 100%; aspect-ratio: 3 / 4; background: var(--panel-2); overflow: hidden; }
+  .mb-thumb-wrap img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .mb-body { padding: 8px; display: flex; flex-direction: column; gap: 6px; }
+  .mb-credit { font-size: 10.5px; color: var(--text-dim); line-height: 1.3; }
+  .mb-actions { display: flex; flex-direction: column; gap: 5px; }
+  .mb-actions .btn { width: 100%; text-align: center; }
+  .mb-empty { grid-column: 1 / -1; text-align: center; color: var(--text-dim); font-size: 13px; padding: 30px 10px; }
+  .mb-toast {
+    position: fixed; bottom: 22px; left: 50%; transform: translateX(-50%);
+    background: var(--accent); color: #16130a; font-weight: 700; font-size: 13px;
+    padding: 10px 18px; border-radius: 999px; box-shadow: 0 10px 30px rgba(0,0,0,.4);
+    z-index: 999; opacity: 0; pointer-events: none; transition: opacity .2s ease;
+  }
+  .mb-toast.show { opacity: 1; }
   .cs-iframe-wrap { width: 100%; border-radius: 12px; overflow: hidden; border: 1px solid var(--border); background: #05090f; }
   .cs-iframe { width: 100%; height: 640px; border: none; display: block; }
   .cs-tweet-editor { display: flex; flex-direction: column; gap: 10px; margin-bottom: 12px; }
@@ -262,6 +285,7 @@
     <div class="tabs">
       <button class="tab-btn active" id="tabBtnRoteiro" data-tab="roteiro">Videos Studio</button>
       <button class="tab-btn" id="tabBtnCarousel" data-tab="carousel">Carousel Studio</button>
+      <button class="tab-btn" id="tabBtnMedia" data-tab="media">Banco de Mídia</button>
       <button class="tab-btn" id="tabBtnChat" data-tab="chat">Assistente (Claude)</button>
     </div>
 
@@ -393,6 +417,25 @@
       </div>
     </div>
 
+    <div id="tabPanelMedia" class="tab-panel" style="display:none;">
+      <h2>Banco de Mídia</h2>
+      <div class="note" style="margin-bottom:12px;">
+        Fotos gratuitas (Unsplash, uso livre — sem direitos autorais) direto aqui dentro.
+        Busque por tema, baixe o arquivo original ou mande com um clique pra virar B-roll
+        no Videos Studio ou imagem de página no Carousel Studio (Estilo Tweet/X).
+        <b>Não é possível baixar vídeos/fotos do Instagram, TikTok ou YouTube por aqui</b> —
+        isso violaria os Termos de Uso dessas plataformas e não é algo que eu construo.
+      </div>
+      <div class="card">
+        <div class="field" style="margin-bottom:0;">
+          <label>Buscar por palavra-chave</label>
+          <input type="text" id="mediaBankSearch" placeholder="ex: dinheiro, carro, tempo, equipe, casa...">
+        </div>
+        <div class="mb-chips" id="mediaBankChips"></div>
+      </div>
+      <div class="mb-grid" id="mediaBankGrid"></div>
+    </div>
+
     <div id="tabPanelChat" class="tab-panel" style="display:none;">
       <h2>Conectar</h2>
       <div class="card">
@@ -512,6 +555,93 @@
     'fade': 'Fade (preto)',
     'slide': 'Slide lateral',
   };
+
+  // ---------------------------------------------------------------------
+  // Banco de Mídia — biblioteca curada de fotos gratuitas do Unsplash (uso
+  // livre, sem direitos autorais, licença Unsplash). Não é busca ao vivo
+  // (o app não tem servidor por trás) — é uma seleção fixa organizada por
+  // tema, pensada pros assuntos que a B4 Business e a B4 Technology mais
+  // usam. Baixar vídeo/foto de link de rede social (Instagram, TikTok,
+  // YouTube) não entra aqui — violaria os Termos de Uso dessas plataformas.
+  const MEDIA_BANK_CATEGORIES = {
+    'crescimento': 'Crescimento',
+    'dinheiro': 'Dinheiro',
+    'seguranca': 'Segurança',
+    'tempo': 'Tempo',
+    'estrategia': 'Estratégia',
+    'comunidade': 'Comunidade',
+    'tecnologia': 'Tecnologia',
+    'carro': 'Carro',
+    'casa': 'Casa / Imóvel',
+    'aposentadoria': 'Aposentadoria',
+    'cidade': 'Cidade',
+    'reuniao': 'Reunião',
+  };
+  function mbUrl(id) {
+    return 'https://images.unsplash.com/photo-' + id + '?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080';
+  }
+  const MEDIA_BANK = [
+    // Crescimento
+    { id: 'mb-1', category: 'crescimento', label: 'Gráfico de mercado no notebook', credit: 'Markus Winkler · Unsplash', url: mbUrl('1591696205602-2f950c417cb9') },
+    { id: 'mb-2', category: 'crescimento', label: 'Gráfico de velas na tela escura', credit: 'Maxim Hopman · Unsplash', url: mbUrl('1611974789855-9c2a0a7236a3') },
+    { id: 'mb-3', category: 'crescimento', label: 'Jornal financeiro com gráfico', credit: 'Markus Spiske · Unsplash', url: mbUrl('1618044733300-9472054094ee') },
+    { id: 'mb-4', category: 'crescimento', label: 'Gráfico de barras em fundo azul', credit: 'Алекс Арцибашев · Unsplash', url: mbUrl('1634117622592-114e3024ff27') },
+    // Dinheiro
+    { id: 'mb-5', category: 'dinheiro', label: 'Notas de dólar em leque', credit: 'Alexander Mils · Unsplash', url: mbUrl('1553729459-efe14ef6055d') },
+    { id: 'mb-6', category: 'dinheiro', label: 'Miniatura sentada sobre moedas lendo jornal', credit: 'Mathieu Stern · Unsplash', url: mbUrl('1604594849809-dfedbc827105') },
+    { id: 'mb-7', category: 'dinheiro', label: 'Moedas de ouro empilhadas', credit: 'Ibrahim Rifath · Unsplash', url: mbUrl('1534951009808-766178b47a4f') },
+    { id: 'mb-8', category: 'dinheiro', label: 'Casa feita de dinheiro', credit: 'Kostiantyn Li · Unsplash', url: mbUrl('1634757439914-23b8acb9d411') },
+    // Segurança
+    { id: 'mb-9', category: 'seguranca', label: 'Cadeado vermelho sobre teclado', credit: 'FlyD · Unsplash', url: mbUrl('1614064641938-3bbee52942c7') },
+    { id: 'mb-10', category: 'seguranca', label: 'Cadeado dourado sobre teclado', credit: 'Towfiqu barbhuiya · Unsplash', url: mbUrl('1633265486064-086b219458ec') },
+    { id: 'mb-11', category: 'seguranca', label: 'Cadeado prateado', credit: 'Zaqy Al Fattah · Unsplash', url: mbUrl('1555529902-5261145633bf') },
+    { id: 'mb-12', category: 'seguranca', label: 'Cadeado de aço em close', credit: 'Jose Fontano · Unsplash', url: mbUrl('1493129922668-fcb1a8514643') },
+    // Tempo
+    { id: 'mb-13', category: 'tempo', label: 'Relógios marrom e branco', credit: 'Akram Huseyn · Unsplash', url: mbUrl('1533749047139-189de3cf06d3') },
+    { id: 'mb-14', category: 'tempo', label: 'Despertador analógico preto e branco', credit: 'Virginia Marinova · Unsplash', url: mbUrl('1541480601022-2308c0f02487') },
+    { id: 'mb-15', category: 'tempo', label: 'Relógio analógico às 12h', credit: 'Djim Loic · Unsplash', url: mbUrl('1456574808786-d2ba7a6aa654') },
+    { id: 'mb-16', category: 'tempo', label: 'Relógio analógico redondo', credit: 'Thomas Bormans · Unsplash', url: mbUrl('1504197832061-98356e3dcdcf') },
+    // Estratégia
+    { id: 'mb-17', category: 'estrategia', label: 'Papel com "Marketing Strategy"', credit: 'Campaign Creators · Unsplash', url: mbUrl('1533750349088-cd871a92f312') },
+    { id: 'mb-18', category: 'estrategia', label: 'Equipe colaborando com post-its', credit: 'UX Indonesia · Unsplash', url: mbUrl('1586936893354-362ad6ae47ba') },
+    { id: 'mb-19', category: 'estrategia', label: 'Pessoa escrevendo no quadro branco', credit: 'Campaign Creators · Unsplash', url: mbUrl('1542744094-24638eff58bb') },
+    { id: 'mb-20', category: 'estrategia', label: 'Equipe diversa colaborando no escritório', credit: 'Vitaly Gariev · Unsplash', url: mbUrl('1758873269811-4e62e346b4b7') },
+    // Comunidade
+    { id: 'mb-21', category: 'comunidade', label: 'Grupo com mãos empilhadas', credit: 'Hannah Busing · Unsplash', url: mbUrl('1582213782179-e0d53f98f2ca') },
+    { id: 'mb-22', category: 'comunidade', label: 'Equipe em união de mãos', credit: 'Rineshkumar Ghirao · Unsplash', url: mbUrl('1630068846062-3ffe78aa5049') },
+    { id: 'mb-23', category: 'comunidade', label: 'Grupo unindo as mãos', credit: 'Outward Bound Costa Rica · Unsplash', url: mbUrl('1704386651981-0729a60da579') },
+    { id: 'mb-24', category: 'comunidade', label: 'Grupo de mãos dadas', credit: 'Marlis Trio Akbar · Unsplash', url: mbUrl('1651372381086-9861c9c81db5') },
+    // Tecnologia
+    { id: 'mb-25', category: 'tecnologia', label: 'Escritório com monitores', credit: 'Austin Distel · Unsplash', url: mbUrl('1556761175-4b46a572b786') },
+    { id: 'mb-26', category: 'tecnologia', label: 'Equipe colaborando em escritório aberto', credit: 'LYCS Architecture · Unsplash', url: mbUrl('1531973576160-7125cd663d86') },
+    { id: 'mb-27', category: 'tecnologia', label: 'Pessoas trabalhando no escritório', credit: 'Alex Kotliarskyi · Unsplash', url: mbUrl('1504384308090-c894fdcc538d') },
+    { id: 'mb-28', category: 'tecnologia', label: 'Monitor em mesa de madeira', credit: 'Annie Spratt · Unsplash', url: mbUrl('1498409785966-ab341407de6e') },
+    // Carro
+    { id: 'mb-29', category: 'carro', label: 'Carro vermelho sob árvore', credit: 'Adam Stefanca · Unsplash', url: mbUrl('1550355291-bbee04a92027') },
+    { id: 'mb-30', category: 'carro', label: 'BMW azul', credit: 'Stephan Louis · Unsplash', url: mbUrl('1614687153862-b0e115ebcef1') },
+    { id: 'mb-31', category: 'carro', label: 'Chave do carro na mão', credit: 'Swansway Motor Group · Unsplash', url: mbUrl('1671719367451-7bf05ae9549c') },
+    { id: 'mb-32', category: 'carro', label: 'Sedan cinza na estrada', credit: 'TopSphere Media · Unsplash', url: mbUrl('1578659258511-4a4e7dee7344') },
+    // Casa / Imóvel
+    { id: 'mb-33', category: 'casa', label: 'Miniatura de casa branca e vermelha', credit: 'Tierra Mallorca · Unsplash', url: mbUrl('1560518883-ce09059eeffa') },
+    { id: 'mb-34', category: 'casa', label: 'Segurando as chaves na entrada de casa', credit: 'Jakub Żerdzicki · Unsplash', url: mbUrl('1741156386380-0236c72eb6f9') },
+    { id: 'mb-35', category: 'casa', label: 'Chaves novas da casa com dinheiro', credit: 'Jakub Żerdzicki · Unsplash', url: mbUrl('1742318592061-15c5f19e1e47') },
+    { id: 'mb-36', category: 'casa', label: 'Molho de chaves sobre mesa de madeira', credit: 'Filip Szalbot · Unsplash', url: mbUrl('1643804926339-e94f0a655185') },
+    // Aposentadoria
+    { id: 'mb-37', category: 'aposentadoria', label: 'Casal sênior sorrindo no sofá', credit: 'Vitaly Gariev · Unsplash', url: mbUrl('1758691031402-5cfbeebc6162') },
+    { id: 'mb-38', category: 'aposentadoria', label: 'Casal sênior sorrindo um pro outro', credit: 'Vitaly Gariev · Unsplash', url: mbUrl('1758686253861-bbfd56e5ba7a') },
+    { id: 'mb-39', category: 'aposentadoria', label: 'Idosos tomando chá e compartilhando foto', credit: 'Vitaly Gariev · Unsplash', url: mbUrl('1758691031213-116dedd71c0f') },
+    { id: 'mb-40', category: 'aposentadoria', label: 'Três idosos fazendo quebra-cabeça juntos', credit: 'Vitaly Gariev · Unsplash', url: mbUrl('1758691031197-3ce709db9640') },
+    // Cidade
+    { id: 'mb-41', category: 'cidade', label: 'Skyline ao entardecer', credit: 'Calvin Ma · Unsplash', url: mbUrl('1672279410716-c676739163e9') },
+    { id: 'mb-42', category: 'cidade', label: 'Prédios altos durante o dia', credit: 'Venti Views · Unsplash', url: mbUrl('1601783210890-d921f8d008b3') },
+    { id: 'mb-43', category: 'cidade', label: 'Skyline com água em primeiro plano', credit: 'Jorge Ramírez · Unsplash', url: mbUrl('1650570725926-cd88ef8784bd') },
+    { id: 'mb-44', category: 'cidade', label: 'Vista aérea de prédios ao entardecer', credit: 'Andre Benz · Unsplash', url: mbUrl('1562351768-f68650f3ec54') },
+    // Reunião
+    { id: 'mb-45', category: 'reuniao', label: 'Aperto de mãos entre duas pessoas', credit: 'Cytonn Photography · Unsplash', url: mbUrl('1521791136064-7986c2920216') },
+    { id: 'mb-46', category: 'reuniao', label: 'Aperto de mãos sobre mesa de madeira', credit: 'Rock Staar · Unsplash', url: mbUrl('1638262052640-82e94d64664a') },
+    { id: 'mb-47', category: 'reuniao', label: 'Aperto de mãos em frente ao notebook', credit: 'Hunters Race · Unsplash', url: mbUrl('1686771416282-3888ddaf249b') },
+    { id: 'mb-48', category: 'reuniao', label: 'Sala de reunião com mesa oval', credit: 'Benjamin Child · Unsplash', url: mbUrl('1431540015161-0bf868a2d407') },
+  ];
 
   // ---------------------------------------------------------------------
   // Carousel Studio — modelos enviados pelo usuário (arquivos originais da
@@ -976,6 +1106,19 @@
       transitionIn: 'corte-seco', effectsNotes: '', complementaryTakes: [],
     }, overrides || {});
   }
+  // Carrega o B-roll de uma parte animada a partir de uma URL (arquivo local
+  // em data URL, OU imagem remota do Banco de Mídia). crossOrigin=anonymous
+  // é essencial pras imagens remotas: sem isso, desenhar a imagem no canvas
+  // "suja" o canvas (CORS) e quebra a exportação de vídeo (captureStream).
+  // Não afeta data URLs — é inofensivo deixar sempre ligado.
+  function loadBrollImageInto(part, url) {
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = function () { part.brollImg = img; };
+    img.onerror = function () { part.brollImg = null; };
+    img.src = url;
+    return img;
+  }
 
   const state = {
     theme: 'b4-blue',
@@ -992,6 +1135,9 @@
     // arrastando a imagem direto no preview — ver script injetado no
     // CAROUSEL_MODEL_APOSENTADORIA_HTML e o listener de 'message' abaixo.
     carousel1Pos: { 1: { x: 0, y: 0 }, 2: { x: 0, y: 0 }, 5: { x: 0, y: 0 } },
+    // Filtro atual do Banco de Mídia (não faz parte do projeto salvo — é só
+    // estado de navegação da biblioteca curada, não conteúdo do usuário).
+    mediaBankFilter: { category: 'todas', query: '' },
     parts: [
       makeAnimadoPart({
         chapterTitle: 'O que o mercado não conta',
@@ -2261,9 +2407,7 @@
       const reader = new FileReader();
       reader.onload = function () {
         part.brollDataUrl = reader.result;
-        const img = new Image();
-        img.onload = function () { part.brollImg = img; };
-        img.src = reader.result;
+        loadBrollImageInto(part, reader.result);
         brollThumb.src = reader.result;
         brollFilename.textContent = file.name;
       };
@@ -2522,6 +2666,139 @@
   });
 
   // ---------------------------------------------------------------------
+  // Banco de Mídia — biblioteca curada de fotos gratuitas (ver MEDIA_BANK
+  // no topo do arquivo). Busca/filtra localmente (sem servidor) e manda
+  // pro Videos Studio (nova parte animada com B-roll) ou pro Carousel
+  // Studio Estilo Tweet/X (nova página) com um clique, ou baixa o arquivo
+  // original direto pro computador.
+  // ---------------------------------------------------------------------
+  let mbToastTimer = null;
+  function showMbToast(msg) {
+    let toastEl = document.getElementById('mbToast');
+    if (!toastEl) {
+      toastEl = document.createElement('div');
+      toastEl.id = 'mbToast';
+      toastEl.className = 'mb-toast';
+      document.body.appendChild(toastEl);
+    }
+    toastEl.textContent = msg;
+    toastEl.classList.add('show');
+    if (mbToastTimer) clearTimeout(mbToastTimer);
+    mbToastTimer = setTimeout(function () { toastEl.classList.remove('show'); }, 2600);
+  }
+
+  function downloadRemoteFile(url, filename) {
+    fetch(url, { mode: 'cors' })
+      .then(function (res) {
+        if (!res.ok) throw new Error('status ' + res.status);
+        return res.blob();
+      })
+      .then(function (blob) {
+        const blobUrl = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = blobUrl; a.download = filename;
+        document.body.appendChild(a); a.click(); a.remove();
+        setTimeout(function () { URL.revokeObjectURL(blobUrl); }, 10000);
+      })
+      .catch(function () {
+        // Se o navegador bloquear o fetch cross-origin, abre a imagem numa
+        // aba nova — dá pra salvar com clique direito > Salvar imagem como.
+        window.open(url, '_blank');
+        showMbToast('Abrindo em nova aba — clique com o botão direito e "Salvar imagem como".');
+      });
+  }
+
+  const mediaBankGrid = document.getElementById('mediaBankGrid');
+  const mediaBankChips = document.getElementById('mediaBankChips');
+  const mediaBankSearch = document.getElementById('mediaBankSearch');
+
+  function renderMediaBankChips() {
+    const cats = ['todas'].concat(Object.keys(MEDIA_BANK_CATEGORIES));
+    mediaBankChips.innerHTML = cats.map(function (cat) {
+      const label = cat === 'todas' ? 'Todas' : MEDIA_BANK_CATEGORIES[cat];
+      const active = state.mediaBankFilter.category === cat ? ' active' : '';
+      return '<button type="button" class="mb-chip' + active + '" data-cat="' + cat + '">' + label + '</button>';
+    }).join('');
+    mediaBankChips.querySelectorAll('.mb-chip').forEach(function (chip) {
+      chip.addEventListener('click', function () {
+        state.mediaBankFilter.category = chip.getAttribute('data-cat');
+        renderMediaBankChips();
+        renderMediaBankGrid();
+      });
+    });
+  }
+
+  function renderMediaBankGrid() {
+    const cat = state.mediaBankFilter.category;
+    const query = (state.mediaBankFilter.query || '').trim().toLowerCase();
+    const items = MEDIA_BANK.filter(function (item) {
+      if (cat !== 'todas' && item.category !== cat) return false;
+      if (!query) return true;
+      const haystack = (item.label + ' ' + MEDIA_BANK_CATEGORIES[item.category]).toLowerCase();
+      return haystack.indexOf(query) !== -1;
+    });
+    if (!items.length) {
+      mediaBankGrid.innerHTML = '<div class="mb-empty">Nenhuma imagem encontrada pra essa busca. Tente outra palavra-chave ou categoria.</div>';
+      return;
+    }
+    mediaBankGrid.innerHTML = items.map(function (item) {
+      return (
+        '<div class="mb-card">' +
+          '<div class="mb-thumb-wrap"><img src="' + item.url + '" alt="' + escapeHtmlAttr(item.label) + '" loading="lazy"></div>' +
+          '<div class="mb-body">' +
+            '<div class="mb-credit">' + escapeHtmlAttr(item.label) + '<br>' + escapeHtmlAttr(item.credit) + '</div>' +
+            '<div class="mb-actions">' +
+              '<button type="button" class="btn btn-sm" data-mb-action="download" data-mb-id="' + item.id + '">Baixar</button>' +
+              '<button type="button" class="btn btn-sm" data-mb-action="roteiro" data-mb-id="' + item.id + '">Usar no Roteiro</button>' +
+              '<button type="button" class="btn btn-sm" data-mb-action="carousel" data-mb-id="' + item.id + '">Usar no Carousel (Tweet/X)</button>' +
+            '</div>' +
+          '</div>' +
+        '</div>'
+      );
+    }).join('');
+    mediaBankGrid.querySelectorAll('[data-mb-action]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        const id = btn.getAttribute('data-mb-id');
+        const item = MEDIA_BANK.find(function (m) { return m.id === id; });
+        if (!item) return;
+        const action = btn.getAttribute('data-mb-action');
+        if (action === 'download') {
+          downloadRemoteFile(item.url, item.id + '.jpg');
+        } else if (action === 'roteiro') {
+          const part = makeAnimadoPart({ chapterTitle: item.label, brollDataUrl: item.url });
+          loadBrollImageInto(part, item.url);
+          state.parts.push(part);
+          renderPartsList();
+          document.getElementById('tabBtnRoteiro').click();
+          showMbToast('Adicionado como nova parte no Videos Studio.');
+        } else if (action === 'carousel') {
+          state.tweetCarousel.slides.push({
+            id: nextTweetId(), text: '', imageUrl: item.url, imageDataUrl: item.url,
+            imageZoom: 1, imagePos: { x: 0, y: 0 }, credit: 'Foto: ' + item.credit,
+          });
+          renderTweetEditor(); renderTweetRail();
+          document.getElementById('tabBtnCarousel').click();
+          document.getElementById('csBtnModel2').click();
+          showMbToast('Adicionado como nova página no Carousel Estilo Tweet/X.');
+        }
+      });
+    });
+  }
+
+  function escapeHtmlAttr(str) {
+    return String(str == null ? '' : str)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+
+  mediaBankSearch.addEventListener('input', function () {
+    state.mediaBankFilter.query = mediaBankSearch.value;
+    renderMediaBankGrid();
+  });
+
+  renderMediaBankChips();
+  renderMediaBankGrid();
+
+  // ---------------------------------------------------------------------
   // Salvar / abrir projeto
   // ---------------------------------------------------------------------
   document.getElementById('btnSaveProject').addEventListener('click', function () {
@@ -2640,9 +2917,7 @@
             visualRefNote: p.visualRefNote || '',
           };
           if (part.brollDataUrl) {
-            const bimg = new Image();
-            bimg.onload = function () { part.brollImg = bimg; };
-            bimg.src = part.brollDataUrl;
+            loadBrollImageInto(part, part.brollDataUrl);
           }
           return part;
         });
@@ -2678,10 +2953,11 @@
   // ---------------------------------------------------------------------
   // Abas
   // ---------------------------------------------------------------------
-  const tabButtons = [document.getElementById('tabBtnRoteiro'), document.getElementById('tabBtnCarousel'), document.getElementById('tabBtnChat')];
+  const tabButtons = [document.getElementById('tabBtnRoteiro'), document.getElementById('tabBtnCarousel'), document.getElementById('tabBtnMedia'), document.getElementById('tabBtnChat')];
   const tabPanels = {
     roteiro: document.getElementById('tabPanelRoteiro'),
     carousel: document.getElementById('tabPanelCarousel'),
+    media: document.getElementById('tabPanelMedia'),
     chat: document.getElementById('tabPanelChat'),
   };
   tabButtons.forEach(function (btn) {
