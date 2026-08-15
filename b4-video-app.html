@@ -206,7 +206,12 @@
   .mb-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; margin-top: 12px; }
   .mb-card { background: var(--panel); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; display: flex; flex-direction: column; }
   .mb-thumb-wrap { position: relative; width: 100%; aspect-ratio: 3 / 4; background: var(--panel-2); overflow: hidden; }
-  .mb-thumb-wrap img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .mb-thumb-wrap img, .mb-thumb-wrap video { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .mb-video-badge {
+    position: absolute; top: 6px; right: 6px; background: rgba(0,0,0,.65); color: #fff;
+    font-size: 9.5px; font-weight: 800; letter-spacing: .04em; padding: 3px 6px; border-radius: 4px;
+    pointer-events: none;
+  }
   .mb-body { padding: 8px; display: flex; flex-direction: column; gap: 6px; }
   .mb-credit { font-size: 10.5px; color: var(--text-dim); line-height: 1.3; }
   .mb-actions { display: flex; flex-direction: column; gap: 5px; }
@@ -290,7 +295,10 @@
     </div>
 
     <div id="tabPanelRoteiro" class="tab-panel">
-      <h2>Identidade de marca (B4 Technology)</h2>
+      <h2 style="display:flex; align-items:center; justify-content:space-between;">
+        <span>Identidade de marca</span>
+        <button type="button" class="btn btn-sm" id="btnToggleBrandDetails" style="text-transform:none; letter-spacing:normal; font-weight:600;">Ver detalhes</button>
+      </h2>
       <div class="card" id="brandIdentityCard"></div>
 
       <h2>Padrões (presets)</h2>
@@ -322,12 +330,8 @@
 
       <h2>Partes do vídeo</h2>
       <div class="note" style="margin-bottom:12px;">
-        Cada parte pode ser uma <b>cena animada</b> (roteiro escrito, gerado
-        do zero com cartela + legenda + B-roll) ou um <b>clipe pré-gravado</b>
-        (vídeo que você já filmou, onde você planeja legenda, transição,
-        efeitos e takes complementares por cima). Misture os dois tipos na
-        mesma linha do tempo pra montar uma produção que junta os dois
-        estilos.
+        <b>Cena animada</b> (gerada do zero) ou <b>clipe pré-gravado</b>
+        (vídeo já filmado) — misture os dois na mesma timeline.
       </div>
       <div id="partsList"></div>
       <div class="kind-switch">
@@ -336,12 +340,8 @@
       </div>
 
       <div class="note" style="margin-top:16px;">
-        Tudo roda no seu navegador — nada é enviado a nenhum servidor (exceto
-        as chamadas de IA na aba Assistente, que vão direto pra Anthropic).
-        Os dados (roteiro, imagens, áudios, vídeos) ficam só na memória desta
-        aba enquanto você trabalha. Use <b>Salvar projeto</b> para baixar um
-        arquivo .json com tudo dentro e <b>Abrir projeto</b> para continuar
-        depois.
+        Tudo fica só no seu navegador, nada é enviado a servidor. Use
+        <b>Salvar projeto</b> / <b>Abrir projeto</b> pra continuar depois.
       </div>
     </div>
 
@@ -420,17 +420,21 @@
     <div id="tabPanelMedia" class="tab-panel" style="display:none;">
       <h2>Banco de Mídia</h2>
       <div class="note" style="margin-bottom:12px;">
-        Fotos gratuitas (Unsplash, uso livre — sem direitos autorais) direto aqui dentro.
-        Busque por tema, baixe o arquivo original ou mande com um clique pra virar B-roll
-        no Videos Studio ou imagem de página no Carousel Studio (Estilo Tweet/X).
-        <b>Não é possível baixar vídeos/fotos do Instagram, TikTok ou YouTube por aqui</b> —
-        isso violaria os Termos de Uso dessas plataformas e não é algo que eu construo.
+        Fotos e vídeos gratuitos (Unsplash e Pixabay, uso livre — sem direitos
+        autorais) direto aqui dentro. Busque por tema, baixe o arquivo original
+        ou mande com um clique pra virar B-roll/clipe no Videos Studio ou
+        imagem de página no Carousel Studio (Estilo Tweet/X — só aceita foto).
+        <b>Não é possível baixar vídeos/fotos do Instagram, TikTok, YouTube ou
+        Pinterest por aqui</b> — isso violaria os Termos de Uso dessas
+        plataformas (a maioria proíbe até coleta automática/scraping) e
+        quase sempre envolveria reusar conteúdo de terceiros sem licença.
       </div>
       <div class="card">
         <div class="field" style="margin-bottom:0;">
           <label>Buscar por palavra-chave</label>
           <input type="text" id="mediaBankSearch" placeholder="ex: dinheiro, carro, tempo, equipe, casa...">
         </div>
+        <div class="mb-chips" id="mediaBankTypeChips"></div>
         <div class="mb-chips" id="mediaBankChips"></div>
       </div>
       <div class="mb-grid" id="mediaBankGrid"></div>
@@ -490,15 +494,9 @@
       <button class="btn btn-primary" id="btnExport">Exportar vídeo</button>
       <button class="btn" id="btnExportPlan">Exportar plano de edição (.txt)</button>
       <div class="note" id="exportNote">
-        A exportação de vídeo grava a reprodução em tempo real e baixa o
-        arquivo automaticamente ao final (formato .webm, ou .mp4 se o seu
-        navegador suportar) — funciona só para partes do tipo
-        <b>cena animada</b>. Alguns apps (ex: Instagram) pedem .mp4 — se sair
-        .webm, converta com uma ferramenta gratuita online antes de publicar.
-        Se o projeto tiver <b>clipes pré-gravados</b>, use
-        <b>Exportar plano de edição</b> — ele lista tudo (textos, transições,
-        efeitos, takes complementares) pra você montar o vídeo final num
-        editor de vídeo de verdade.
+        Exporta em .webm (ou .mp4, se o navegador suportar) — só funciona
+        pra <b>cena animada</b>. Com <b>clipes pré-gravados</b>, use
+        <b>Exportar plano de edição</b> pra montar num editor de vídeo.
       </div>
     </div>
   </div>
@@ -641,6 +639,40 @@
     { id: 'mb-46', category: 'reuniao', label: 'Aperto de mãos sobre mesa de madeira', credit: 'Rock Staar · Unsplash', url: mbUrl('1638262052640-82e94d64664a') },
     { id: 'mb-47', category: 'reuniao', label: 'Aperto de mãos em frente ao notebook', credit: 'Hunters Race · Unsplash', url: mbUrl('1686771416282-3888ddaf249b') },
     { id: 'mb-48', category: 'reuniao', label: 'Sala de reunião com mesa oval', credit: 'Benjamin Child · Unsplash', url: mbUrl('1431540015161-0bf868a2d407') },
+    // Mais fotos gratuitas (Pixabay — licença Pixabay Content License, uso
+    // livre sem exigir crédito, mas mostramos o autor por boa prática).
+    { id: 'mb-73', category: 'dinheiro', type: 'image', label: 'Notas de dólar americano', credit: 'TBIT · Pixabay', url: 'https://cdn.pixabay.com/photo/2015/09/15/15/53/bank-notes-941246_1280.jpg' },
+    { id: 'mb-74', category: 'estrategia', type: 'image', label: 'Quadro de planejamento de ideias', credit: 'geralt · Pixabay', url: 'https://cdn.pixabay.com/photo/2018/09/17/12/46/business-idea-3683781_1280.jpg' },
+    { id: 'mb-75', category: 'comunidade', type: 'image', label: 'Equipe em brainstorming', credit: 'Mohamed_hassan · Pixabay', url: 'https://cdn.pixabay.com/photo/2018/03/10/12/00/teamwork-3213924_1280.jpg' },
+    { id: 'mb-76', category: 'crescimento', type: 'image', label: 'Alvo com dardo — meta atingida', credit: 'geralt · Pixabay', url: 'https://cdn.pixabay.com/photo/2018/07/13/09/33/target-3535310_1280.jpg' },
+    { id: 'mb-77', category: 'tecnologia', type: 'image', label: 'Escritório de startup, mesa de trabalho', credit: 'StartupStockPhotos · Pixabay', url: 'https://cdn.pixabay.com/photo/2015/01/09/11/11/office-594132_1280.jpg' },
+    { id: 'mb-78', category: 'reuniao', type: 'image', label: 'Reunião de negócios em escritório', credit: 'mwitt1337 · Pixabay', url: 'https://cdn.pixabay.com/photo/2017/05/04/16/37/meeting-2284501_1280.jpg' },
+    // Vídeos gratuitos (Pixabay — licença Pixabay Content License, uso livre
+    // sem exigir crédito). Usados como "clipe pré-gravado" no Videos Studio —
+    // não aparecem como opção pro Carousel (que só aceita imagem estática).
+    { id: 'mb-49', category: 'crescimento', type: 'video', label: 'Análise de gráficos financeiros', credit: 'Pixabay', url: 'https://cdn.pixabay.com/video/2021/09/15/88697-606080045_large.mp4' },
+    { id: 'mb-50', category: 'dinheiro', type: 'video', label: 'Notas de dólar em movimento', credit: 'Pixabay', url: 'https://cdn.pixabay.com/video/2024/01/31/198750-908438365_large.mp4' },
+    { id: 'mb-51', category: 'dinheiro', type: 'video', label: 'Dinheiro americano em close', credit: 'Pixabay', url: 'https://cdn.pixabay.com/video/2020/08/11/46924-449295261_large.mp4' },
+    { id: 'mb-52', category: 'seguranca', type: 'video', label: 'Segurança de dados e backup', credit: 'Pixabay', url: 'https://cdn.pixabay.com/video/2016/02/15/2176-155747466_large.mp4' },
+    { id: 'mb-53', category: 'seguranca', type: 'video', label: 'Cadeado de proteção', credit: 'Pixabay', url: 'https://cdn.pixabay.com/video/2025/08/24/299521_large.mp4' },
+    { id: 'mb-54', category: 'tempo', type: 'video', label: 'Relógio marcando o tempo', credit: 'Pixabay', url: 'https://cdn.pixabay.com/video/2018/04/15/15604-265015199_large.mp4' },
+    { id: 'mb-55', category: 'tempo', type: 'video', label: 'Ponteiros do relógio em movimento', credit: 'Pixabay', url: 'https://cdn.pixabay.com/video/2024/01/28/198430-907598392_large.mp4' },
+    { id: 'mb-56', category: 'estrategia', type: 'video', label: 'Esboçando um plano no quadro branco', credit: 'Pixabay', url: 'https://cdn.pixabay.com/video/2016/05/12/3161-166338902_large.mp4' },
+    { id: 'mb-57', category: 'estrategia', type: 'video', label: 'Sala de planejamento de startup', credit: 'Pixabay', url: 'https://cdn.pixabay.com/video/2025/03/02/262071_large.mp4' },
+    { id: 'mb-58', category: 'comunidade', type: 'video', label: 'Mãos unidas em equipe', credit: 'Pixabay', url: 'https://cdn.pixabay.com/video/2022/01/29/106038-671593535_large.mp4' },
+    { id: 'mb-59', category: 'comunidade', type: 'video', label: 'Apoio e trabalho em equipe', credit: 'Pixabay', url: 'https://cdn.pixabay.com/video/2020/11/07/55309-499594302_large.mp4' },
+    { id: 'mb-60', category: 'tecnologia', type: 'video', label: 'Trabalhando no notebook', credit: 'Pixabay', url: 'https://cdn.pixabay.com/video/2021/01/03/61037-497754241_large.mp4' },
+    { id: 'mb-61', category: 'tecnologia', type: 'video', label: 'Planejamento no escritório', credit: 'Pixabay', url: 'https://cdn.pixabay.com/video/2025/03/28/268230_large.mp4' },
+    { id: 'mb-62', category: 'carro', type: 'video', label: 'Carro na estrada', credit: 'Pixabay', url: 'https://cdn.pixabay.com/video/2016/02/14/2165-155327596_large.mp4' },
+    { id: 'mb-63', category: 'carro', type: 'video', label: 'Carro em rodovia', credit: 'Pixabay', url: 'https://cdn.pixabay.com/video/2022/10/25/136460-764399879_large.mp4' },
+    { id: 'mb-64', category: 'casa', type: 'video', label: 'Arquiteto planejando um imóvel', credit: 'Pixabay', url: 'https://cdn.pixabay.com/video/2020/01/22/31483-387312378_large.mp4' },
+    { id: 'mb-65', category: 'casa', type: 'video', label: 'Vista aérea de bairro residencial', credit: 'Pixabay', url: 'https://cdn.pixabay.com/video/2016/06/27/3584-172488232_large.mp4' },
+    { id: 'mb-66', category: 'aposentadoria', type: 'video', label: 'Casal sênior no parque', credit: 'Pixabay', url: 'https://cdn.pixabay.com/video/2023/02/18/151194-800210466_large.mp4' },
+    { id: 'mb-67', category: 'aposentadoria', type: 'video', label: 'Casal sênior feliz', credit: 'Pixabay', url: 'https://cdn.pixabay.com/video/2023/07/21/172681-849651720_large.mp4' },
+    { id: 'mb-68', category: 'cidade', type: 'video', label: 'Skyline de Dubai', credit: 'Pixabay', url: 'https://cdn.pixabay.com/video/2020/02/05/31956-389724705_large.mp4' },
+    { id: 'mb-69', category: 'cidade', type: 'video', label: 'Skyline ao pôr do sol', credit: 'Pixabay', url: 'https://cdn.pixabay.com/video/2021/07/08/80724-573496156_large.mp4' },
+    { id: 'mb-70', category: 'reuniao', type: 'video', label: 'Reunião de planejamento', credit: 'Pixabay', url: 'https://cdn.pixabay.com/video/2016/02/29/2340-157269921_large.mp4' },
+    { id: 'mb-71', category: 'reuniao', type: 'video', label: 'Reunião sobre imóveis', credit: 'Pixabay', url: 'https://cdn.pixabay.com/video/2024/02/02/198888-909564511_large.mp4' },
   ];
 
   // ---------------------------------------------------------------------
@@ -1137,7 +1169,7 @@
     carousel1Pos: { 1: { x: 0, y: 0 }, 2: { x: 0, y: 0 }, 5: { x: 0, y: 0 } },
     // Filtro atual do Banco de Mídia (não faz parte do projeto salvo — é só
     // estado de navegação da biblioteca curada, não conteúdo do usuário).
-    mediaBankFilter: { category: 'todas', query: '' },
+    mediaBankFilter: { category: 'todas', query: '', type: 'todos' },
     parts: [
       makeAnimadoPart({
         chapterTitle: 'O que o mercado não conta',
@@ -1905,19 +1937,44 @@
   syncGlobalControls();
 
   // ---- Identidade de marca (card de referência, gerado a partir de THEMES
-  // para nunca ficar desatualizado em relação aos temas de verdade) ----
+  // para nunca ficar desatualizado em relação aos temas de verdade). Fica
+  // recolhida por padrão (só o tema ativo + 3 pontinhos de cor) — o
+  // conteúdo completo (fontes, regra de logo, os 3 temas com hex) só
+  // aparece se a pessoa clicar em "Ver detalhes". ----
   const DEFAULT_THEME_ID = 'b4-blue';
+  let brandDetailsOpen = false;
+  const btnToggleBrandDetails = document.getElementById('btnToggleBrandDetails');
+
   function renderBrandIdentity() {
     const el = document.getElementById('brandIdentityCard');
     el.innerHTML = '';
+    btnToggleBrandDetails.textContent = brandDetailsOpen ? 'Ocultar detalhes' : 'Ver detalhes';
+
+    if (!brandDetailsOpen) {
+      const activeTheme = THEMES[state.theme] || THEMES[DEFAULT_THEME_ID];
+      const row = document.createElement('div');
+      row.className = 'swatch-row';
+      const label = document.createElement('span');
+      label.style.fontSize = '12px';
+      label.style.color = 'var(--text-dim)';
+      label.textContent = 'Tema ativo: ' + activeTheme.name;
+      row.appendChild(label);
+      [activeTheme.bg, activeTheme.accent, activeTheme.text].forEach(function (color) {
+        const dot = document.createElement('div');
+        dot.className = 'swatch-dot';
+        dot.style.background = color;
+        row.appendChild(dot);
+      });
+      el.appendChild(row);
+      return;
+    }
 
     const intro = document.createElement('div');
     intro.className = 'note';
     intro.style.marginBottom = '10px';
-    intro.innerHTML = 'Paleta e fonte extraídas do material oficial da B4 Business (Carousel Studio). O tema <b>' + THEMES[DEFAULT_THEME_ID].name +
-      '</b> é a identidade padrão — os outros temas são variações dentro da mesma família visual, ' +
-      'não cores livres. Fontes oficiais: <b>Sora</b> (títulos) + <b>Inter</b> (texto de apoio). ' +
-      'Logo sempre no canto superior esquerdo, com margem fixa e fade-in suave.';
+    intro.innerHTML = 'Paleta e fonte do material oficial da B4 Business. Tema <b>' + THEMES[DEFAULT_THEME_ID].name +
+      '</b> é o padrão — os outros são variações da mesma família, não cores livres. ' +
+      'Fontes: <b>Sora</b> (títulos) + <b>Inter</b> (texto). Logo sempre no canto superior esquerdo.';
     el.appendChild(intro);
 
     Object.keys(THEMES).forEach(function (key) {
@@ -1949,10 +2006,14 @@
     });
   }
   renderBrandIdentity();
+  btnToggleBrandDetails.addEventListener('click', function () {
+    brandDetailsOpen = !brandDetailsOpen;
+    renderBrandIdentity();
+  });
 
   selCaptionStyle.addEventListener('change', function () { state.captionStyle = selCaptionStyle.value; });
   selBrollStyle.addEventListener('change', function () { state.brollStyle = selBrollStyle.value; });
-  selTheme.addEventListener('change', function () { state.theme = selTheme.value; });
+  selTheme.addEventListener('change', function () { state.theme = selTheme.value; renderBrandIdentity(); });
 
   // ---- Logo ----
   const fileLogo = document.getElementById('fileLogo');
@@ -2365,9 +2426,10 @@
     // Palavras-chave
     const kwField = document.createElement('div');
     kwField.className = 'field';
-    const kwLabel = document.createElement('label'); kwLabel.textContent = 'Palavras-chave (separadas por vírgula, ganham cor de destaque)';
+    const kwLabel = document.createElement('label'); kwLabel.textContent = 'Palavras-chave';
     const kwInput = document.createElement('input');
     kwInput.type = 'text'; kwInput.value = part.keywords.join(', ');
+    kwInput.placeholder = 'Separadas por vírgula — ganham cor de destaque';
     kwInput.oninput = function () {
       part.keywords = kwInput.value.split(',').map(function (s) { return s.trim(); }).filter(Boolean);
     };
@@ -2377,7 +2439,7 @@
     // Tema de ícone (referência visual rápida desenhada na cartela)
     const iconField = document.createElement('div');
     iconField.className = 'field';
-    const iconLabel = document.createElement('label'); iconLabel.textContent = 'Tema de ícone (mostrado na cartela)';
+    const iconLabel = document.createElement('label'); iconLabel.textContent = 'Tema de ícone';
     const iconSelect = document.createElement('select');
     Object.keys(ICON_THEME_LABELS).forEach(function (key) {
       const opt = document.createElement('option');
@@ -2400,7 +2462,7 @@
     brollFileInput.type = 'file'; brollFileInput.accept = 'image/*';
     const brollFilename = document.createElement('div');
     brollFilename.className = 'filename';
-    brollFilename.textContent = part.brollDataUrl ? 'B-roll enviado' : 'Nenhum B-roll enviado (usa placeholder no preview).';
+    brollFilename.textContent = part.brollDataUrl ? 'B-roll enviado' : 'Nenhum B-roll enviado.';
     brollFileInput.onchange = function () {
       const file = brollFileInput.files[0];
       if (!file) return;
@@ -2422,12 +2484,12 @@
     audioField.className = 'field';
     audioField.style.marginTop = '10px';
     const audioLabel = document.createElement('label');
-    audioLabel.textContent = 'Áudio de narração (opcional — .mp3/.wav gerado na ElevenLabs)';
+    audioLabel.textContent = 'Áudio de narração (opcional)';
     const audioFileInput = document.createElement('input');
     audioFileInput.type = 'file'; audioFileInput.accept = 'audio/*';
     const audioFilename = document.createElement('div');
     audioFilename.className = 'filename';
-    audioFilename.textContent = part.audioFileName || 'Sem áudio — a legenda usa timing estimado por texto.';
+    audioFilename.textContent = part.audioFileName || 'Sem áudio (timing estimado por texto).';
     audioFileInput.onchange = function () {
       const file = audioFileInput.files[0];
       if (!file) return;
@@ -2449,7 +2511,7 @@
     refField.className = 'field';
     refField.style.marginTop = '10px';
     const refLabel = document.createElement('label');
-    refLabel.textContent = 'Referência visual / estilo de animação (nota pra quem for produzir)';
+    refLabel.textContent = 'Referência visual (opcional)';
     const refNoteInput = document.createElement('textarea');
     refNoteInput.value = part.visualRefNote || '';
     refNoteInput.placeholder = 'Ex: linha fina estilo motion graphics, ícones outline, paleta B4 Navy...';
@@ -2467,7 +2529,7 @@
     refFileInput.type = 'file'; refFileInput.accept = 'image/*';
     const refFilename = document.createElement('div');
     refFilename.className = 'filename';
-    refFilename.textContent = part.visualRefFileName || 'Nenhuma imagem de referência anexada (opcional).';
+    refFilename.textContent = part.visualRefFileName || 'Nenhuma referência anexada.';
     refFileInput.onchange = function () {
       const file = refFileInput.files[0];
       if (!file) return;
@@ -2546,7 +2608,7 @@
     const videoField = document.createElement('div');
     videoField.className = 'field';
     const videoLabel = document.createElement('label');
-    videoLabel.textContent = 'Vídeo já gravado (.mp4/.mov/.webm)';
+    videoLabel.textContent = 'Vídeo já gravado';
     const videoFileInput = document.createElement('input');
     videoFileInput.type = 'file'; videoFileInput.accept = 'video/*';
     const videoFilename = document.createElement('div');
@@ -2589,7 +2651,7 @@
     const capField = document.createElement('div');
     capField.className = 'field';
     capField.style.marginTop = '10px';
-    const capLabel = document.createElement('label'); capLabel.textContent = 'Legenda (aparece sobreposta na prévia deste clipe)';
+    const capLabel = document.createElement('label'); capLabel.textContent = 'Legenda';
     const capArea = document.createElement('textarea');
     capArea.value = part.captionText || '';
     capArea.style.minHeight = '50px';
@@ -2615,9 +2677,10 @@
     // Efeitos planejados (nota livre)
     const fxField = document.createElement('div');
     fxField.className = 'field';
-    const fxLabel = document.createElement('label'); fxLabel.textContent = 'Efeitos planejados (nota livre — zoom, cor, desfoque...)';
+    const fxLabel = document.createElement('label'); fxLabel.textContent = 'Efeitos planejados (opcional)';
     const fxArea = document.createElement('textarea');
     fxArea.value = part.effectsNotes || '';
+    fxArea.placeholder = 'Zoom, cor, desfoque...';
     fxArea.style.minHeight = '50px';
     fxArea.oninput = function () { part.effectsNotes = fxArea.value; };
     fxField.appendChild(fxLabel); fxField.appendChild(fxArea);
@@ -2626,7 +2689,7 @@
     // Takes complementares
     const takesField = document.createElement('div');
     takesField.className = 'field';
-    const takesLabel = document.createElement('label'); takesLabel.textContent = 'Takes complementares (b-roll extra pra cobrir este clipe)';
+    const takesLabel = document.createElement('label'); takesLabel.textContent = 'Takes complementares';
     takesField.appendChild(takesLabel);
     const takesList = document.createElement('div');
     renderComplementaryTakes(takesList, part);
@@ -2710,7 +2773,9 @@
 
   const mediaBankGrid = document.getElementById('mediaBankGrid');
   const mediaBankChips = document.getElementById('mediaBankChips');
+  const mediaBankTypeChips = document.getElementById('mediaBankTypeChips');
   const mediaBankSearch = document.getElementById('mediaBankSearch');
+  const MEDIA_BANK_TYPES = { 'todos': 'Todos', 'image': 'Fotos', 'video': 'Vídeos' };
 
   function renderMediaBankChips() {
     const cats = ['todas'].concat(Object.keys(MEDIA_BANK_CATEGORIES));
@@ -2726,31 +2791,52 @@
         renderMediaBankGrid();
       });
     });
+
+    mediaBankTypeChips.innerHTML = Object.keys(MEDIA_BANK_TYPES).map(function (t) {
+      const active = state.mediaBankFilter.type === t ? ' active' : '';
+      return '<button type="button" class="mb-chip' + active + '" data-type="' + t + '">' + MEDIA_BANK_TYPES[t] + '</button>';
+    }).join('');
+    mediaBankTypeChips.querySelectorAll('.mb-chip').forEach(function (chip) {
+      chip.addEventListener('click', function () {
+        state.mediaBankFilter.type = chip.getAttribute('data-type');
+        renderMediaBankChips();
+        renderMediaBankGrid();
+      });
+    });
   }
 
   function renderMediaBankGrid() {
     const cat = state.mediaBankFilter.category;
+    const type = state.mediaBankFilter.type || 'todos';
     const query = (state.mediaBankFilter.query || '').trim().toLowerCase();
     const items = MEDIA_BANK.filter(function (item) {
+      const itemType = item.type || 'image';
       if (cat !== 'todas' && item.category !== cat) return false;
+      if (type !== 'todos' && itemType !== type) return false;
       if (!query) return true;
       const haystack = (item.label + ' ' + MEDIA_BANK_CATEGORIES[item.category]).toLowerCase();
       return haystack.indexOf(query) !== -1;
     });
     if (!items.length) {
-      mediaBankGrid.innerHTML = '<div class="mb-empty">Nenhuma imagem encontrada pra essa busca. Tente outra palavra-chave ou categoria.</div>';
+      mediaBankGrid.innerHTML = '<div class="mb-empty">Nada encontrado pra essa busca. Tente outra palavra-chave, categoria ou tipo.</div>';
       return;
     }
     mediaBankGrid.innerHTML = items.map(function (item) {
+      const itemType = item.type || 'image';
+      const isVideo = itemType === 'video';
+      const thumbHtml = isVideo
+        ? '<video src="' + item.url + '" muted loop preload="metadata"></video><span class="mb-video-badge">VÍDEO</span>'
+        : '<img src="' + item.url + '" alt="' + escapeHtmlAttr(item.label) + '" loading="lazy">';
+      const roteiroLabel = isVideo ? 'Usar no Roteiro (clipe)' : 'Usar no Roteiro';
       return (
         '<div class="mb-card">' +
-          '<div class="mb-thumb-wrap"><img src="' + item.url + '" alt="' + escapeHtmlAttr(item.label) + '" loading="lazy"></div>' +
+          '<div class="mb-thumb-wrap"' + (isVideo ? ' onmouseenter="this.querySelector(\'video\').play().catch(function(){})" onmouseleave="this.querySelector(\'video\').pause()"' : '') + '>' + thumbHtml + '</div>' +
           '<div class="mb-body">' +
             '<div class="mb-credit">' + escapeHtmlAttr(item.label) + '<br>' + escapeHtmlAttr(item.credit) + '</div>' +
             '<div class="mb-actions">' +
               '<button type="button" class="btn btn-sm" data-mb-action="download" data-mb-id="' + item.id + '">Baixar</button>' +
-              '<button type="button" class="btn btn-sm" data-mb-action="roteiro" data-mb-id="' + item.id + '">Usar no Roteiro</button>' +
-              '<button type="button" class="btn btn-sm" data-mb-action="carousel" data-mb-id="' + item.id + '">Usar no Carousel (Tweet/X)</button>' +
+              '<button type="button" class="btn btn-sm" data-mb-action="roteiro" data-mb-id="' + item.id + '">' + roteiroLabel + '</button>' +
+              (isVideo ? '' : '<button type="button" class="btn btn-sm" data-mb-action="carousel" data-mb-id="' + item.id + '">Usar no Carousel (Tweet/X)</button>') +
             '</div>' +
           '</div>' +
         '</div>'
@@ -2761,9 +2847,16 @@
         const id = btn.getAttribute('data-mb-id');
         const item = MEDIA_BANK.find(function (m) { return m.id === id; });
         if (!item) return;
+        const itemType = item.type || 'image';
         const action = btn.getAttribute('data-mb-action');
         if (action === 'download') {
-          downloadRemoteFile(item.url, item.id + '.jpg');
+          downloadRemoteFile(item.url, item.id + (itemType === 'video' ? '.mp4' : '.jpg'));
+        } else if (action === 'roteiro' && itemType === 'video') {
+          const part = makeVideoPart({ clipTitle: item.label, videoDataUrl: item.url, videoFileName: item.label });
+          state.parts.push(part);
+          renderPartsList();
+          document.getElementById('tabBtnRoteiro').click();
+          showMbToast('Adicionado como novo clipe pré-gravado no Videos Studio.');
         } else if (action === 'roteiro') {
           const part = makeAnimadoPart({ chapterTitle: item.label, brollDataUrl: item.url });
           loadBrollImageInto(part, item.url);
