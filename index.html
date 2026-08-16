@@ -361,7 +361,8 @@
   <div class="sidebar">
     <div class="tabs">
       <button class="tab-btn active" id="tabBtnProducao" data-tab="producao">Produção</button>
-      <button class="tab-btn" id="tabBtnRoteiro" data-tab="roteiro">Videos Studio</button>
+      <button class="tab-btn" id="tabBtnRoteiro" data-tab="roteiro">Roteiro</button>
+      <button class="tab-btn" id="tabBtnVideo" data-tab="video">Vídeo</button>
       <button class="tab-btn" id="tabBtnCarousel" data-tab="carousel">Carousel Studio</button>
       <button class="tab-btn" id="tabBtnMedia" data-tab="media">Banco de Mídia</button>
       <button class="tab-btn" id="tabBtnChat" data-tab="chat">Assistente (Claude)</button>
@@ -375,12 +376,19 @@
         outras abas — esta aba só reúne status e exportação.
       </div>
 
-      <h2>Videos Studio</h2>
+      <h2>Roteiro</h2>
       <div class="card" id="prodVideosCard"></div>
       <div class="export-box" style="margin-top:12px;">
         <button class="btn btn-primary" id="btnExportProducaoVideo">Exportar vídeo</button>
         <button class="btn" id="btnExportProducaoPlan">Exportar plano de edição (.txt)</button>
         <div class="note" id="prodExportNote"></div>
+      </div>
+
+      <h2 style="margin-top:20px;">Vídeo</h2>
+      <div class="card" id="prodVideoClipsCard"></div>
+      <div class="export-box" style="margin-top:12px;">
+        <button class="btn" id="btnExportProducaoVideoClipsPlan">Exportar plano de edição (.txt)</button>
+        <div class="note" id="prodVideoClipsExportNote">Clipes usam preview em vídeo real — não passam pelo canvas, então não geram .webm por aqui. Use o plano de edição pra montar num editor de vídeo (CapCut, Premiere etc.) com os arquivos originais.</div>
       </div>
 
       <h2 style="margin-top:20px;">Carousel Studio</h2>
@@ -426,22 +434,41 @@
         </div>
       </div>
 
-      <h2>Partes do vídeo</h2>
+      <h2>Cenas do roteiro</h2>
       <div class="note" style="margin-bottom:12px;">
-        <b>Cena animada</b> (gerada do zero) ou <b>clipe pré-gravado</b>
-        (vídeo já filmado) — misture os dois na mesma timeline. Na barra acima
-        da prévia: arraste um bloco pra reordenar, as bordas de um clipe pra
-        aparar (in/out) e a régua fina pra buscar no vídeo.
+        Só <b>cena animada</b> aqui (cartela + narração + B-roll, 100% gerado).
+        Clipe já filmado agora tem aba própria — veja <b>Vídeo</b>. Na barra
+        acima da prévia: arraste um bloco pra reordenar e a régua fina pra
+        buscar.
       </div>
       <div id="partsList"></div>
       <div class="kind-switch">
         <button class="btn" id="btnAddPartAnimado">+ Cena animada</button>
-        <button class="btn" id="btnAddPartVideo">+ Clipe pré-gravado</button>
       </div>
 
       <div class="note" style="margin-top:16px;">
         Tudo fica só no seu navegador, nada é enviado a servidor. Use
         <b>Salvar projeto</b> / <b>Abrir projeto</b> pra continuar depois.
+      </div>
+    </div>
+
+    <div id="tabPanelVideo" class="tab-panel" style="display:none;">
+      <h2>Clipes de vídeo</h2>
+      <div class="note" style="margin-bottom:12px;">
+        Editor estilo CapCut, exclusivo pra clipe já filmado — separado do
+        <b>Roteiro</b> (cena animada). Cada clipe tem um <b>banco de takes</b>
+        (suba várias tomadas e escolha a ativa), velocidade e ajuste de
+        cor/filtro. Na barra acima da prévia: arraste um bloco pra reordenar,
+        as bordas pra aparar (in/out) e a régua fina pra buscar no vídeo.
+      </div>
+      <div id="videoClipsList"></div>
+      <button class="btn" id="btnAddVideoClip">+ Adicionar clipe</button>
+
+      <div class="note" style="margin-top:16px;">
+        Tudo fica só no seu navegador, nada é enviado a servidor. A prévia
+        toca o vídeo real (não passa pelo canvas), então "Exportar vídeo"
+        fica só no <b>Roteiro</b> — aqui use <b>Exportar plano de edição</b>
+        pra montar o corte final num editor de vídeo de verdade.
       </div>
     </div>
 
@@ -522,8 +549,9 @@
       <div class="note" style="margin-bottom:12px;">
         Fotos e vídeos gratuitos (Unsplash e Pixabay, uso livre — sem direitos
         autorais) direto aqui dentro. Busque por tema, baixe o arquivo original
-        ou mande com um clique pra virar B-roll/clipe no Videos Studio ou
-        imagem de página no Carousel Studio (Estilo Tweet/X — só aceita foto).
+        ou mande com um clique pra virar B-roll no Roteiro, clipe na aba
+        Vídeo, ou imagem de página no Carousel Studio (Estilo Tweet/X — só
+        aceita foto).
         <b>Não é possível baixar vídeos/fotos do Instagram, TikTok, YouTube ou
         Pinterest por aqui</b> — isso violaria os Termos de Uso dessas
         plataformas (a maioria proíbe até coleta automática/scraping) e
@@ -568,44 +596,76 @@
 
       <div class="note" style="margin-top:16px;">
         O assistente pode <b>editar o projeto de verdade</b>: trocar
-        tema/legenda/B-roll, adicionar, editar, remover e reordenar partes
-        (cenas animadas ou clipes pré-gravados) — direto pelo chat, sem você
-        mexer nos campos ao lado. Ele não sobe nem baixa imagens/áudios/
-        vídeos (isso continua na aba Videos Studio).
+        tema/legenda/B-roll, adicionar, editar, remover e reordenar cenas do
+        <b>Roteiro</b> (cena animada) — direto pelo chat, sem você mexer nos
+        campos ao lado. Ele não gerencia a aba <b>Vídeo</b> (clipes) nem sobe
+        arquivos (imagem/áudio/vídeo) — isso continua manual, nas abas
+        Roteiro e Vídeo.
       </div>
     </div>
   </div>
 
   <div class="preview-col">
-    <div class="preview-stage" id="previewStage">
-      <canvas id="preview" width="1080" height="1920"></canvas>
-      <div class="clip-preview" id="clipPreviewWrap" style="display:none;">
-        <video id="clipPreviewVideo" playsinline></video>
-        <div class="clip-caption-overlay" id="clipCaptionOverlay"></div>
+    <div id="previewColRoteiro" style="display:flex;flex-direction:column;align-items:center;gap:12px;width:100%;">
+      <div class="preview-stage" id="previewStage">
+        <canvas id="preview" width="1080" height="1920"></canvas>
+        <div class="clip-preview" id="clipPreviewWrap" style="display:none;">
+          <video id="clipPreviewVideo" playsinline></video>
+          <div class="clip-caption-overlay" id="clipCaptionOverlay"></div>
+        </div>
+        <div class="overlay-badge-layer" id="overlayBadgeLayer">
+          <div class="overlay-badge" id="overlayBadge" style="display:none;"></div>
+        </div>
       </div>
-      <div class="overlay-badge-layer" id="overlayBadgeLayer">
-        <div class="overlay-badge" id="overlayBadge" style="display:none;"></div>
+
+      <div class="timeline-label" style="width:100%;max-width:340px;font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--text-dim);">Timeline de edição — Roteiro</div>
+      <div class="edit-timeline" id="editTimeline">
+        <div class="et-ruler" id="etRuler"></div>
+        <div class="et-track" id="etTrack"></div>
+        <div class="et-playhead" id="etPlayhead" style="left:0%;"></div>
+      </div>
+      <div class="controls">
+        <button class="btn btn-sm" id="btnPlayPause">▶ Play</button>
+        <span class="time-label" id="timeLabel">0:00 / 0:00</span>
+      </div>
+
+      <div class="export-box">
+        <button class="btn btn-primary" id="btnExport">Exportar vídeo</button>
+        <button class="btn" id="btnExportPlan">Exportar plano de edição (.txt)</button>
+        <div class="note" id="exportNote">
+          Exporta em .webm (ou .mp4, se o navegador suportar).
+        </div>
       </div>
     </div>
 
-    <div class="timeline-label" style="width:100%;max-width:340px;font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--text-dim);">Timeline de edição</div>
-    <div class="edit-timeline" id="editTimeline">
-      <div class="et-ruler" id="etRuler"></div>
-      <div class="et-track" id="etTrack"></div>
-      <div class="et-playhead" id="etPlayhead" style="left:0%;"></div>
-    </div>
-    <div class="controls">
-      <button class="btn btn-sm" id="btnPlayPause">▶ Play</button>
-      <span class="time-label" id="timeLabel">0:00 / 0:00</span>
-    </div>
+    <div id="previewColVideo" style="display:none;flex-direction:column;align-items:center;gap:12px;width:100%;">
+      <div class="preview-stage" id="vcPreviewStage">
+        <div class="clip-preview" id="vcClipPreviewWrap">
+          <video id="vcClipPreviewVideo" playsinline></video>
+          <div class="clip-caption-overlay" id="vcClipCaptionOverlay"></div>
+        </div>
+        <div class="overlay-badge-layer" id="vcOverlayBadgeLayer">
+          <div class="overlay-badge" id="vcOverlayBadge" style="display:none;"></div>
+        </div>
+      </div>
 
-    <div class="export-box">
-      <button class="btn btn-primary" id="btnExport">Exportar vídeo</button>
-      <button class="btn" id="btnExportPlan">Exportar plano de edição (.txt)</button>
-      <div class="note" id="exportNote">
-        Exporta em .webm (ou .mp4, se o navegador suportar) — só funciona
-        pra <b>cena animada</b>. Com <b>clipes pré-gravados</b>, use
-        <b>Exportar plano de edição</b> pra montar num editor de vídeo.
+      <div class="timeline-label" style="width:100%;max-width:340px;font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--text-dim);">Timeline de edição — Vídeo</div>
+      <div class="edit-timeline" id="vcEditTimeline">
+        <div class="et-ruler" id="vcEtRuler"></div>
+        <div class="et-track" id="vcEtTrack"></div>
+        <div class="et-playhead" id="vcEtPlayhead" style="left:0%;"></div>
+      </div>
+      <div class="controls">
+        <button class="btn btn-sm" id="vcBtnPlayPause">▶ Play</button>
+        <span class="time-label" id="vcTimeLabel">0:00 / 0:00</span>
+      </div>
+
+      <div class="export-box">
+        <button class="btn" id="vcBtnExportPlan">Exportar plano de edição (.txt)</button>
+        <div class="note" id="vcExportNote">
+          A prévia toca o vídeo real, então não gera .webm por aqui — use o
+          plano de edição pra montar o corte final num editor de vídeo.
+        </div>
       </div>
     </div>
   </div>
@@ -1255,6 +1315,58 @@
       overlay: { enabled: false, text: '', pos: { x: 50, y: 18 } },
     }, overrides || {});
   }
+  // ---------------------------------------------------------------------
+  // Clipe de vídeo (aba Vídeo, estilo CapCut) — separado da cena animada.
+  // Cada clipe tem um BANCO DE TAKES (várias tomadas pra escolher a
+  // ativa) em vez de um único arquivo. videoDataUrl/videoFileName/
+  // videoSourceDurationSec no clipe são espelhos da take ativa (mantidos
+  // em sincronia por syncClipActiveTake()) — assim toda a lógica de
+  // recorte/timeline/prévia/transição (originalmente escrita pra um único
+  // arquivo por parte) funciona sem precisar saber de takes.
+  // ---------------------------------------------------------------------
+  function makeTake(overrides) {
+    return Object.assign({
+      id: nextTakeId(), label: 'Take 1',
+      videoDataUrl: null, videoFileName: null, videoSourceDurationSec: null,
+    }, overrides || {});
+  }
+  function makeVideoClip(overrides) {
+    const firstTake = makeTake({ label: 'Take 1' });
+    return Object.assign({
+      id: nextId(), kind: 'video',
+      clipTitle: 'Novo clipe', captionText: '',
+      takes: [firstTake], activeTakeId: firstTake.id,
+      // Espelhos da take ativa — ver syncClipActiveTake().
+      videoDataUrl: null, videoFileName: null, videoSourceDurationSec: null,
+      // Recorte (in/out) dentro da take ativa.
+      trimStartSec: 0, videoDurationSec: null,
+      // Velocidade (0.5 = câmera lenta, 2 = acelerado) — só comprime/estica
+      // a duração NA TIMELINE (ver buildVideoClipTimeline()); o recorte
+      // (trimStartSec/videoDurationSec) continua em segundos "reais" da take.
+      speed: 1,
+      // Ajuste de cor/filtro (50–150%, 100 = original) — aplicado como CSS
+      // filter no <video> da prévia (ver vcApplyClipStyle()).
+      brightness: 100, contrast: 100, saturation: 100,
+      transitionIn: 'corte-seco', effectsNotes: '',
+      overlay: { enabled: false, text: '', pos: { x: 50, y: 18 } },
+    }, overrides || {});
+  }
+  function activeTakeOf(clip) {
+    const takes = clip.takes || [];
+    return takes.find(function (t) { return t.id === clip.activeTakeId; }) || takes[0] || null;
+  }
+  // Copia os campos da take ativa pro topo do clipe — chame sempre que a
+  // take ativa mudar de conteúdo (upload) ou de seleção.
+  function syncClipActiveTake(clip) {
+    const take = activeTakeOf(clip);
+    if (!take) {
+      clip.videoDataUrl = null; clip.videoFileName = null; clip.videoSourceDurationSec = null;
+      return;
+    }
+    clip.videoDataUrl = take.videoDataUrl;
+    clip.videoFileName = take.videoFileName;
+    clip.videoSourceDurationSec = take.videoSourceDurationSec;
+  }
   // Carrega o B-roll de uma parte animada a partir de uma URL (arquivo local
   // em data URL, OU imagem remota do Banco de Mídia). crossOrigin=anonymous
   // é essencial pras imagens remotas: sem isso, desenhar a imagem no canvas
@@ -1304,6 +1416,9 @@
         keywords: ['B4', 'consórcio'],
       }),
     ],
+    // Clipes já filmados (aba Vídeo, estilo CapCut) — separados de parts
+    // (que agora é só cena animada). Cada item vem de makeVideoClip().
+    videoClips: [],
     tweetCarousel: {
       slides: [
         {
@@ -1373,6 +1488,24 @@
   }
 
   function getTimeline() { return buildTimeline(state.parts); }
+
+  // ---- Timeline da aba Vídeo (clipes) — separada da timeline do Roteiro
+  // acima; só tem um tipo de bloco (videoclip), então é bem mais simples. A
+  // velocidade do clipe comprime/estica a duração NA TIMELINE (câmera
+  // acelerada ocupa menos tempo pro mesmo trecho de vídeo) sem mexer no
+  // recorte (trimStartSec/videoDurationSec), que continua em segundos reais
+  // da take — ver vcSyncPreview() pra conversão de volta.
+  function buildVideoClipTimeline(clips) {
+    const blocks = [];
+    let t = 0;
+    clips.forEach(function (clip, i) {
+      const duration = vcClipDurationSeconds(clip);
+      blocks.push({ type: 'videoclip', part: clip, chapterNumber: i + 1, start: t, duration: duration });
+      t += duration;
+    });
+    return { blocks, total: t };
+  }
+  function getVideoTimeline() { return buildVideoClipTimeline(state.videoClips); }
 
   function findActiveBlock(blocks, t) {
     if (!blocks.length) return null;
@@ -2010,6 +2143,150 @@
     updatePlayButtonLabel();
   });
 
+  // =======================================================================
+  // Aba Vídeo — motor de prévia/reprodução (mirror do motor do Roteiro
+  // acima, mas pra state.videoClips; prefixo vc). Duplicado de propósito —
+  // evita risco de regressão no código do Roteiro, já testado.
+  // =======================================================================
+  let vcIsPlaying = false;
+  let vcCurrentTime = 0;
+  let vcLastPerf = null;
+  let vcCurrentClipKey = null;
+
+  const vcClipPreviewVideo = document.getElementById('vcClipPreviewVideo');
+  const vcClipCaptionOverlay = document.getElementById('vcClipCaptionOverlay');
+  const vcPreviewStage = document.getElementById('vcPreviewStage');
+  const vcOverlayBadge = document.getElementById('vcOverlayBadge');
+  let vcOverlayDragClip = null;
+
+  // Transição de entrada + cor/filtro do clipe, aplicados juntos como CSS no
+  // <video> da prévia (a transição também usa TRANSITION_DUR/easeOutCubic/
+  // lerp já definidos acima, pro Roteiro).
+  function vcApplyClipStyle(clip, localT) {
+    const kind = clip.transitionIn || 'corte-seco';
+    let opacity = 1, transform = 'none', extraFilter = '';
+    if (kind !== 'corte-seco' && localT <= TRANSITION_DUR) {
+      const p = Math.max(0, Math.min(1, localT / TRANSITION_DUR));
+      const e = easeOutCubic(p);
+      if (kind === 'fade') { opacity = p; }
+      else if (kind === 'slide') { transform = 'translateX(' + ((1 - e) * 100) + '%)'; }
+      else if (kind === 'zoom-in') { transform = 'scale(' + lerp(1.18, 1, e) + ')'; }
+      else if (kind === 'whip-pan') { transform = 'translateX(' + ((1 - e) * -55) + '%)'; extraFilter = 'blur(' + lerp(10, 0, e) + 'px) '; }
+    }
+    const b = clip.brightness == null ? 100 : clip.brightness;
+    const c = clip.contrast == null ? 100 : clip.contrast;
+    const s = clip.saturation == null ? 100 : clip.saturation;
+    vcClipPreviewVideo.style.opacity = String(opacity);
+    vcClipPreviewVideo.style.transform = transform;
+    vcClipPreviewVideo.style.filter = extraFilter + 'brightness(' + b + '%) contrast(' + c + '%) saturate(' + s + '%)';
+  }
+
+  function vcSyncPreview(active) {
+    if (!active) {
+      if (vcCurrentClipKey !== null) { vcClipPreviewVideo.pause(); vcCurrentClipKey = null; }
+      vcClipCaptionOverlay.textContent = '';
+      return;
+    }
+    const clip = active.block.part;
+    const trimStart = clip.trimStartSec || 0;
+    const speed = clip.speed || 1;
+    const key = clip.id + ':' + clip.activeTakeId + ':' + (clip.videoDataUrl ? clip.videoDataUrl.length : 0);
+    if (key !== vcCurrentClipKey) {
+      vcCurrentClipKey = key;
+      vcClipPreviewVideo.src = clip.videoDataUrl || '';
+      vcClipPreviewVideo.currentTime = trimStart;
+    }
+    vcClipCaptionOverlay.textContent = clip.captionText || '';
+    vcClipPreviewVideo.playbackRate = speed;
+    if (clip.videoDataUrl) {
+      const target = trimStart + active.localT * speed;
+      if (Math.abs(vcClipPreviewVideo.currentTime - target) > 0.25) {
+        vcClipPreviewVideo.currentTime = Math.min(target, vcClipPreviewVideo.duration || target);
+      }
+      if (vcIsPlaying && vcClipPreviewVideo.paused) vcClipPreviewVideo.play().catch(function () {});
+      else if (!vcIsPlaying && !vcClipPreviewVideo.paused) vcClipPreviewVideo.pause();
+    } else {
+      vcClipPreviewVideo.pause();
+    }
+    vcApplyClipStyle(clip, active.localT);
+  }
+
+  function vcSyncOverlayBadge(active) {
+    const clip = active ? active.block.part : null;
+    const ov = clip && clip.overlay;
+    if (ov && ov.enabled && (ov.text || '').trim()) {
+      const pos = ov.pos || { x: 50, y: 18 };
+      vcOverlayBadge.style.display = 'block';
+      vcOverlayBadge.textContent = ov.text;
+      vcOverlayBadge.style.left = pos.x + '%';
+      vcOverlayBadge.style.top = pos.y + '%';
+      vcOverlayDragClip = clip;
+    } else {
+      vcOverlayBadge.style.display = 'none';
+      vcOverlayDragClip = null;
+    }
+  }
+
+  (function attachVcOverlayBadgeDrag() {
+    let dragging = false, frameRect = null;
+    vcOverlayBadge.addEventListener('pointerdown', function (e) {
+      if (!vcOverlayDragClip) return;
+      dragging = true;
+      frameRect = vcPreviewStage.getBoundingClientRect();
+      vcOverlayBadge.setPointerCapture(e.pointerId);
+      e.preventDefault();
+    });
+    vcOverlayBadge.addEventListener('pointermove', function (e) {
+      if (!dragging || !vcOverlayDragClip || !frameRect) return;
+      const x = Math.min(1, Math.max(0, (e.clientX - frameRect.left) / frameRect.width));
+      const y = Math.min(1, Math.max(0, (e.clientY - frameRect.top) / frameRect.height));
+      vcOverlayDragClip.overlay.pos = { x: x * 100, y: y * 100 };
+      vcOverlayBadge.style.left = (x * 100) + '%';
+      vcOverlayBadge.style.top = (y * 100) + '%';
+    });
+    function endDrag() { dragging = false; frameRect = null; }
+    vcOverlayBadge.addEventListener('pointerup', endDrag);
+    vcOverlayBadge.addEventListener('pointercancel', endDrag);
+  })();
+
+  const vcPlayPauseBtn = document.getElementById('vcBtnPlayPause');
+  const vcTimeLabel = document.getElementById('vcTimeLabel');
+  function vcUpdatePlayButtonLabel() { vcPlayPauseBtn.textContent = vcIsPlaying ? '⏸ Pause' : '▶ Play'; }
+
+  function vcTick(now) {
+    const timeline = getVideoTimeline();
+    if (vcIsPlaying) {
+      if (vcLastPerf != null) vcCurrentTime += (now - vcLastPerf) / 1000;
+      vcLastPerf = now;
+      if (vcCurrentTime >= timeline.total) {
+        vcCurrentTime = timeline.total;
+        vcIsPlaying = false;
+        vcUpdatePlayButtonLabel();
+        vcClipPreviewVideo.pause();
+      }
+    }
+    const active = findActiveBlock(timeline.blocks, vcCurrentTime);
+    vcSyncPreview(active);
+    vcSyncOverlayBadge(active);
+    vcUpdatePlayhead();
+    vcTimeLabel.textContent = fmt(vcCurrentTime) + ' / ' + fmt(timeline.total);
+    requestAnimationFrame(vcTick);
+  }
+  requestAnimationFrame(vcTick);
+
+  vcPlayPauseBtn.addEventListener('click', function () {
+    if (vcIsPlaying) {
+      vcIsPlaying = false;
+      vcClipPreviewVideo.pause();
+    } else {
+      const timeline = getVideoTimeline();
+      if (vcCurrentTime >= timeline.total) vcCurrentTime = 0;
+      vcIsPlaying = true;
+      vcLastPerf = null;
+    }
+    vcUpdatePlayButtonLabel();
+  });
+
   // ---- Exportar ----
   const btnExport = document.getElementById('btnExport');
   let mediaRecorder = null;
@@ -2145,6 +2422,43 @@
     setTimeout(function () { URL.revokeObjectURL(url); }, 10000);
   });
 
+  // ---- Plano de edição da aba Vídeo (clipes) ----
+  function buildVideoClipEditPlanText() {
+    const lines = [];
+    lines.push('PLANO DE EDIÇÃO — B4 Studio Edition — Vídeo (clipes)');
+    lines.push('Total de clipes: ' + state.videoClips.length);
+    lines.push('');
+    state.videoClips.forEach(function (clip, i) {
+      lines.push('----------------------------------------');
+      lines.push('CLIPE ' + (i + 1) + ' — ' + (clip.clipTitle || 'sem título'));
+      const active = activeTakeOf(clip);
+      lines.push('Take ativa: ' + (active ? (active.label || 'sem nome') + (active.videoFileName ? ' — ' + active.videoFileName : ' (arquivo não enviado)') : '(nenhuma)'));
+      if (clip.takes && clip.takes.length > 1) {
+        lines.push('Outras takes no banco: ' + clip.takes.filter(function (t) { return t.id !== clip.activeTakeId; }).map(function (t) { return t.label + (t.videoFileName ? ' (' + t.videoFileName + ')' : ' (vazia)'); }).join(', '));
+      }
+      lines.push('Duração usada: ' + (clip.videoDurationSec ? fmt(clip.videoDurationSec) + ' min:seg' : 'desconhecida (envie o vídeo pra medir)'));
+      lines.push('Recorte (in/out): ' + (trimInfoLabel(clip) || '(vídeo ainda não enviado)'));
+      lines.push('Velocidade: ' + (clip.speed || 1) + 'x');
+      lines.push('Cor/filtro: brilho ' + (clip.brightness || 100) + '% · contraste ' + (clip.contrast || 100) + '% · saturação ' + (clip.saturation || 100) + '%');
+      lines.push('Transição de entrada: ' + (TRANSITION_LABELS[clip.transitionIn] || clip.transitionIn));
+      lines.push('Legenda planejada: ' + (clip.captionText ? '"' + clip.captionText + '"' : '(nenhuma)'));
+      lines.push('Overlay: ' + (clip.overlay && clip.overlay.enabled && clip.overlay.text ? '"' + clip.overlay.text + '"' : '(nenhum)'));
+      lines.push('Efeitos planejados: ' + (clip.effectsNotes || '(nenhum)'));
+      lines.push('');
+    });
+    return lines.join('\n');
+  }
+  function downloadVideoClipPlan() {
+    const text = buildVideoClipEditPlanText();
+    const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'plano-de-edicao-b4-studio-edition-video.txt';
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(function () { URL.revokeObjectURL(url); }, 10000);
+  }
+  document.getElementById('vcBtnExportPlan').addEventListener('click', downloadVideoClipPlan);
+
   // ---------------------------------------------------------------------
   // Produção — aba única de envio para produção (primeira aba do app).
   // Não duplica os editores: só mostra o que está pronto/pendente em cada
@@ -2153,19 +2467,22 @@
   // morando no Videos Studio).
   // ---------------------------------------------------------------------
   const prodVideosCard = document.getElementById('prodVideosCard');
+  const prodVideoClipsCard = document.getElementById('prodVideoClipsCard');
   const prodCarouselCard = document.getElementById('prodCarouselCard');
   const prodExportNote = document.getElementById('prodExportNote');
   const btnExportProducaoVideo = document.getElementById('btnExportProducaoVideo');
   const btnExportProducaoPlan = document.getElementById('btnExportProducaoPlan');
+  const btnExportProducaoVideoClipsPlan = document.getElementById('btnExportProducaoVideoClipsPlan');
 
   function partReadiness(part) {
-    if (part.kind === 'video') {
-      if (!part.videoDataUrl) return { level: 'blocking', text: 'vídeo não enviado ainda' };
-      return { level: 'ok', text: 'pronto (' + fmt(part.videoDurationSec || DEFAULT_CLIP_SECONDS) + ')' };
-    }
     if (!(part.text || '').trim()) return { level: 'blocking', text: 'sem texto narrado' };
     if (!part.brollDataUrl) return { level: 'warning', text: 'usa placeholder de B-roll (opcional, mas recomendado trocar)' };
     return { level: 'ok', text: 'pronta' };
+  }
+
+  function videoClipReadiness(clip) {
+    if (!clip.videoDataUrl) return { level: 'blocking', text: 'vídeo não enviado ainda' };
+    return { level: 'ok', text: 'pronto (' + fmt(clip.videoDurationSec || DEFAULT_CLIP_SECONDS) + ')' };
   }
 
   function goToPart(index) {
@@ -2174,16 +2491,22 @@
     if (part) setTimeout(function () { focusPartCard(part.id); }, 60);
   }
 
+  function goToVideoClip(index) {
+    document.getElementById('tabBtnVideo').click();
+    const clip = state.videoClips[index];
+    if (clip) setTimeout(function () { focusVideoClipCard(clip.id); }, 60);
+  }
+
   function renderProducaoTab() {
-    // ---- Videos Studio ----
+    // ---- Roteiro ----
     const timeline = getTimeline();
     if (!state.parts.length) {
-      prodVideosCard.innerHTML = '<div class="et-empty">Nenhuma parte no roteiro ainda — vá pra aba Videos Studio pra começar.</div>';
+      prodVideosCard.innerHTML = '<div class="et-empty">Nenhuma cena no roteiro ainda — vá pra aba Roteiro pra começar.</div>';
     } else {
       const rows = state.parts.map(function (part, i) {
         const r = partReadiness(part);
         const dot = r.level === 'ok' ? '#4ade80' : (r.level === 'warning' ? '#ffb74d' : '#ff6b6b');
-        const title = part.kind === 'video' ? (part.clipTitle || 'Clipe') : (part.chapterTitle || 'Cena');
+        const title = part.chapterTitle || 'Cena';
         return (
           '<div class="prod-row" data-prod-index="' + i + '" style="display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--border);cursor:pointer;">' +
             '<span style="width:8px;height:8px;border-radius:50%;background:' + dot + ';flex:0 0 auto;"></span>' +
@@ -2194,7 +2517,7 @@
       }).join('');
       const blockingCount = state.parts.filter(function (p) { return partReadiness(p).level === 'blocking'; }).length;
       const summary = '<div style="font-size:11.5px;color:var(--text-dim);margin-bottom:8px;">' +
-        state.parts.length + ' parte(s) · duração total ~' + fmt(timeline.total) +
+        state.parts.length + ' cena(s) · duração total ~' + fmt(timeline.total) +
         (blockingCount ? ' · <span style="color:#ff6b6b;">' + blockingCount + ' pendência(s)</span>' : ' · tudo pronto') +
         '</div>';
       prodVideosCard.innerHTML = summary + rows;
@@ -2202,10 +2525,34 @@
         row.addEventListener('click', function () { goToPart(Number(row.getAttribute('data-prod-index'))); });
       });
     }
-    const hasVideoParts = state.parts.some(function (p) { return p.kind === 'video'; });
-    prodExportNote.textContent = hasVideoParts
-      ? 'Este projeto tem clipe(s) pré-gravado(s) — "Exportar vídeo" fica bloqueado (ele só grava cena animada). Use "Exportar plano de edição".'
-      : 'Exporta em .webm (ou .mp4, se o navegador suportar).';
+    prodExportNote.textContent = 'Exporta em .webm (ou .mp4, se o navegador suportar).';
+
+    // ---- Vídeo (clipes) ----
+    const vcTimeline = getVideoTimeline();
+    if (!state.videoClips.length) {
+      prodVideoClipsCard.innerHTML = '<div class="et-empty">Nenhum clipe ainda — vá pra aba Vídeo pra começar.</div>';
+    } else {
+      const vcRows = state.videoClips.map(function (clip, i) {
+        const r = videoClipReadiness(clip);
+        const dot = r.level === 'ok' ? '#4ade80' : (r.level === 'warning' ? '#ffb74d' : '#ff6b6b');
+        return (
+          '<div class="prod-row" data-prod-vc-index="' + i + '" style="display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--border);cursor:pointer;">' +
+            '<span style="width:8px;height:8px;border-radius:50%;background:' + dot + ';flex:0 0 auto;"></span>' +
+            '<span style="flex:1;font-size:13px;">' + (i + 1) + '. ' + escapeHtmlAttr(clip.clipTitle || 'Clipe') + '</span>' +
+            '<span style="font-size:11.5px;color:var(--text-dim);">' + escapeHtmlAttr(r.text) + '</span>' +
+          '</div>'
+        );
+      }).join('');
+      const vcBlockingCount = state.videoClips.filter(function (c) { return videoClipReadiness(c).level === 'blocking'; }).length;
+      const vcSummary = '<div style="font-size:11.5px;color:var(--text-dim);margin-bottom:8px;">' +
+        state.videoClips.length + ' clipe(s) · duração total ~' + fmt(vcTimeline.total) +
+        (vcBlockingCount ? ' · <span style="color:#ff6b6b;">' + vcBlockingCount + ' pendência(s)</span>' : ' · tudo pronto') +
+        '</div>';
+      prodVideoClipsCard.innerHTML = vcSummary + vcRows;
+      prodVideoClipsCard.querySelectorAll('[data-prod-vc-index]').forEach(function (row) {
+        row.addEventListener('click', function () { goToVideoClip(Number(row.getAttribute('data-prod-vc-index'))); });
+      });
+    }
 
     // ---- Carousel Studio ----
     const slides = state.tweetCarousel.slides || [];
@@ -2226,6 +2573,7 @@
 
   btnExportProducaoVideo.addEventListener('click', function () { btnExport.click(); });
   btnExportProducaoPlan.addEventListener('click', function () { document.getElementById('btnExportPlan').click(); });
+  btnExportProducaoVideoClipsPlan.addEventListener('click', function () { downloadVideoClipPlan(); });
 
   renderProducaoTab();
 
@@ -3340,9 +3688,537 @@
     state.parts.push(makeAnimadoPart({ chapterTitle: 'Nova parte' }));
     renderPartsList();
   });
-  document.getElementById('btnAddPartVideo').addEventListener('click', function () {
-    state.parts.push(makeVideoPart({ clipTitle: 'Novo clipe' }));
-    renderPartsList();
+
+  // =======================================================================
+  // Aba Vídeo — lista de clipes + timeline visual (mirror do Roteiro acima,
+  // prefixo vc, operando em state.videoClips em vez de state.parts).
+  // =======================================================================
+  const videoClipsListEl = document.getElementById('videoClipsList');
+  const vcEditTimelineEl = document.getElementById('vcEditTimeline');
+  const vcEtRuler = document.getElementById('vcEtRuler');
+  const vcEtTrack = document.getElementById('vcEtTrack');
+  const vcEtPlayhead = document.getElementById('vcEtPlayhead');
+  let vcEtDropIndicator = null;
+
+  // Duração do clipe NA TIMELINE (recorte comprimido/esticado pela
+  // velocidade) — ver buildVideoClipTimeline() mais acima, que usa a mesma
+  // conta.
+  function vcClipDurationSeconds(clip) {
+    return (clip.videoDurationSec || DEFAULT_CLIP_SECONDS) / (clip.speed || 1);
+  }
+  function vcPartStartTime(index) {
+    let t = 0;
+    for (let i = 0; i < index; i++) t += vcClipDurationSeconds(state.videoClips[i]);
+    return t;
+  }
+
+  function vcUpdatePlayhead() {
+    const timeline = getVideoTimeline();
+    const pct = timeline.total > 0 ? Math.min(100, Math.max(0, (vcCurrentTime / timeline.total) * 100)) : 0;
+    vcEtPlayhead.style.left = pct + '%';
+  }
+
+  function updateVcSegmentWidths() {
+    const timeline = getVideoTimeline();
+    vcEtTrack.querySelectorAll('.et-seg').forEach(function (segEl) {
+      const idx = Number(segEl.getAttribute('data-index'));
+      const clip = state.videoClips[idx];
+      if (!clip) return;
+      const widthPct = timeline.total > 0 ? (vcClipDurationSeconds(clip) / timeline.total) * 100 : 0;
+      segEl.style.width = widthPct + '%';
+    });
+    vcUpdatePlayhead();
+  }
+
+  function vcScrubToClientX(clientX, rect) {
+    const timeline = getVideoTimeline();
+    if (timeline.total <= 0 || !rect.width) return;
+    const x = Math.min(rect.width, Math.max(0, clientX - rect.left));
+    vcCurrentTime = (x / rect.width) * timeline.total;
+    vcCurrentClipKey = null;
+    vcLastPerf = null;
+  }
+
+  function focusVideoClipCard(clipId) {
+    const cardEl = videoClipsListEl.querySelector('[data-vc-id="' + clipId + '"]');
+    if (!cardEl) return;
+    cardEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    cardEl.classList.add('et-focus');
+    setTimeout(function () { cardEl.classList.remove('et-focus'); }, 1400);
+  }
+
+  function vcStopPlaybackForEdit() {
+    vcIsPlaying = false;
+    vcClipPreviewVideo.pause();
+    vcUpdatePlayButtonLabel();
+    return true;
+  }
+
+  // Recorte (in/out) arrastando as bordas do bloco — o pxPerSec é calculado
+  // em segundos DE TIMELINE (o que a largura do bloco representa), então a
+  // conversão pra segundos "reais" da take multiplica pela velocidade.
+  function attachVcTrimHandle(handle, clip, which) {
+    let dragging = false, segRect = null;
+    let startClientX = 0, startTrimStart = 0, startDuration = 0, srcDur = 0, speed = 1;
+    handle.addEventListener('pointerdown', function (e) {
+      e.stopPropagation();
+      dragging = true;
+      segRect = handle.parentElement.getBoundingClientRect();
+      startClientX = e.clientX;
+      startTrimStart = clip.trimStartSec || 0;
+      startDuration = clip.videoDurationSec || DEFAULT_CLIP_SECONDS;
+      srcDur = clip.videoSourceDurationSec || (startTrimStart + startDuration);
+      speed = clip.speed || 1;
+      handle.setPointerCapture(e.pointerId);
+      vcStopPlaybackForEdit();
+    });
+    handle.addEventListener('pointermove', function (e) {
+      if (!dragging || !segRect || !segRect.width) return;
+      e.stopPropagation();
+      const MIN_DUR = 0.3;
+      const startDurationTimeline = startDuration / speed;
+      const pxPerSec = segRect.width / Math.max(0.001, startDurationTimeline);
+      const dSec = ((e.clientX - startClientX) / pxPerSec) * speed;
+      if (which === 'end') {
+        clip.videoDurationSec = Math.max(MIN_DUR, Math.min(startDuration + dSec, srcDur - startTrimStart));
+      } else {
+        let newTrimStart = startTrimStart + dSec;
+        newTrimStart = Math.max(0, Math.min(newTrimStart, startTrimStart + startDuration - MIN_DUR));
+        clip.trimStartSec = newTrimStart;
+        clip.videoDurationSec = (startTrimStart + startDuration) - newTrimStart;
+      }
+      vcCurrentClipKey = null;
+      updateVcSegmentWidths();
+    });
+    function endDrag() {
+      if (!dragging) return;
+      dragging = false; segRect = null;
+      renderVideoClipsList();
+    }
+    handle.addEventListener('pointerup', endDrag);
+    handle.addEventListener('pointercancel', endDrag);
+  }
+
+  function attachVcSegmentDrag(seg) {
+    let dragging = false, moved = false, startX = 0, trackRect = null, fromIndex = -1, targetIndex = -1;
+    const DRAG_THRESHOLD = 6;
+    seg.addEventListener('pointerdown', function (e) {
+      if (e.target !== seg && e.target.classList && e.target.classList.contains('et-trim-handle')) return;
+      dragging = true; moved = false;
+      startX = e.clientX;
+      trackRect = vcEtTrack.getBoundingClientRect();
+      fromIndex = Number(seg.getAttribute('data-index'));
+      targetIndex = fromIndex;
+      seg.setPointerCapture(e.pointerId);
+      vcStopPlaybackForEdit();
+    });
+    seg.addEventListener('pointermove', function (e) {
+      if (!dragging || !trackRect) return;
+      const dx = e.clientX - startX;
+      if (!moved && Math.abs(dx) > DRAG_THRESHOLD) { moved = true; seg.classList.add('dragging'); }
+      if (!moved) return;
+      const x = Math.min(trackRect.width, Math.max(0, e.clientX - trackRect.left));
+      const segs = Array.from(vcEtTrack.querySelectorAll('.et-seg'));
+      let acc = 0, idx = segs.length;
+      for (let i = 0; i < segs.length; i++) {
+        const w = segs[i].getBoundingClientRect().width;
+        if (x < acc + w / 2) { idx = i; break; }
+        acc += w;
+      }
+      targetIndex = idx;
+      const indicator = ensureVcDropIndicator();
+      let leftPx = 0;
+      for (let i = 0; i < targetIndex && i < segs.length; i++) leftPx += segs[i].getBoundingClientRect().width;
+      indicator.style.display = 'block';
+      indicator.style.left = leftPx + 'px';
+    });
+    function endDrag(e) {
+      if (!dragging) return;
+      dragging = false;
+      seg.classList.remove('dragging');
+      if (vcEtDropIndicator) vcEtDropIndicator.style.display = 'none';
+      if (moved && targetIndex !== -1 && targetIndex !== fromIndex) {
+        const movedClip = state.videoClips.splice(fromIndex, 1)[0];
+        let insertAt = targetIndex;
+        if (insertAt > fromIndex) insertAt -= 1;
+        state.videoClips.splice(insertAt, 0, movedClip);
+        renderVideoClipsList();
+      } else if (!moved) {
+        vcCurrentTime = vcPartStartTime(fromIndex);
+        vcCurrentClipKey = null;
+        vcLastPerf = null;
+        focusVideoClipCard(state.videoClips[fromIndex] && state.videoClips[fromIndex].id);
+      }
+      trackRect = null;
+    }
+    seg.addEventListener('pointerup', endDrag);
+    seg.addEventListener('pointercancel', endDrag);
+  }
+
+  function ensureVcDropIndicator() {
+    if (!vcEtDropIndicator || !vcEtDropIndicator.isConnected) {
+      vcEtDropIndicator = document.createElement('div');
+      vcEtDropIndicator.className = 'et-drop-indicator';
+      vcEtTrack.appendChild(vcEtDropIndicator);
+    }
+    return vcEtDropIndicator;
+  }
+
+  function renderVcEditTimeline() {
+    vcEtTrack.innerHTML = '';
+    vcEtDropIndicator = null;
+    if (!state.videoClips.length) {
+      const empty = document.createElement('div');
+      empty.className = 'et-empty';
+      empty.textContent = 'Adicione um clipe pra ver a timeline.';
+      vcEtTrack.appendChild(empty);
+      vcUpdatePlayhead();
+      return;
+    }
+    const timeline = getVideoTimeline();
+    state.videoClips.forEach(function (clip, index) {
+      const duration = vcClipDurationSeconds(clip);
+      const widthPct = timeline.total > 0 ? (duration / timeline.total) * 100 : 0;
+      const seg = document.createElement('div');
+      seg.className = 'et-seg video';
+      seg.style.width = widthPct + '%';
+      seg.setAttribute('data-index', String(index));
+      seg.title = clip.clipTitle || 'Clipe';
+      const label = document.createElement('span');
+      label.className = 'et-seg-label';
+      label.textContent = (index + 1) + '. ' + (clip.clipTitle || 'Clipe');
+      seg.appendChild(label);
+      if (clip.videoDataUrl) {
+        const leftHandle = document.createElement('div');
+        leftHandle.className = 'et-trim-handle left';
+        const rightHandle = document.createElement('div');
+        rightHandle.className = 'et-trim-handle right';
+        seg.appendChild(leftHandle);
+        seg.appendChild(rightHandle);
+        attachVcTrimHandle(leftHandle, clip, 'start');
+        attachVcTrimHandle(rightHandle, clip, 'end');
+      }
+      attachVcSegmentDrag(seg);
+      vcEtTrack.appendChild(seg);
+    });
+    ensureVcDropIndicator().style.display = 'none';
+    vcUpdatePlayhead();
+  }
+
+  vcEtRuler.addEventListener('pointerdown', function (e) {
+    vcEtRuler.setPointerCapture(e.pointerId);
+    vcStopPlaybackForEdit();
+    vcScrubToClientX(e.clientX, vcEtRuler.getBoundingClientRect());
+  });
+  vcEtRuler.addEventListener('pointermove', function (e) {
+    if (e.buttons !== 1) return;
+    vcScrubToClientX(e.clientX, vcEtRuler.getBoundingClientRect());
+  });
+
+  function buildVideoClipCardHead(clip, index) {
+    const head = document.createElement('div');
+    head.className = 'part-card-head';
+    const title = document.createElement('strong');
+    title.textContent = 'Clipe ' + (index + 1);
+    const actions = document.createElement('div');
+    actions.className = 'actions';
+
+    const upBtn = document.createElement('button');
+    upBtn.className = 'btn btn-sm'; upBtn.textContent = '↑'; upBtn.disabled = index === 0;
+    upBtn.onclick = function () {
+      if (index === 0) return;
+      const tmp = state.videoClips[index - 1];
+      state.videoClips[index - 1] = state.videoClips[index];
+      state.videoClips[index] = tmp;
+      renderVideoClipsList();
+    };
+
+    const downBtn = document.createElement('button');
+    downBtn.className = 'btn btn-sm'; downBtn.textContent = '↓'; downBtn.disabled = index === state.videoClips.length - 1;
+    downBtn.onclick = function () {
+      if (index === state.videoClips.length - 1) return;
+      const tmp = state.videoClips[index + 1];
+      state.videoClips[index + 1] = state.videoClips[index];
+      state.videoClips[index] = tmp;
+      renderVideoClipsList();
+    };
+
+    const delBtn = document.createElement('button');
+    delBtn.className = 'btn btn-sm btn-danger'; delBtn.textContent = 'Remover';
+    delBtn.onclick = function () {
+      if (!confirm('Remover este clipe?')) return;
+      state.videoClips.splice(index, 1);
+      renderVideoClipsList();
+    };
+
+    actions.appendChild(upBtn); actions.appendChild(downBtn); actions.appendChild(delBtn);
+    head.appendChild(title); head.appendChild(actions);
+    return head;
+  }
+
+  const SPEED_LABELS = { '0.5': '0.5x (câmera lenta)', '0.75': '0.75x', '1': '1x (normal)', '1.25': '1.25x', '1.5': '1.5x', '2': '2x (acelerado)' };
+
+  function buildVideoClipCard(card, clip) {
+    // Título do clipe
+    const titleField = document.createElement('div');
+    titleField.className = 'field';
+    const titleLabel = document.createElement('label'); titleLabel.textContent = 'Título do clipe';
+    const titleInput = document.createElement('input');
+    titleInput.type = 'text'; titleInput.value = clip.clipTitle || '';
+    titleInput.oninput = function () { clip.clipTitle = titleInput.value; };
+    titleField.appendChild(titleLabel); titleField.appendChild(titleInput);
+    card.appendChild(titleField);
+
+    // Banco de takes — várias tomadas por clipe, escolha a ativa (é a que
+    // toca na prévia/exporta no plano de edição).
+    const durSpan = document.createElement('span');
+    durSpan.className = 'dur-badge';
+    const trimInfoDiv = document.createElement('div');
+    trimInfoDiv.className = 'trim-info';
+    const videoPreview = document.createElement('video');
+    videoPreview.className = 'video-thumb';
+    videoPreview.controls = true;
+
+    function refreshDurBadges() {
+      durSpan.textContent = clip.videoDurationSec
+        ? '~' + fmt(clip.videoDurationSec) + ' min:seg (duração real do clipe)'
+        : '~' + fmt(DEFAULT_CLIP_SECONDS) + ' min:seg (estimado — envie o vídeo pra medir)';
+      trimInfoDiv.textContent = trimInfoLabel(clip);
+    }
+    function refreshPreviewSrc() {
+      if (clip.videoDataUrl) { videoPreview.src = clip.videoDataUrl; videoPreview.style.display = 'block'; }
+      else { videoPreview.removeAttribute('src'); videoPreview.style.display = 'none'; }
+    }
+    videoPreview.onloadedmetadata = function () {
+      if (!isFinite(videoPreview.duration) || videoPreview.duration <= 0) return;
+      const take = activeTakeOf(clip);
+      if (take) take.videoSourceDurationSec = videoPreview.duration;
+      clip.videoSourceDurationSec = videoPreview.duration;
+      if (clip.videoDurationSec == null) {
+        clip.videoDurationSec = videoPreview.duration;
+        clip.trimStartSec = 0;
+      } else {
+        clip.trimStartSec = Math.min(clip.trimStartSec || 0, Math.max(0, videoPreview.duration - 0.3));
+        clip.videoDurationSec = Math.min(clip.videoDurationSec, videoPreview.duration - clip.trimStartSec);
+      }
+      refreshDurBadges();
+      renderVcEditTimeline();
+    };
+    refreshPreviewSrc();
+    refreshDurBadges();
+
+    const takesField = document.createElement('div');
+    takesField.className = 'field';
+    const takesLabel = document.createElement('label'); takesLabel.textContent = 'Banco de takes';
+    takesField.appendChild(takesLabel);
+    const takesListEl = document.createElement('div');
+    takesField.appendChild(takesListEl);
+
+    function renderTakeRows() {
+      takesListEl.innerHTML = '';
+      clip.takes.forEach(function (take, ti) {
+        const row = document.createElement('div');
+        row.className = 'take-row';
+
+        const radioWrap = document.createElement('label');
+        radioWrap.style.cssText = 'display:flex;align-items:center;gap:5px;flex:0 0 auto;font-size:11.5px;color:var(--text-dim);cursor:pointer;';
+        const radio = document.createElement('input');
+        radio.type = 'radio'; radio.name = 'activeTake-' + clip.id;
+        radio.checked = clip.activeTakeId === take.id;
+        radio.onchange = function () {
+          clip.activeTakeId = take.id;
+          syncClipActiveTake(clip);
+          vcCurrentClipKey = null;
+          refreshPreviewSrc();
+          refreshDurBadges();
+          renderVcEditTimeline();
+        };
+        radioWrap.appendChild(radio);
+        radioWrap.appendChild(document.createTextNode('Ativa'));
+
+        const labelInput = document.createElement('input');
+        labelInput.type = 'text';
+        labelInput.value = take.label || ('Take ' + (ti + 1));
+        labelInput.oninput = function () { take.label = labelInput.value; };
+
+        const fileInput = document.createElement('input');
+        fileInput.type = 'file'; fileInput.accept = 'video/*';
+        fileInput.style.flex = '0 0 auto';
+
+        const fname = document.createElement('span');
+        fname.className = 'filename'; fname.style.flex = '0 0 auto';
+        fname.textContent = take.videoFileName || 'sem arquivo';
+
+        fileInput.onchange = function () {
+          const file = fileInput.files[0];
+          if (!file) return;
+          const reader = new FileReader();
+          reader.onload = function () {
+            take.videoDataUrl = reader.result;
+            take.videoFileName = file.name;
+            take.videoSourceDurationSec = null;
+            fname.textContent = file.name;
+            if (clip.activeTakeId === take.id) {
+              clip.videoDurationSec = null;
+              clip.trimStartSec = 0;
+              syncClipActiveTake(clip);
+              vcCurrentClipKey = null;
+              refreshPreviewSrc();
+              refreshDurBadges();
+            }
+            renderVcEditTimeline();
+          };
+          reader.readAsDataURL(file);
+        };
+
+        const rmBtn = document.createElement('button');
+        rmBtn.className = 'btn btn-sm btn-danger'; rmBtn.textContent = '✕';
+        rmBtn.style.flex = '0 0 auto';
+        rmBtn.disabled = clip.takes.length <= 1;
+        rmBtn.onclick = function () {
+          if (clip.takes.length <= 1) return;
+          if (!confirm('Remover esta take?')) return;
+          clip.takes = clip.takes.filter(function (t) { return t.id !== take.id; });
+          if (clip.activeTakeId === take.id) clip.activeTakeId = clip.takes[0].id;
+          syncClipActiveTake(clip);
+          vcCurrentClipKey = null;
+          renderVideoClipsList();
+        };
+
+        row.appendChild(radioWrap); row.appendChild(labelInput);
+        row.appendChild(fileInput); row.appendChild(fname); row.appendChild(rmBtn);
+        takesListEl.appendChild(row);
+      });
+    }
+    renderTakeRows();
+
+    const addTakeBtn = document.createElement('button');
+    addTakeBtn.className = 'btn btn-sm'; addTakeBtn.textContent = '+ Adicionar take';
+    addTakeBtn.style.marginTop = '8px';
+    addTakeBtn.onclick = function () {
+      const take = makeTake({ label: 'Take ' + (clip.takes.length + 1) });
+      clip.takes.push(take);
+      renderTakeRows();
+    };
+    takesField.appendChild(addTakeBtn);
+    card.appendChild(takesField);
+
+    const videoField = document.createElement('div');
+    videoField.className = 'field';
+    videoField.style.marginTop = '10px';
+    videoField.appendChild(durSpan);
+    videoField.appendChild(trimInfoDiv);
+    videoField.appendChild(videoPreview);
+    card.appendChild(videoField);
+
+    // Legenda planejada (mostrada sobreposta na prévia sincronizada)
+    const capField = document.createElement('div');
+    capField.className = 'field';
+    capField.style.marginTop = '10px';
+    const capLabel = document.createElement('label'); capLabel.textContent = 'Legenda';
+    const capArea = document.createElement('textarea');
+    capArea.value = clip.captionText || '';
+    capArea.style.minHeight = '50px';
+    capArea.oninput = function () { clip.captionText = capArea.value; };
+    capField.appendChild(capLabel); capField.appendChild(capArea);
+    card.appendChild(capField);
+
+    appendOverlayField(card, clip);
+
+    // Transição de entrada
+    const transField = document.createElement('div');
+    transField.className = 'field';
+    const transLabel = document.createElement('label'); transLabel.textContent = 'Transição de entrada';
+    const transSelect = document.createElement('select');
+    Object.keys(TRANSITION_LABELS).forEach(function (key) {
+      const opt = document.createElement('option');
+      opt.value = key; opt.textContent = TRANSITION_LABELS[key];
+      if (key === (clip.transitionIn || 'corte-seco')) opt.selected = true;
+      transSelect.appendChild(opt);
+    });
+    transSelect.onchange = function () { clip.transitionIn = transSelect.value; };
+    transField.appendChild(transLabel); transField.appendChild(transSelect);
+    card.appendChild(transField);
+
+    // Velocidade — câmera lenta/acelerada. Só muda a duração NA TIMELINE
+    // (ver vcClipDurationSeconds()), não o recorte em si.
+    const speedField = document.createElement('div');
+    speedField.className = 'field';
+    const speedLabel = document.createElement('label'); speedLabel.textContent = 'Velocidade';
+    const speedSelect = document.createElement('select');
+    Object.keys(SPEED_LABELS).forEach(function (key) {
+      const opt = document.createElement('option');
+      opt.value = key; opt.textContent = SPEED_LABELS[key];
+      if (Number(key) === (clip.speed || 1)) opt.selected = true;
+      speedSelect.appendChild(opt);
+    });
+    speedSelect.onchange = function () {
+      clip.speed = Number(speedSelect.value);
+      vcCurrentClipKey = null;
+      renderVcEditTimeline();
+    };
+    speedField.appendChild(speedLabel); speedField.appendChild(speedSelect);
+    card.appendChild(speedField);
+
+    // Cor/filtro — aplicado na prévia real (não é só nota de planejamento).
+    const colorField = document.createElement('div');
+    colorField.className = 'field';
+    const colorLabel = document.createElement('label'); colorLabel.textContent = 'Cor / filtro';
+    colorField.appendChild(colorLabel);
+    [['brightness', 'Brilho'], ['contrast', 'Contraste'], ['saturation', 'Saturação']].forEach(function (pair) {
+      const key = pair[0], name = pair[1];
+      const row = document.createElement('div');
+      row.className = 'row';
+      row.style.alignItems = 'center';
+      row.style.marginBottom = '6px';
+      const rowLabel = document.createElement('span');
+      rowLabel.style.cssText = 'flex:0 0 76px;font-size:11.5px;color:var(--text-dim);';
+      rowLabel.textContent = name;
+      const range = document.createElement('input');
+      range.type = 'range'; range.min = '50'; range.max = '150'; range.step = '5';
+      range.value = String(clip[key] == null ? 100 : clip[key]);
+      const valLabel = document.createElement('span');
+      valLabel.style.cssText = 'flex:0 0 42px;font-size:11.5px;color:var(--text-dim);text-align:right;';
+      valLabel.textContent = range.value + '%';
+      range.oninput = function () {
+        clip[key] = Number(range.value);
+        valLabel.textContent = range.value + '%';
+      };
+      row.appendChild(rowLabel); row.appendChild(range); row.appendChild(valLabel);
+      colorField.appendChild(row);
+    });
+    card.appendChild(colorField);
+
+    // Efeitos planejados (nota livre)
+    const fxField = document.createElement('div');
+    fxField.className = 'field';
+    const fxLabel = document.createElement('label'); fxLabel.textContent = 'Efeitos planejados (opcional)';
+    const fxArea = document.createElement('textarea');
+    fxArea.value = clip.effectsNotes || '';
+    fxArea.placeholder = 'Zoom, desfoque, outros ajustes que não dá pra fazer aqui...';
+    fxArea.style.minHeight = '50px';
+    fxArea.oninput = function () { clip.effectsNotes = fxArea.value; };
+    fxField.appendChild(fxLabel); fxField.appendChild(fxArea);
+    card.appendChild(fxField);
+  }
+
+  function renderVideoClipsList() {
+    videoClipsListEl.innerHTML = '';
+    state.videoClips.forEach(function (clip, index) {
+      const card = document.createElement('div');
+      card.className = 'card part-card';
+      card.setAttribute('data-vc-id', String(clip.id));
+      card.appendChild(buildVideoClipCardHead(clip, index));
+      buildVideoClipCard(card, clip);
+      videoClipsListEl.appendChild(card);
+    });
+    renderVcEditTimeline();
+  }
+  renderVideoClipsList();
+
+  document.getElementById('btnAddVideoClip').addEventListener('click', function () {
+    state.videoClips.push(makeVideoClip({ clipTitle: 'Novo clipe' }));
+    renderVideoClipsList();
   });
 
   // ---------------------------------------------------------------------
@@ -3444,7 +4320,7 @@
       const thumbHtml = isVideo
         ? '<video src="' + item.url + '" muted loop preload="metadata"></video><span class="mb-video-badge">VÍDEO</span>'
         : '<img src="' + item.url + '" alt="' + escapeHtmlAttr(item.label) + '" loading="lazy">';
-      const roteiroLabel = isVideo ? 'Usar no Roteiro (clipe)' : 'Usar no Roteiro';
+      const roteiroLabel = isVideo ? 'Usar no Vídeo (clipe)' : 'Usar no Roteiro';
       return (
         '<div class="mb-card">' +
           '<div class="mb-thumb-wrap"' + (isVideo ? ' onmouseenter="this.querySelector(\'video\').play().catch(function(){})" onmouseleave="this.querySelector(\'video\').pause()"' : '') + '>' + thumbHtml + '</div>' +
@@ -3469,18 +4345,21 @@
         if (action === 'download') {
           downloadRemoteFile(item.url, item.id + (itemType === 'video' ? '.mp4' : '.jpg'));
         } else if (action === 'roteiro' && itemType === 'video') {
-          const part = makeVideoPart({ clipTitle: item.label, videoDataUrl: item.url, videoFileName: item.label });
-          state.parts.push(part);
-          renderPartsList();
-          document.getElementById('tabBtnRoteiro').click();
-          showMbToast('Adicionado como novo clipe pré-gravado no Videos Studio.');
+          const clip = makeVideoClip({ clipTitle: item.label });
+          clip.takes[0].videoDataUrl = item.url;
+          clip.takes[0].videoFileName = item.label;
+          syncClipActiveTake(clip);
+          state.videoClips.push(clip);
+          renderVideoClipsList();
+          document.getElementById('tabBtnVideo').click();
+          showMbToast('Adicionado como novo clipe na aba Vídeo.');
         } else if (action === 'roteiro') {
           const part = makeAnimadoPart({ chapterTitle: item.label, brollDataUrl: item.url });
           loadBrollImageInto(part, item.url);
           state.parts.push(part);
           renderPartsList();
           document.getElementById('tabBtnRoteiro').click();
-          showMbToast('Adicionado como nova parte no Videos Studio.');
+          showMbToast('Adicionado como nova parte no Roteiro.');
         } else if (action === 'carousel') {
           state.tweetCarousel.slides.push({
             id: nextTweetId(), text: '', imageUrl: item.url, imageDataUrl: item.url,
@@ -3525,22 +4404,6 @@
         5: { x: state.carousel1Pos[5].x, y: state.carousel1Pos[5].y },
       },
       parts: state.parts.map(function (p) {
-        if (p.kind === 'video') {
-          return {
-            id: p.id, kind: 'video', clipTitle: p.clipTitle, captionText: p.captionText,
-            videoDataUrl: p.videoDataUrl || null, videoFileName: p.videoFileName || null,
-            videoDurationSec: p.videoDurationSec || null, transitionIn: p.transitionIn || 'corte-seco',
-            effectsNotes: p.effectsNotes || '',
-            trimStartSec: p.trimStartSec || 0, videoSourceDurationSec: p.videoSourceDurationSec || null,
-            overlay: {
-              enabled: !!(p.overlay && p.overlay.enabled), text: (p.overlay && p.overlay.text) || '',
-              pos: { x: (p.overlay && p.overlay.pos && p.overlay.pos.x) || 50, y: (p.overlay && p.overlay.pos && p.overlay.pos.y) || 18 },
-            },
-            complementaryTakes: (p.complementaryTakes || []).map(function (t) {
-              return { id: t.id, note: t.note || '', fileDataUrl: t.fileDataUrl || null, fileName: t.fileName || null };
-            }),
-          };
-        }
         return {
           id: p.id, kind: 'animado', chapterTitle: p.chapterTitle, text: p.text, keywords: p.keywords,
           brollDataUrl: p.brollDataUrl || null, audioDataUrl: p.audioDataUrl || null, audioFileName: p.audioFileName || null,
@@ -3550,6 +4413,24 @@
           overlay: {
             enabled: !!(p.overlay && p.overlay.enabled), text: (p.overlay && p.overlay.text) || '',
             pos: { x: (p.overlay && p.overlay.pos && p.overlay.pos.x) || 50, y: (p.overlay && p.overlay.pos && p.overlay.pos.y) || 18 },
+          },
+        };
+      }),
+      videoClips: state.videoClips.map(function (c) {
+        return {
+          id: c.id, clipTitle: c.clipTitle, captionText: c.captionText,
+          takes: (c.takes || []).map(function (t) {
+            return { id: t.id, label: t.label || '', videoDataUrl: t.videoDataUrl || null, videoFileName: t.videoFileName || null, videoSourceDurationSec: t.videoSourceDurationSec || null };
+          }),
+          activeTakeId: c.activeTakeId,
+          videoDurationSec: c.videoDurationSec || null,
+          trimStartSec: c.trimStartSec || 0,
+          speed: c.speed || 1, brightness: c.brightness == null ? 100 : c.brightness,
+          contrast: c.contrast == null ? 100 : c.contrast, saturation: c.saturation == null ? 100 : c.saturation,
+          transitionIn: c.transitionIn || 'corte-seco', effectsNotes: c.effectsNotes || '',
+          overlay: {
+            enabled: !!(c.overlay && c.overlay.enabled), text: (c.overlay && c.overlay.text) || '',
+            pos: { x: (c.overlay && c.overlay.pos && c.overlay.pos.x) || 50, y: (c.overlay && c.overlay.pos && c.overlay.pos.y) || 18 },
           },
         };
       }),
@@ -3614,25 +4495,16 @@
           logoThumb.removeAttribute('src');
           logoFilename.textContent = 'Nenhum logo enviado (PNG com fundo transparente).';
         }
-        state.parts = (data.parts || []).map(function (p) {
+        // Migração: projetos salvos antes da separação Roteiro/Vídeo tinham
+        // clipe pré-gravado misturado em "parts" (kind='video'). Esses vão
+        // pra state.videoClips (como clipe de take única) em vez de ficar
+        // em state.parts, que agora é só cena animada.
+        const migratedClips = [];
+        state.parts = (data.parts || []).filter(function (p) { return p.kind !== 'video'; }).map(function (p) {
           const overlay = {
             enabled: !!(p.overlay && p.overlay.enabled), text: (p.overlay && p.overlay.text) || '',
             pos: { x: (p.overlay && p.overlay.pos && p.overlay.pos.x) || 50, y: (p.overlay && p.overlay.pos && p.overlay.pos.y) || 18 },
           };
-          if (p.kind === 'video') {
-            return {
-              id: p.id || nextId(), kind: 'video',
-              clipTitle: p.clipTitle || '', captionText: p.captionText || '',
-              videoDataUrl: p.videoDataUrl || null, videoFileName: p.videoFileName || null,
-              videoDurationSec: p.videoDurationSec || null, transitionIn: p.transitionIn || 'corte-seco',
-              effectsNotes: p.effectsNotes || '',
-              trimStartSec: p.trimStartSec || 0, videoSourceDurationSec: p.videoSourceDurationSec || null,
-              overlay: overlay,
-              complementaryTakes: (p.complementaryTakes || []).map(function (t) {
-                return { id: t.id || nextTakeId(), note: t.note || '', fileDataUrl: t.fileDataUrl || null, fileName: t.fileName || null };
-              }),
-            };
-          }
           const part = {
             id: p.id || nextId(), kind: 'animado', chapterTitle: p.chapterTitle || '', text: p.text || '',
             keywords: p.keywords || [], brollDataUrl: p.brollDataUrl || null, brollImg: null,
@@ -3647,7 +4519,46 @@
           }
           return part;
         });
+        (data.parts || []).filter(function (p) { return p.kind === 'video'; }).forEach(function (p) {
+          const take = makeTake({
+            label: 'Take 1', videoDataUrl: p.videoDataUrl || null, videoFileName: p.videoFileName || null,
+            videoSourceDurationSec: p.videoSourceDurationSec || null,
+          });
+          const clip = makeVideoClip({
+            id: p.id || nextId(), clipTitle: p.clipTitle || '', captionText: p.captionText || '',
+            takes: [take], activeTakeId: take.id,
+            videoDurationSec: p.videoDurationSec || null, trimStartSec: p.trimStartSec || 0,
+            transitionIn: p.transitionIn || 'corte-seco', effectsNotes: p.effectsNotes || '',
+            overlay: {
+              enabled: !!(p.overlay && p.overlay.enabled), text: (p.overlay && p.overlay.text) || '',
+              pos: { x: (p.overlay && p.overlay.pos && p.overlay.pos.x) || 50, y: (p.overlay && p.overlay.pos && p.overlay.pos.y) || 18 },
+            },
+          });
+          syncClipActiveTake(clip);
+          migratedClips.push(clip);
+        });
+        state.videoClips = (data.videoClips || []).map(function (c) {
+          const takes = (c.takes && c.takes.length) ? c.takes.map(function (t) {
+            return makeTake({ id: t.id || nextTakeId(), label: t.label || 'Take', videoDataUrl: t.videoDataUrl || null, videoFileName: t.videoFileName || null, videoSourceDurationSec: t.videoSourceDurationSec || null });
+          }) : [makeTake({ label: 'Take 1' })];
+          const activeTakeId = (c.activeTakeId && takes.some(function (t) { return t.id === c.activeTakeId; })) ? c.activeTakeId : takes[0].id;
+          const clip = makeVideoClip({
+            id: c.id || nextId(), clipTitle: c.clipTitle || '', captionText: c.captionText || '',
+            takes: takes, activeTakeId: activeTakeId,
+            videoDurationSec: c.videoDurationSec || null, trimStartSec: c.trimStartSec || 0,
+            speed: c.speed || 1, brightness: c.brightness == null ? 100 : c.brightness,
+            contrast: c.contrast == null ? 100 : c.contrast, saturation: c.saturation == null ? 100 : c.saturation,
+            transitionIn: c.transitionIn || 'corte-seco', effectsNotes: c.effectsNotes || '',
+            overlay: {
+              enabled: !!(c.overlay && c.overlay.enabled), text: (c.overlay && c.overlay.text) || '',
+              pos: { x: (c.overlay && c.overlay.pos && c.overlay.pos.x) || 50, y: (c.overlay && c.overlay.pos && c.overlay.pos.y) || 18 },
+            },
+          });
+          syncClipActiveTake(clip);
+          return clip;
+        }).concat(migratedClips);
         currentClipKey = null;
+        vcCurrentClipKey = null;
         const savedTweetSlides = (data.tweetCarousel && data.tweetCarousel.slides) || [];
         state.tweetCarousel.slides = savedTweetSlides.length
           ? savedTweetSlides.map(function (s) {
@@ -3664,8 +4575,11 @@
         renderTweetRail();
         syncGlobalControls();
         renderPartsList();
+        renderVideoClipsList();
         currentTime = 0; lastPerf = null; currentAudioKey = null; isPlaying = false;
         updatePlayButtonLabel();
+        vcCurrentTime = 0; vcLastPerf = null; vcIsPlaying = false;
+        vcUpdatePlayButtonLabel();
       } catch (e) {
         alert('Arquivo de projeto inválido: ' + e.message);
       }
@@ -3679,14 +4593,17 @@
   // ---------------------------------------------------------------------
   // Abas
   // ---------------------------------------------------------------------
-  const tabButtons = [document.getElementById('tabBtnProducao'), document.getElementById('tabBtnRoteiro'), document.getElementById('tabBtnCarousel'), document.getElementById('tabBtnMedia'), document.getElementById('tabBtnChat')];
+  const tabButtons = [document.getElementById('tabBtnProducao'), document.getElementById('tabBtnRoteiro'), document.getElementById('tabBtnVideo'), document.getElementById('tabBtnCarousel'), document.getElementById('tabBtnMedia'), document.getElementById('tabBtnChat')];
   const tabPanels = {
     producao: document.getElementById('tabPanelProducao'),
     roteiro: document.getElementById('tabPanelRoteiro'),
+    video: document.getElementById('tabPanelVideo'),
     carousel: document.getElementById('tabPanelCarousel'),
     media: document.getElementById('tabPanelMedia'),
     chat: document.getElementById('tabPanelChat'),
   };
+  const previewColRoteiro = document.getElementById('previewColRoteiro');
+  const previewColVideo = document.getElementById('previewColVideo');
   tabButtons.forEach(function (btn) {
     btn.addEventListener('click', function () {
       tabButtons.forEach(function (b) { b.classList.remove('active'); });
@@ -3695,6 +4612,12 @@
       Object.keys(tabPanels).forEach(function (key) {
         tabPanels[key].style.display = key === tab ? 'block' : 'none';
       });
+      // A prévia (canvas do Roteiro OU vídeo real da aba Vídeo) só troca
+      // quando uma dessas duas abas é clicada — nas outras (Produção,
+      // Carousel, Mídia, Assistente), fica mostrando o que já estava ativo,
+      // igual já acontecia antes de existir a aba Vídeo.
+      if (tab === 'roteiro') { previewColRoteiro.style.display = 'flex'; previewColVideo.style.display = 'none'; }
+      else if (tab === 'video') { previewColRoteiro.style.display = 'none'; previewColVideo.style.display = 'flex'; }
       if (tab === 'producao') renderProducaoTab();
     });
   });
@@ -3739,25 +4662,21 @@
     },
     {
       name: 'add_part',
-      description: 'Adiciona uma nova parte ao FINAL da linha do tempo. kind="animado" (padrão) vira uma cartela de capítulo numerada + bloco de narração/legenda, 100% gerado. kind="video" vira um clipe pré-gravado — nesse caso você só planeja legenda/transição/efeitos/takes em texto, o usuário sobe o arquivo de vídeo depois pela aba (você não consegue enviar arquivos).',
+      description: 'Adiciona uma nova cena animada ao FINAL do roteiro (cartela de capítulo numerada + bloco de narração/legenda, 100% gerado). O roteiro só tem esse tipo de parte — clipe já filmado vive numa aba separada (Vídeo), que você não gerencia.',
       input_schema: {
         type: 'object',
         properties: {
-          kind: { type: 'string', enum: ['animado', 'video'], description: 'Tipo da parte. Padrão: animado.' },
-          chapterTitle: { type: 'string', description: '(kind=animado) Título curto mostrado na cartela de capítulo.' },
-          text: { type: 'string', description: '(kind=animado) Texto que será narrado e legendado nesta parte.' },
-          keywords: { type: 'array', items: { type: 'string' }, description: '(kind=animado) Palavras desse texto que devem ganhar a cor de destaque nas legendas.' },
-          iconTheme: { type: 'string', enum: Object.keys(ICON_THEME_LABELS), description: '(kind=animado) Tema de ícone opcional desenhado na cartela.' },
-          clipTitle: { type: 'string', description: '(kind=video) Título curto do clipe.' },
-          captionText: { type: 'string', description: '(kind=video) Legenda planejada, sobreposta na prévia do clipe.' },
-          transitionIn: { type: 'string', enum: Object.keys(TRANSITION_LABELS), description: '(kind=video) Transição de entrada planejada.' },
-          effectsNotes: { type: 'string', description: '(kind=video) Nota livre com os efeitos planejados pra esse clipe.' },
+          chapterTitle: { type: 'string', description: 'Título curto mostrado na cartela de capítulo.' },
+          text: { type: 'string', description: 'Texto que será narrado e legendado nesta parte.' },
+          keywords: { type: 'array', items: { type: 'string' }, description: 'Palavras desse texto que devem ganhar a cor de destaque nas legendas.' },
+          iconTheme: { type: 'string', enum: Object.keys(ICON_THEME_LABELS), description: 'Tema de ícone opcional desenhado na cartela.' },
         },
+        required: ['chapterTitle', 'text'],
       },
     },
     {
       name: 'update_part',
-      description: 'Edita uma parte existente pelo índice (0 = primeira). Só muda os campos enviados — use os campos do tipo (kind) correto dessa parte, veja em get_project_state.',
+      description: 'Edita uma cena existente do roteiro pelo índice (0 = primeira). Só muda os campos enviados.',
       input_schema: {
         type: 'object',
         properties: {
@@ -3766,10 +4685,6 @@
           text: { type: 'string' },
           keywords: { type: 'array', items: { type: 'string' } },
           iconTheme: { type: 'string', enum: Object.keys(ICON_THEME_LABELS) },
-          clipTitle: { type: 'string' },
-          captionText: { type: 'string' },
-          transitionIn: { type: 'string', enum: Object.keys(TRANSITION_LABELS) },
-          effectsNotes: { type: 'string' },
         },
         required: ['index'],
       },
@@ -3797,17 +4712,8 @@
       brollStyle: state.brollStyle,
       totalParts: state.parts.length,
       parts: state.parts.map(function (p, i) {
-        if (p.kind === 'video') {
-          return {
-            index: i, kind: 'video', clipTitle: p.clipTitle, captionText: p.captionText,
-            transitionIn: p.transitionIn, effectsNotes: p.effectsNotes,
-            hasVideoFile: !!p.videoDataUrl, takesCount: (p.complementaryTakes || []).length,
-            trimStartSec: p.trimStartSec || 0, videoDurationSec: p.videoDurationSec || null,
-            overlayText: (p.overlay && p.overlay.enabled && p.overlay.text) || null,
-          };
-        }
         return {
-          index: i, kind: 'animado',
+          index: i,
           chapterTitle: p.chapterTitle,
           text: p.text,
           keywords: p.keywords,
@@ -3817,6 +4723,7 @@
           overlayText: (p.overlay && p.overlay.enabled && p.overlay.text) || null,
         };
       }),
+      totalVideoClips: state.videoClips.length,
     }, null, 2);
   }
 
@@ -3825,8 +4732,8 @@
       'Você é o assistente embutido no B4 Studio Edition, o sistema único de edição automática de vídeos verticais (9:16) da B4 Business/B4 Technology.',
       'Sua função é EDITAR o projeto usando as ferramentas disponíveis, não apenas descrever o que fazer.',
       'Sempre que o usuário pedir uma mudança concreta (mudar tema, adicionar/editar/remover/reordenar parte, trocar estilo de legenda ou B-roll), chame a ferramenta correspondente em vez de só responder em texto.',
-      'O projeto tem dois tipos de parte, misturáveis na mesma linha do tempo: "animado" (roteiro escrito, 100% gerado — cartela + narração + B-roll) e "video" (clipe pré-gravado, onde você só planeja legenda/transição/efeitos/takes em texto). Use kind ao chamar add_part; sem kind, o padrão é animado.',
-      'Você NÃO consegue subir arquivos (imagem, áudio ou vídeo) — isso continua na aba Videos Studio, feito pelo usuário. Ao adicionar um clipe pré-gravado (kind=video), avise que falta o usuário subir o arquivo de vídeo.',
+      'Você só gerencia o ROTEIRO (aba Roteiro — cena animada: cartela + narração + B-roll, 100% gerado). Clipe já filmado vive numa aba separada (Vídeo, estilo CapCut, com banco de takes/velocidade/cor) que você NÃO gerencia — se o usuário pedir pra adicionar um clipe/vídeo, explique que isso é feito manualmente na aba Vídeo.',
+      'Você NÃO consegue subir arquivos (imagem, áudio ou vídeo) — isso continua manual, feito pelo usuário nas abas Roteiro e Vídeo.',
       'Chame get_project_state se precisar confirmar os índices ou o conteúdo atual antes de editar (por exemplo antes de update_part/remove_part/reorder_part).',
       'Valores válidos: theme = ' + Object.keys(THEMES).join(', ') + '. captionStyle = ' + Object.keys(CAPTION_LABELS).join(', ') + '. brollStyle = ' + Object.keys(BROLL_LABELS).join(', ') + '. iconTheme = ' + Object.keys(ICON_THEME_LABELS).join(', ') + '. transitionIn = ' + Object.keys(TRANSITION_LABELS).join(', ') + '.',
       'IDENTIDADE DE MARCA (B4 Technology) — proteja isso sempre: só existem os ' + Object.keys(THEMES).length + ' temas listados acima (theme), todos usam as fontes Sora + Inter e o logo no canto superior esquerdo, extraídos do material oficial da B4 Business (Carousel Studio). Você não tem ferramenta para criar cores/fontes/posições novas — não existe essa possibilidade no set_presets, então nunca prometa isso. Se o usuário pedir uma cor ou fonte fora dos temas existentes, explique que o app só tem esses ' + Object.keys(THEMES).length + ' temas oficiais e pergunte qual deles usar (ou sugira o mais próximo do que ele quer).',
@@ -3864,17 +4771,7 @@
       return { text: 'Presets atualizados: ' + applied.join(', ') + '.', label: applied.join(', ') };
     }
     if (name === 'add_part') {
-      if (input.kind === 'video') {
-        if (!input.clipTitle) return errResult('clipTitle é obrigatório pra kind=video.');
-        state.parts.push(makeVideoPart({
-          clipTitle: input.clipTitle, captionText: input.captionText || '',
-          transitionIn: input.transitionIn && TRANSITION_LABELS[input.transitionIn] ? input.transitionIn : 'corte-seco',
-          effectsNotes: input.effectsNotes || '',
-        }));
-        renderPartsList();
-        return { text: 'Clipe pré-gravado adicionado no índice ' + (state.parts.length - 1) + ' ("' + input.clipTitle + '"). O usuário precisa subir o arquivo de vídeo pela aba Videos Studio.', label: 'adicionou clipe' };
-      }
-      if (!input.chapterTitle || !input.text) return errResult('chapterTitle e text são obrigatórios pra kind=animado.');
+      if (!input.chapterTitle || !input.text) return errResult('chapterTitle e text são obrigatórios.');
       state.parts.push(makeAnimadoPart({
         chapterTitle: input.chapterTitle, text: input.text, keywords: input.keywords || [],
         iconTheme: input.iconTheme && ICON_THEME_LABELS[input.iconTheme] ? input.iconTheme : 'nenhum',
@@ -3885,25 +4782,15 @@
     if (name === 'update_part') {
       const idx = input.index;
       if (typeof idx !== 'number' || idx < 0 || idx >= state.parts.length) {
-        return errResult('índice inválido: ' + idx + ' (o projeto tem ' + state.parts.length + ' partes, índices válidos 0-' + (state.parts.length - 1) + ').');
+        return errResult('índice inválido: ' + idx + ' (o roteiro tem ' + state.parts.length + ' partes, índices válidos 0-' + (state.parts.length - 1) + ').');
       }
       const part = state.parts[idx];
-      if (part.kind === 'video') {
-        if (input.clipTitle !== undefined) part.clipTitle = input.clipTitle;
-        if (input.captionText !== undefined) part.captionText = input.captionText;
-        if (input.transitionIn !== undefined) {
-          if (!TRANSITION_LABELS[input.transitionIn]) return errResult('transitionIn inválido: "' + input.transitionIn + '". Válidos: ' + Object.keys(TRANSITION_LABELS).join(', '));
-          part.transitionIn = input.transitionIn;
-        }
-        if (input.effectsNotes !== undefined) part.effectsNotes = input.effectsNotes;
-      } else {
-        if (input.chapterTitle !== undefined) part.chapterTitle = input.chapterTitle;
-        if (input.text !== undefined) part.text = input.text;
-        if (input.keywords !== undefined) part.keywords = input.keywords;
-        if (input.iconTheme !== undefined) {
-          if (!ICON_THEME_LABELS[input.iconTheme]) return errResult('iconTheme inválido: "' + input.iconTheme + '". Válidos: ' + Object.keys(ICON_THEME_LABELS).join(', '));
-          part.iconTheme = input.iconTheme;
-        }
+      if (input.chapterTitle !== undefined) part.chapterTitle = input.chapterTitle;
+      if (input.text !== undefined) part.text = input.text;
+      if (input.keywords !== undefined) part.keywords = input.keywords;
+      if (input.iconTheme !== undefined) {
+        if (!ICON_THEME_LABELS[input.iconTheme]) return errResult('iconTheme inválido: "' + input.iconTheme + '". Válidos: ' + Object.keys(ICON_THEME_LABELS).join(', '));
+        part.iconTheme = input.iconTheme;
       }
       renderPartsList();
       return { text: 'Parte ' + idx + ' atualizada.', label: 'editou parte ' + idx };
