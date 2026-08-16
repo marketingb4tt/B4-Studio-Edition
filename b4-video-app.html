@@ -70,6 +70,23 @@
     max-height: calc(100vh - 58px);
     overflow-y: auto;
   }
+  /* Em telas estreitas (celular), o layout de 2 colunas lado a lado não
+     cabe — sem isso, a prévia/timeline/exportação (que ficam na coluna da
+     direita) saem da tela e só aparecem rolando pro lado, o que ninguém
+     faz. Abaixo de 860px, empilha tudo numa coluna só, com a prévia +
+     timeline + exportação PRIMEIRO (é o que se quer achar mais rápido) e
+     os campos de edição depois. */
+  @media (max-width: 860px) {
+    .app { flex-direction: column-reverse; }
+    .sidebar, .preview-col {
+      flex: 1 1 auto; width: 100%; min-width: 0; max-width: 100%;
+      max-height: none; overflow-y: visible; position: static;
+    }
+    .sidebar { border-right: none; border-top: 1px solid var(--border); }
+    .tabs { flex-wrap: wrap; }
+    .tab-btn { flex: 1 1 140px; }
+    .grid-3 { grid-template-columns: 1fr; }
+  }
   h2 { font-size: 13px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-dim); margin: 22px 0 10px; }
   h2:first-child { margin-top: 0; }
   .card {
@@ -571,6 +588,7 @@
       </div>
     </div>
 
+    <div class="timeline-label" style="width:100%;max-width:340px;font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--text-dim);">Timeline de edição</div>
     <div class="edit-timeline" id="editTimeline">
       <div class="et-ruler" id="etRuler"></div>
       <div class="et-track" id="etTrack"></div>
