@@ -150,6 +150,61 @@
     white-space: pre-wrap;
   }
   .clip-caption-overlay:empty { display: none; }
+  .overlay-badge-layer { position: absolute; inset: 0; pointer-events: none; z-index: 5; }
+  .overlay-badge {
+    position: absolute; transform: translate(-50%, -50%);
+    background: var(--accent); color: #0b0b12; font-family: 'Sora', Arial, sans-serif;
+    font-weight: 800; font-size: 13px; letter-spacing: .02em; text-transform: uppercase;
+    padding: 7px 14px; border-radius: 999px; white-space: nowrap; cursor: grab;
+    box-shadow: 0 6px 16px rgba(0,0,0,.4); pointer-events: auto; touch-action: none;
+    max-width: 78%; overflow: hidden; text-overflow: ellipsis;
+  }
+  .overlay-badge:active { cursor: grabbing; }
+  .edit-timeline { position: relative; width: 100%; max-width: 340px; }
+  .et-ruler {
+    position: relative; height: 14px; margin-bottom: 4px; border-radius: 4px;
+    background: var(--panel-2); border: 1px solid var(--border); cursor: pointer; touch-action: none;
+  }
+  .et-track {
+    position: relative; display: flex; height: 46px; border-radius: 8px;
+    background: var(--panel-2); border: 1px solid var(--border); overflow: hidden;
+  }
+  .et-seg {
+    position: relative; height: 100%; flex: 0 0 auto; display: flex; align-items: center; justify-content: center;
+    overflow: hidden; cursor: grab; border-right: 1px solid var(--bg);
+    font-size: 10px; font-weight: 700; color: #0b0b12; user-select: none; touch-action: none;
+  }
+  .et-seg:last-child { border-right: none; }
+  .et-seg.animado { background: #4be9d3; }
+  .et-seg.video { background: #ffb74d; }
+  .et-seg.dragging { opacity: .55; }
+  .et-seg-label { padding: 0 5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; pointer-events: none; }
+  .et-trim-handle {
+    position: absolute; top: 0; bottom: 0; width: 11px; cursor: ew-resize;
+    background: rgba(11,11,18,.32); touch-action: none;
+  }
+  .et-trim-handle.left { left: 0; } .et-trim-handle.right { right: 0; }
+  .et-trim-handle::after {
+    content: ''; position: absolute; top: 50%; left: 50%; width: 3px; height: 16px;
+    background: #0b0b12; transform: translate(-50%, -50%); border-radius: 2px;
+  }
+  .et-drop-indicator {
+    position: absolute; top: -3px; bottom: -3px; width: 3px; background: var(--text);
+    border-radius: 2px; pointer-events: none; display: none; z-index: 4;
+  }
+  .et-playhead {
+    position: absolute; top: 0; bottom: 0; width: 2px; background: var(--text);
+    pointer-events: none; box-shadow: 0 0 6px rgba(255,255,255,.6); z-index: 3;
+  }
+  .et-playhead::before {
+    content: ''; position: absolute; top: -3px; left: 50%; transform: translate(-50%, 0);
+    width: 8px; height: 8px; border-radius: 50%; background: var(--text);
+  }
+  .et-empty { font-size: 11px; color: var(--text-dim); padding: 14px; text-align: center; width: 100%; }
+  .et-disabled { pointer-events: none; opacity: .5; }
+  .trim-info:empty { display: none; }
+  .part-card.et-focus { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 12px; transition: outline-color .3s ease; }
+  .trim-info { font-size: 11px; color: var(--text-dim); margin-top: 4px; }
   .kind-switch { display: flex; gap: 8px; margin-bottom: 14px; }
   .kind-switch .btn { flex: 1; }
   .kind-badge {
@@ -275,7 +330,7 @@
 
 <header>
   <div>
-    <h1>B4 <span>Studio Edition</span> — editor automático de vídeos verticais</h1>
+    <h1>B4 <span>Studio Edition</span> — Sistema de Produção Audiovisual de forma automatizada</h1>
     <div class="byline">Sistema único da B4 Technology — antigo projeto Remotion foi descontinuado, tudo vive aqui agora</div>
   </div>
   <div class="header-actions">
@@ -288,13 +343,39 @@
 <div class="app">
   <div class="sidebar">
     <div class="tabs">
-      <button class="tab-btn active" id="tabBtnRoteiro" data-tab="roteiro">Videos Studio</button>
+      <button class="tab-btn active" id="tabBtnProducao" data-tab="producao">Produção</button>
+      <button class="tab-btn" id="tabBtnRoteiro" data-tab="roteiro">Videos Studio</button>
       <button class="tab-btn" id="tabBtnCarousel" data-tab="carousel">Carousel Studio</button>
       <button class="tab-btn" id="tabBtnMedia" data-tab="media">Banco de Mídia</button>
       <button class="tab-btn" id="tabBtnChat" data-tab="chat">Assistente (Claude)</button>
     </div>
 
-    <div id="tabPanelRoteiro" class="tab-panel">
+    <div id="tabPanelProducao" class="tab-panel">
+      <h2>Envio para produção</h2>
+      <div class="note" style="margin-bottom:12px;">
+        Visão geral do que está pronto e do que falta em cada peça, com os
+        downloads finais centralizados aqui. Os editores continuam nas
+        outras abas — esta aba só reúne status e exportação.
+      </div>
+
+      <h2>Videos Studio</h2>
+      <div class="card" id="prodVideosCard"></div>
+      <div class="export-box" style="margin-top:12px;">
+        <button class="btn btn-primary" id="btnExportProducaoVideo">Exportar vídeo</button>
+        <button class="btn" id="btnExportProducaoPlan">Exportar plano de edição (.txt)</button>
+        <div class="note" id="prodExportNote"></div>
+      </div>
+
+      <h2 style="margin-top:20px;">Carousel Studio</h2>
+      <div class="card" id="prodCarouselCard"></div>
+      <div class="note" style="margin-top:8px;">
+        Carousel Studio ainda não tem exportação automática de imagem por
+        aqui — quando as páginas estiverem prontas, grave a tela ou tire
+        print direto na aba <b>Carousel Studio</b>.
+      </div>
+    </div>
+
+    <div id="tabPanelRoteiro" class="tab-panel" style="display:none;">
       <h2 style="display:flex; align-items:center; justify-content:space-between;">
         <span>Identidade de marca</span>
         <button type="button" class="btn btn-sm" id="btnToggleBrandDetails" style="text-transform:none; letter-spacing:normal; font-weight:600;">Ver detalhes</button>
@@ -331,7 +412,9 @@
       <h2>Partes do vídeo</h2>
       <div class="note" style="margin-bottom:12px;">
         <b>Cena animada</b> (gerada do zero) ou <b>clipe pré-gravado</b>
-        (vídeo já filmado) — misture os dois na mesma timeline.
+        (vídeo já filmado) — misture os dois na mesma timeline. Na barra acima
+        da prévia: arraste um bloco pra reordenar, as bordas de um clipe pra
+        aparar (in/out) e a régua fina pra buscar no vídeo.
       </div>
       <div id="partsList"></div>
       <div class="kind-switch">
@@ -483,10 +566,18 @@
         <video id="clipPreviewVideo" playsinline></video>
         <div class="clip-caption-overlay" id="clipCaptionOverlay"></div>
       </div>
+      <div class="overlay-badge-layer" id="overlayBadgeLayer">
+        <div class="overlay-badge" id="overlayBadge" style="display:none;"></div>
+      </div>
+    </div>
+
+    <div class="edit-timeline" id="editTimeline">
+      <div class="et-ruler" id="etRuler"></div>
+      <div class="et-track" id="etTrack"></div>
+      <div class="et-playhead" id="etPlayhead" style="left:0%;"></div>
     </div>
     <div class="controls">
       <button class="btn btn-sm" id="btnPlayPause">▶ Play</button>
-      <input type="range" id="seekRange" min="0" max="1000" value="0" />
       <span class="time-label" id="timeLabel">0:00 / 0:00</span>
     </div>
 
@@ -532,6 +623,7 @@
     'hard-cut': 'Corte seco',
     'slide-in': 'Slide lateral',
     'zoom-blur': 'Zoom punch',
+    'flash-cut': 'Flash branco + corte',
   };
   // Tema de ícone opcional desenhado na cartela de capítulo de uma cena
   // animada — referência visual rápida do assunto da parte (ver
@@ -552,6 +644,8 @@
     'corte-seco': 'Corte seco',
     'fade': 'Fade (preto)',
     'slide': 'Slide lateral',
+    'zoom-in': 'Zoom de entrada',
+    'whip-pan': 'Whip pan (borrão rápido)',
   };
 
   // ---------------------------------------------------------------------
@@ -1128,6 +1222,7 @@
       brollDataUrl: null, brollImg: null, audioDataUrl: null, audioFileName: null,
       iconTheme: 'nenhum',
       visualRefDataUrl: null, visualRefFileName: null, visualRefNote: '',
+      overlay: { enabled: false, text: '', pos: { x: 50, y: 18 } },
     }, overrides || {});
   }
   function makeVideoPart(overrides) {
@@ -1135,7 +1230,11 @@
       id: nextId(), kind: 'video',
       clipTitle: 'Novo clipe', captionText: '',
       videoDataUrl: null, videoFileName: null, videoDurationSec: null,
+      // Recorte (in/out) dentro do arquivo original — ver renderEditTimeline()
+      // / attachTrimHandle() pra arrastar as bordas do clipe na timeline.
+      trimStartSec: 0, videoSourceDurationSec: null,
       transitionIn: 'corte-seco', effectsNotes: '', complementaryTakes: [],
+      overlay: { enabled: false, text: '', pos: { x: 50, y: 18 } },
     }, overrides || {});
   }
   // Carrega o B-roll de uma parte animada a partir de uma URL (arquivo local
@@ -1400,7 +1499,42 @@
       else drawPlaceholderBroll(c, theme, 0, 0, WIDTH, HEIGHT);
       c.restore();
       drawBottomDarken(c, 0, 0, WIDTH, HEIGHT, 0.28);
+    } else if (style === 'flash-cut') {
+      if (img) drawCover(c, img, 0, 0, WIDTH, HEIGHT, {});
+      else drawPlaceholderBroll(c, theme, 0, 0, WIDTH, HEIGHT);
+      const flashSeconds = 8 / FPS;
+      if (localT < flashSeconds) {
+        const p = 1 - localT / flashSeconds;
+        c.fillStyle = 'rgba(255,255,255,' + p + ')';
+        c.fillRect(0, 0, WIDTH, HEIGHT);
+      }
+      drawBottomDarken(c, 0, 0, WIDTH, HEIGHT, 0.28);
     }
+  }
+
+  // ---- Overlay (selo/texto extra, opcional, arrastável na prévia) ----
+  // Camada independente do B-roll e da legenda de narração — um selo curto
+  // (ex: "OFERTA", "NOVO") posicionável livremente, usado em cenas animadas
+  // (desenhado aqui, entra no vídeo exportado) e em clipes pré-gravados
+  // (desenhado em HTML sobre a prévia — ver syncOverlayBadge()).
+  function drawOverlayBadge(c, part, theme) {
+    const ov = part && part.overlay;
+    if (!ov || !ov.enabled || !(ov.text || '').trim()) return;
+    const pos = ov.pos || { x: 50, y: 18 };
+    const text = ov.text.toUpperCase();
+    c.save();
+    c.font = '800 34px ' + theme.font;
+    const padX = 26, padY = 16;
+    const textWidth = c.measureText(text).width;
+    const boxW = textWidth + padX * 2, boxH = 34 + padY * 2;
+    const cx = WIDTH * (pos.x / 100), cy = HEIGHT * (pos.y / 100);
+    c.fillStyle = theme.accent;
+    roundRectPath(c, cx - boxW / 2, cy - boxH / 2, boxW, boxH, boxH / 2);
+    c.fill();
+    c.fillStyle = '#0B0B12';
+    c.textAlign = 'center'; c.textBaseline = 'middle';
+    c.fillText(text, cx, cy + 2);
+    c.restore();
   }
 
   // ---- Cartela de capítulo ----
@@ -1633,7 +1767,11 @@
       if (active) {
         if (active.block.type === 'chapter') drawChapterCard(ctx, active.block, theme, active.localT);
         else if (active.block.type === 'videoclip') { /* clipe pré-gravado — desenhado no overlay de vídeo, não no canvas (ver syncClipPreview()). */ }
-        else { drawBroll(ctx, active.block, theme, active.localT); drawCaptions(ctx, active.block, theme, active.localT); }
+        else {
+          drawBroll(ctx, active.block, theme, active.localT);
+          drawCaptions(ctx, active.block, theme, active.localT);
+          drawOverlayBadge(ctx, active.block.part, theme);
+        }
       }
     }
     drawLogo(ctx, theme, t);
@@ -1698,23 +1836,107 @@
       return;
     }
     const part = active.block.part;
+    const trimStart = part.trimStartSec || 0;
     const key = part.id + ':' + (part.videoDataUrl ? part.videoDataUrl.length : 0);
     if (key !== currentClipKey) {
       currentClipKey = key;
       clipPreviewVideo.src = part.videoDataUrl || '';
-      clipPreviewVideo.currentTime = 0;
+      clipPreviewVideo.currentTime = trimStart;
     }
     clipCaptionOverlay.textContent = part.captionText || '';
     if (part.videoDataUrl) {
-      if (Math.abs(clipPreviewVideo.currentTime - active.localT) > 0.25) {
-        clipPreviewVideo.currentTime = Math.min(active.localT, clipPreviewVideo.duration || active.localT);
+      const target = trimStart + active.localT;
+      if (Math.abs(clipPreviewVideo.currentTime - target) > 0.25) {
+        clipPreviewVideo.currentTime = Math.min(target, clipPreviewVideo.duration || target);
       }
       if (isPlaying && clipPreviewVideo.paused) clipPreviewVideo.play().catch(function () {});
       else if (!isPlaying && !clipPreviewVideo.paused) clipPreviewVideo.pause();
     } else {
       clipPreviewVideo.pause();
     }
+    applyClipTransition(part, active.localT);
   }
+
+  // ---- Transição de entrada de clipe pré-gravado (aplicada na prévia) ----
+  // Efeito real, não só a nota de planejamento — aplicado nos primeiros
+  // instantes do bloco (localT pequeno) via CSS no <video> da prévia.
+  const TRANSITION_DUR = 0.45;
+  function applyClipTransition(part, localT) {
+    const kind = part.transitionIn || 'corte-seco';
+    if (kind === 'corte-seco' || localT > TRANSITION_DUR) {
+      clipPreviewVideo.style.opacity = '1';
+      clipPreviewVideo.style.transform = 'none';
+      clipPreviewVideo.style.filter = 'none';
+      return;
+    }
+    const p = Math.max(0, Math.min(1, localT / TRANSITION_DUR));
+    const e = easeOutCubic(p);
+    if (kind === 'fade') {
+      clipPreviewVideo.style.opacity = String(p);
+      clipPreviewVideo.style.transform = 'none';
+      clipPreviewVideo.style.filter = 'none';
+    } else if (kind === 'slide') {
+      clipPreviewVideo.style.opacity = '1';
+      clipPreviewVideo.style.transform = 'translateX(' + ((1 - e) * 100) + '%)';
+      clipPreviewVideo.style.filter = 'none';
+    } else if (kind === 'zoom-in') {
+      clipPreviewVideo.style.opacity = '1';
+      clipPreviewVideo.style.transform = 'scale(' + lerp(1.18, 1, e) + ')';
+      clipPreviewVideo.style.filter = 'none';
+    } else if (kind === 'whip-pan') {
+      clipPreviewVideo.style.opacity = '1';
+      clipPreviewVideo.style.transform = 'translateX(' + ((1 - e) * -55) + '%)';
+      clipPreviewVideo.style.filter = 'blur(' + lerp(10, 0, e) + 'px)';
+    }
+  }
+
+  // ---- Badge de overlay (selo/texto extra) — sincroniza + arrasta ----
+  // Elemento HTML único, reaproveitado tanto pra cena animada (que também
+  // desenha o mesmo selo no canvas — ver drawOverlayBadge() — pra entrar no
+  // vídeo exportado) quanto pra clipe pré-gravado (aqui o HTML é a única
+  // representação, já que exportação fica bloqueada quando há clipes).
+  const previewStage = document.getElementById('previewStage');
+  const overlayBadge = document.getElementById('overlayBadge');
+  let overlayDragPart = null;
+
+  function syncOverlayBadge(active) {
+    const showable = !!(active && (active.block.type === 'narration' || active.block.type === 'videoclip'));
+    const part = showable ? active.block.part : null;
+    const ov = part && part.overlay;
+    if (ov && ov.enabled && (ov.text || '').trim()) {
+      const pos = ov.pos || { x: 50, y: 18 };
+      overlayBadge.style.display = 'block';
+      overlayBadge.textContent = ov.text;
+      overlayBadge.style.left = pos.x + '%';
+      overlayBadge.style.top = pos.y + '%';
+      overlayDragPart = part;
+    } else {
+      overlayBadge.style.display = 'none';
+      overlayDragPart = null;
+    }
+  }
+
+  (function attachOverlayBadgeDrag() {
+    let dragging = false, frameRect = null;
+    overlayBadge.addEventListener('pointerdown', function (e) {
+      if (!overlayDragPart) return;
+      dragging = true;
+      frameRect = previewStage.getBoundingClientRect();
+      overlayBadge.setPointerCapture(e.pointerId);
+      e.preventDefault();
+    });
+    overlayBadge.addEventListener('pointermove', function (e) {
+      if (!dragging || !overlayDragPart || !frameRect) return;
+      const x = Math.min(1, Math.max(0, (e.clientX - frameRect.left) / frameRect.width));
+      const y = Math.min(1, Math.max(0, (e.clientY - frameRect.top) / frameRect.height));
+      overlayDragPart.overlay.pos = { x: x * 100, y: y * 100 };
+      overlayBadge.style.left = (x * 100) + '%';
+      overlayBadge.style.top = (y * 100) + '%';
+    });
+    function endDrag() { dragging = false; frameRect = null; }
+    overlayBadge.addEventListener('pointerup', endDrag);
+    overlayBadge.addEventListener('pointercancel', endDrag);
+  })();
 
   function fmt(s) {
     s = Math.max(0, s);
@@ -1723,7 +1945,6 @@
   }
 
   const playPauseBtn = document.getElementById('btnPlayPause');
-  const seekRange = document.getElementById('seekRange');
   const timeLabel = document.getElementById('timeLabel');
 
   function updatePlayButtonLabel() { playPauseBtn.textContent = isPlaying ? '⏸ Pause' : '▶ Play'; }
@@ -1745,11 +1966,10 @@
     const active = findActiveBlock(timeline.blocks, currentTime);
     syncNarrationAudio(active);
     syncClipPreview(active);
+    syncOverlayBadge(active);
     renderFrame(currentTime);
 
-    const maxMs = Math.max(1, Math.round(timeline.total * 1000));
-    if (Number(seekRange.max) !== maxMs) seekRange.max = String(maxMs);
-    seekRange.value = String(Math.round(currentTime * 1000));
+    updatePlayhead();
     timeLabel.textContent = fmt(currentTime) + ' / ' + fmt(timeline.total);
 
     requestAnimationFrame(tick);
@@ -1772,17 +1992,6 @@
     updatePlayButtonLabel();
   });
 
-  seekRange.addEventListener('input', function () {
-    if (isRecording) return;
-    isPlaying = false;
-    audioEl.pause();
-    clipPreviewVideo.pause();
-    updatePlayButtonLabel();
-    currentTime = Number(seekRange.value) / 1000;
-    currentAudioKey = null;
-    lastPerf = null;
-  });
-
   // ---- Exportar ----
   const btnExport = document.getElementById('btnExport');
   let mediaRecorder = null;
@@ -1792,7 +2001,12 @@
     btnExport.disabled = active;
     btnExport.textContent = active ? 'Gravando...' : 'Exportar vídeo';
     playPauseBtn.disabled = active;
-    seekRange.disabled = active;
+    editTimelineEl.classList.toggle('et-disabled', active);
+    const prodBtn = document.getElementById('btnExportProducaoVideo');
+    if (prodBtn) {
+      prodBtn.disabled = active;
+      prodBtn.textContent = active ? 'Gravando...' : 'Exportar vídeo';
+    }
   }
 
   function finishRecording() {
@@ -1874,9 +2088,11 @@
       if (part.kind === 'video') {
         lines.push('PARTE ' + (i + 1) + ' — CLIPE PRÉ-GRAVADO — ' + (part.clipTitle || 'sem título'));
         lines.push('Arquivo: ' + (part.videoFileName || '(nenhum vídeo enviado ainda)'));
-        lines.push('Duração: ' + (part.videoDurationSec ? fmt(part.videoDurationSec) + ' min:seg' : 'desconhecida (envie o vídeo pra medir)'));
+        lines.push('Duração usada: ' + (part.videoDurationSec ? fmt(part.videoDurationSec) + ' min:seg' : 'desconhecida (envie o vídeo pra medir)'));
+        lines.push('Recorte (in/out): ' + (trimInfoLabel(part) || '(vídeo ainda não enviado)'));
         lines.push('Transição de entrada: ' + (TRANSITION_LABELS[part.transitionIn] || part.transitionIn));
         lines.push('Legenda planejada: ' + (part.captionText ? '"' + part.captionText + '"' : '(nenhuma)'));
+        lines.push('Overlay: ' + (part.overlay && part.overlay.enabled && part.overlay.text ? '"' + part.overlay.text + '"' : '(nenhum)'));
         lines.push('Efeitos planejados: ' + (part.effectsNotes || '(nenhum)'));
         if (part.complementaryTakes && part.complementaryTakes.length) {
           lines.push('Takes complementares:');
@@ -1892,6 +2108,7 @@
         lines.push('Palavras-chave: ' + ((part.keywords || []).join(', ') || '(nenhuma)'));
         lines.push('Tema de ícone: ' + (ICON_THEME_LABELS[part.iconTheme] || 'Nenhum'));
         lines.push('B-roll enviado: ' + (part.brollDataUrl ? 'sim' : 'não (usa placeholder)'));
+        lines.push('Overlay: ' + (part.overlay && part.overlay.enabled && part.overlay.text ? '"' + part.overlay.text + '"' : '(nenhum)'));
         lines.push('Áudio de narração enviado: ' + (part.audioDataUrl ? 'sim (' + (part.audioFileName || '') + ')' : 'não (timing estimado por texto)'));
         lines.push('Referência visual: ' + (part.visualRefNote || '(nenhuma nota)') + (part.visualRefFileName ? ' — anexo: ' + part.visualRefFileName : ''));
       }
@@ -1909,6 +2126,90 @@
     document.body.appendChild(a); a.click(); a.remove();
     setTimeout(function () { URL.revokeObjectURL(url); }, 10000);
   });
+
+  // ---------------------------------------------------------------------
+  // Produção — aba única de envio para produção (primeira aba do app).
+  // Não duplica os editores: só mostra o que está pronto/pendente em cada
+  // peça e centraliza os downloads finais (os botões aqui só disparam os
+  // botões de verdade — Exportar vídeo / Exportar plano — que continuam
+  // morando no Videos Studio).
+  // ---------------------------------------------------------------------
+  const prodVideosCard = document.getElementById('prodVideosCard');
+  const prodCarouselCard = document.getElementById('prodCarouselCard');
+  const prodExportNote = document.getElementById('prodExportNote');
+  const btnExportProducaoVideo = document.getElementById('btnExportProducaoVideo');
+  const btnExportProducaoPlan = document.getElementById('btnExportProducaoPlan');
+
+  function partReadiness(part) {
+    if (part.kind === 'video') {
+      if (!part.videoDataUrl) return { level: 'blocking', text: 'vídeo não enviado ainda' };
+      return { level: 'ok', text: 'pronto (' + fmt(part.videoDurationSec || DEFAULT_CLIP_SECONDS) + ')' };
+    }
+    if (!(part.text || '').trim()) return { level: 'blocking', text: 'sem texto narrado' };
+    if (!part.brollDataUrl) return { level: 'warning', text: 'usa placeholder de B-roll (opcional, mas recomendado trocar)' };
+    return { level: 'ok', text: 'pronta' };
+  }
+
+  function goToPart(index) {
+    document.getElementById('tabBtnRoteiro').click();
+    const part = state.parts[index];
+    if (part) setTimeout(function () { focusPartCard(part.id); }, 60);
+  }
+
+  function renderProducaoTab() {
+    // ---- Videos Studio ----
+    const timeline = getTimeline();
+    if (!state.parts.length) {
+      prodVideosCard.innerHTML = '<div class="et-empty">Nenhuma parte no roteiro ainda — vá pra aba Videos Studio pra começar.</div>';
+    } else {
+      const rows = state.parts.map(function (part, i) {
+        const r = partReadiness(part);
+        const dot = r.level === 'ok' ? '#4ade80' : (r.level === 'warning' ? '#ffb74d' : '#ff6b6b');
+        const title = part.kind === 'video' ? (part.clipTitle || 'Clipe') : (part.chapterTitle || 'Cena');
+        return (
+          '<div class="prod-row" data-prod-index="' + i + '" style="display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--border);cursor:pointer;">' +
+            '<span style="width:8px;height:8px;border-radius:50%;background:' + dot + ';flex:0 0 auto;"></span>' +
+            '<span style="flex:1;font-size:13px;">' + (i + 1) + '. ' + escapeHtmlAttr(title) + '</span>' +
+            '<span style="font-size:11.5px;color:var(--text-dim);">' + escapeHtmlAttr(r.text) + '</span>' +
+          '</div>'
+        );
+      }).join('');
+      const blockingCount = state.parts.filter(function (p) { return partReadiness(p).level === 'blocking'; }).length;
+      const summary = '<div style="font-size:11.5px;color:var(--text-dim);margin-bottom:8px;">' +
+        state.parts.length + ' parte(s) · duração total ~' + fmt(timeline.total) +
+        (blockingCount ? ' · <span style="color:#ff6b6b;">' + blockingCount + ' pendência(s)</span>' : ' · tudo pronto') +
+        '</div>';
+      prodVideosCard.innerHTML = summary + rows;
+      prodVideosCard.querySelectorAll('[data-prod-index]').forEach(function (row) {
+        row.addEventListener('click', function () { goToPart(Number(row.getAttribute('data-prod-index'))); });
+      });
+    }
+    const hasVideoParts = state.parts.some(function (p) { return p.kind === 'video'; });
+    prodExportNote.textContent = hasVideoParts
+      ? 'Este projeto tem clipe(s) pré-gravado(s) — "Exportar vídeo" fica bloqueado (ele só grava cena animada). Use "Exportar plano de edição".'
+      : 'Exporta em .webm (ou .mp4, se o navegador suportar).';
+
+    // ---- Carousel Studio ----
+    const slides = state.tweetCarousel.slides || [];
+    const emptySlides = slides.map(function (s, i) { return { s: s, i: i }; }).filter(function (o) { return !(o.s.text || '').trim(); });
+    const noImageSlides = slides.filter(function (s) { return !s.imageDataUrl; }).length;
+    prodCarouselCard.innerHTML =
+      '<div style="font-size:13px;margin-bottom:10px;">' +
+        '<b>Padrão Tecnológico</b> — fundos fixos (Canva/Unsplash), sempre pronto pra usar. Logo: ' +
+        (state.logoDataUrl ? 'enviado.' : 'não enviado (usa espaço em branco).') +
+      '</div>' +
+      '<div style="font-size:13px;">' +
+        '<b>Estilo Tweet/X</b> — ' + slides.length + ' página(s)' +
+        (emptySlides.length ? ', <span style="color:#ff6b6b;">' + emptySlides.length + ' sem texto</span>' : ', todas com texto') +
+        (noImageSlides ? ' · ' + noImageSlides + ' usando foto de banco (sem imagem própria enviada)' : '') +
+        '.' +
+      '</div>';
+  }
+
+  btnExportProducaoVideo.addEventListener('click', function () { btnExport.click(); });
+  btnExportProducaoPlan.addEventListener('click', function () { document.getElementById('btnExportPlan').click(); });
+
+  renderProducaoTab();
 
   // ---------------------------------------------------------------------
   // UI — controles globais
@@ -2396,6 +2697,43 @@
     return head;
   }
 
+  // Camada de overlay (selo/texto extra opcional, independente do B-roll e
+  // da legenda) — compartilhada entre cena animada e clipe pré-gravado.
+  // Depois de ativado e com texto, o selo aparece na prévia (ao lado) e dá
+  // pra arrastar direto nela pra reposicionar.
+  function appendOverlayField(card, part) {
+    if (!part.overlay) part.overlay = { enabled: false, text: '', pos: { x: 50, y: 18 } };
+    const ovField = document.createElement('div');
+    ovField.className = 'field';
+    ovField.style.marginTop = '10px';
+    const ovLabel = document.createElement('label');
+    ovLabel.textContent = 'Overlay (opcional)';
+    const ovRow = document.createElement('div');
+    ovRow.className = 'row';
+    ovRow.style.alignItems = 'center';
+    const ovCheckWrap = document.createElement('label');
+    ovCheckWrap.style.cssText = 'display:flex;align-items:center;gap:6px;flex:0 0 auto;font-size:12px;color:var(--text-dim);cursor:pointer;';
+    const ovCheck = document.createElement('input');
+    ovCheck.type = 'checkbox';
+    ovCheck.checked = !!part.overlay.enabled;
+    ovCheckWrap.appendChild(ovCheck);
+    ovCheckWrap.appendChild(document.createTextNode('Ativar'));
+    const ovText = document.createElement('input');
+    ovText.type = 'text';
+    ovText.placeholder = 'Selo — arraste na prévia pra posicionar. Ex: OFERTA';
+    ovText.value = part.overlay.text || '';
+    ovText.style.flex = '1';
+    ovText.disabled = !ovCheck.checked;
+    ovCheck.addEventListener('change', function () {
+      part.overlay.enabled = ovCheck.checked;
+      ovText.disabled = !ovCheck.checked;
+    });
+    ovText.oninput = function () { part.overlay.text = ovText.value; };
+    ovRow.appendChild(ovCheckWrap); ovRow.appendChild(ovText);
+    ovField.appendChild(ovLabel); ovField.appendChild(ovRow);
+    card.appendChild(ovField);
+  }
+
   function buildAnimadoFields(card, part) {
     // Título do capítulo
     const titleField = document.createElement('div');
@@ -2478,6 +2816,8 @@
     brollCol.appendChild(brollFileInput); brollCol.appendChild(brollFilename);
     brollRow.appendChild(brollThumb); brollRow.appendChild(brollCol);
     card.appendChild(brollRow);
+
+    appendOverlayField(card, part);
 
     // Upload de áudio (narração)
     const audioField = document.createElement('div');
@@ -2616,14 +2956,28 @@
     const durSpan = document.createElement('span');
     durSpan.className = 'dur-badge';
     durSpan.textContent = partDurationLabel(part);
+    const trimInfoDiv = document.createElement('div');
+    trimInfoDiv.className = 'trim-info';
+    trimInfoDiv.textContent = trimInfoLabel(part);
     const videoPreview = document.createElement('video');
     videoPreview.className = 'video-thumb';
     videoPreview.controls = true;
     videoPreview.onloadedmetadata = function () {
-      if (isFinite(videoPreview.duration) && videoPreview.duration > 0 && videoPreview.duration !== part.videoDurationSec) {
+      if (!isFinite(videoPreview.duration) || videoPreview.duration <= 0) return;
+      part.videoSourceDurationSec = videoPreview.duration;
+      if (part.videoDurationSec == null) {
+        // Primeiro carregamento (ou arquivo novo) — usa o vídeo inteiro.
         part.videoDurationSec = videoPreview.duration;
-        durSpan.textContent = partDurationLabel(part);
+        part.trimStartSec = 0;
+      } else {
+        // Reabrindo o mesmo arquivo — só garante que o recorte salvo ainda
+        // cabe dentro da duração real (evita recorte "fora" do vídeo).
+        part.trimStartSec = Math.min(part.trimStartSec || 0, Math.max(0, videoPreview.duration - 0.3));
+        part.videoDurationSec = Math.min(part.videoDurationSec, videoPreview.duration - part.trimStartSec);
       }
+      durSpan.textContent = partDurationLabel(part);
+      trimInfoDiv.textContent = trimInfoLabel(part);
+      renderEditTimeline();
     };
     if (part.videoDataUrl) { videoPreview.src = part.videoDataUrl; videoFilename.textContent = part.videoFileName || 'Vídeo enviado'; }
     else { videoPreview.style.display = 'none'; videoFilename.textContent = 'Nenhum vídeo enviado ainda.'; }
@@ -2635,6 +2989,8 @@
         part.videoDataUrl = reader.result;
         part.videoFileName = file.name;
         part.videoDurationSec = null;
+        part.trimStartSec = 0;
+        part.videoSourceDurationSec = null;
         videoPreview.src = reader.result;
         videoPreview.style.display = 'block';
         videoFilename.textContent = file.name;
@@ -2644,6 +3000,7 @@
     };
     videoField.appendChild(videoLabel); videoField.appendChild(videoFileInput);
     videoField.appendChild(videoFilename); videoField.appendChild(durSpan);
+    videoField.appendChild(trimInfoDiv);
     videoField.appendChild(videoPreview);
     card.appendChild(videoField);
 
@@ -2658,6 +3015,8 @@
     capArea.oninput = function () { part.captionText = capArea.value; };
     capField.appendChild(capLabel); capField.appendChild(capArea);
     card.appendChild(capField);
+
+    appendOverlayField(card, part);
 
     // Transição de entrada
     const transField = document.createElement('div');
@@ -2706,16 +3065,256 @@
     card.appendChild(takesField);
   }
 
+  // ---------------------------------------------------------------------
+  // Timeline visual de edição — uma faixa por parte (colorida por tipo),
+  // proporcional à duração de cada uma. Arraste o meio de um bloco pra
+  // reordenar as partes; arraste as bordas de um clipe pré-gravado pra
+  // aparar (in/out); use a régua fina acima pra buscar no vídeo (a régua é
+  // só pra isso — separada do bloco pra não confundir "buscar" com
+  // "reordenar" no mesmo gesto).
+  // ---------------------------------------------------------------------
+  const editTimelineEl = document.getElementById('editTimeline');
+  const etRuler = document.getElementById('etRuler');
+  const etTrack = document.getElementById('etTrack');
+  const etPlayhead = document.getElementById('etPlayhead');
+  let etDropIndicator = null;
+
+  function partDurationSeconds(part) {
+    if (part.kind === 'video') return part.videoDurationSec || DEFAULT_CLIP_SECONDS;
+    const words = estimateWordTimings(part.text);
+    const narrationSeconds = words.length ? words[words.length - 1].end + 0.6 : 1.2;
+    return CHAPTER_SECONDS + narrationSeconds;
+  }
+  function partStartTime(index) {
+    let t = 0;
+    for (let i = 0; i < index; i++) t += partDurationSeconds(state.parts[i]);
+    return t;
+  }
+  function trimInfoLabel(part) {
+    const src = part.videoSourceDurationSec;
+    if (!src) return '';
+    const start = part.trimStartSec || 0;
+    const end = start + (part.videoDurationSec || 0);
+    if (start <= 0.05 && end >= src - 0.05) return 'Usando o vídeo inteiro (' + fmt(src) + ').';
+    return 'Recorte: ' + fmt(start) + '–' + fmt(end) + ' de ' + fmt(src) + ' — arraste as bordas do bloco na timeline pra ajustar.';
+  }
+
+  function updatePlayhead() {
+    const timeline = getTimeline();
+    const pct = timeline.total > 0 ? Math.min(100, Math.max(0, (currentTime / timeline.total) * 100)) : 0;
+    etPlayhead.style.left = pct + '%';
+  }
+
+  function updateSegmentWidths() {
+    const timeline = getTimeline();
+    etTrack.querySelectorAll('.et-seg').forEach(function (segEl) {
+      const idx = Number(segEl.getAttribute('data-index'));
+      const part = state.parts[idx];
+      if (!part) return;
+      const widthPct = timeline.total > 0 ? (partDurationSeconds(part) / timeline.total) * 100 : 0;
+      segEl.style.width = widthPct + '%';
+    });
+    updatePlayhead();
+  }
+
+  function scrubToClientX(clientX, rect) {
+    const timeline = getTimeline();
+    if (timeline.total <= 0 || !rect.width) return;
+    const x = Math.min(rect.width, Math.max(0, clientX - rect.left));
+    currentTime = (x / rect.width) * timeline.total;
+    currentAudioKey = null;
+    lastPerf = null;
+  }
+
+  function focusPartCard(partId) {
+    const cardEl = partsListEl.querySelector('[data-part-id="' + partId + '"]');
+    if (!cardEl) return;
+    cardEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    cardEl.classList.add('et-focus');
+    setTimeout(function () { cardEl.classList.remove('et-focus'); }, 1400);
+  }
+
+  function stopPlaybackForEdit() {
+    if (isRecording) return false;
+    isPlaying = false;
+    audioEl.pause();
+    clipPreviewVideo.pause();
+    updatePlayButtonLabel();
+    return true;
+  }
+
+  function attachTrimHandle(handle, part, which) {
+    let dragging = false, segEl = null, segRect = null;
+    let startClientX = 0, startTrimStart = 0, startDuration = 0, srcDur = 0;
+    handle.addEventListener('pointerdown', function (e) {
+      if (isRecording) return;
+      e.stopPropagation();
+      dragging = true;
+      segEl = handle.parentElement;
+      segRect = segEl.getBoundingClientRect();
+      startClientX = e.clientX;
+      startTrimStart = part.trimStartSec || 0;
+      startDuration = part.videoDurationSec || DEFAULT_CLIP_SECONDS;
+      srcDur = part.videoSourceDurationSec || (startTrimStart + startDuration);
+      handle.setPointerCapture(e.pointerId);
+      stopPlaybackForEdit();
+    });
+    handle.addEventListener('pointermove', function (e) {
+      if (!dragging || !segRect || !segRect.width) return;
+      e.stopPropagation();
+      const MIN_DUR = 0.3;
+      const pxPerSec = segRect.width / Math.max(0.001, startDuration);
+      const dSec = (e.clientX - startClientX) / pxPerSec;
+      if (which === 'end') {
+        part.videoDurationSec = Math.max(MIN_DUR, Math.min(startDuration + dSec, srcDur - startTrimStart));
+      } else {
+        let newTrimStart = startTrimStart + dSec;
+        newTrimStart = Math.max(0, Math.min(newTrimStart, startTrimStart + startDuration - MIN_DUR));
+        part.trimStartSec = newTrimStart;
+        part.videoDurationSec = (startTrimStart + startDuration) - newTrimStart;
+      }
+      currentClipKey = null;
+      updateSegmentWidths();
+    });
+    function endDrag(e) {
+      if (!dragging) return;
+      dragging = false; segEl = null; segRect = null;
+      renderPartsList();
+    }
+    handle.addEventListener('pointerup', endDrag);
+    handle.addEventListener('pointercancel', endDrag);
+  }
+
+  function attachSegmentDrag(seg) {
+    let dragging = false, moved = false, startX = 0, trackRect = null, fromIndex = -1, targetIndex = -1;
+    const DRAG_THRESHOLD = 6;
+    seg.addEventListener('pointerdown', function (e) {
+      if (isRecording) return;
+      if (e.target !== seg && e.target.classList && e.target.classList.contains('et-trim-handle')) return;
+      dragging = true; moved = false;
+      startX = e.clientX;
+      trackRect = etTrack.getBoundingClientRect();
+      fromIndex = Number(seg.getAttribute('data-index'));
+      targetIndex = fromIndex;
+      seg.setPointerCapture(e.pointerId);
+      stopPlaybackForEdit();
+    });
+    seg.addEventListener('pointermove', function (e) {
+      if (!dragging || !trackRect) return;
+      const dx = e.clientX - startX;
+      if (!moved && Math.abs(dx) > DRAG_THRESHOLD) { moved = true; seg.classList.add('dragging'); }
+      if (!moved) return;
+      const x = Math.min(trackRect.width, Math.max(0, e.clientX - trackRect.left));
+      const segs = Array.from(etTrack.querySelectorAll('.et-seg'));
+      let acc = 0, idx = segs.length;
+      for (let i = 0; i < segs.length; i++) {
+        const w = segs[i].getBoundingClientRect().width;
+        if (x < acc + w / 2) { idx = i; break; }
+        acc += w;
+      }
+      targetIndex = idx;
+      const indicator = ensureDropIndicator();
+      let leftPx = 0;
+      for (let i = 0; i < targetIndex && i < segs.length; i++) leftPx += segs[i].getBoundingClientRect().width;
+      indicator.style.display = 'block';
+      indicator.style.left = leftPx + 'px';
+    });
+    function endDrag(e) {
+      if (!dragging) return;
+      dragging = false;
+      seg.classList.remove('dragging');
+      if (etDropIndicator) etDropIndicator.style.display = 'none';
+      if (moved && targetIndex !== -1 && targetIndex !== fromIndex) {
+        const movedPart = state.parts.splice(fromIndex, 1)[0];
+        let insertAt = targetIndex;
+        if (insertAt > fromIndex) insertAt -= 1;
+        state.parts.splice(insertAt, 0, movedPart);
+        renderPartsList();
+      } else if (!moved) {
+        currentTime = partStartTime(fromIndex);
+        currentAudioKey = null;
+        lastPerf = null;
+        focusPartCard(state.parts[fromIndex] && state.parts[fromIndex].id);
+      }
+      trackRect = null;
+    }
+    seg.addEventListener('pointerup', endDrag);
+    seg.addEventListener('pointercancel', endDrag);
+  }
+
+  function ensureDropIndicator() {
+    if (!etDropIndicator || !etDropIndicator.isConnected) {
+      etDropIndicator = document.createElement('div');
+      etDropIndicator.className = 'et-drop-indicator';
+      etTrack.appendChild(etDropIndicator);
+    }
+    return etDropIndicator;
+  }
+
+  function renderEditTimeline() {
+    etTrack.innerHTML = '';
+    etDropIndicator = null;
+    if (!state.parts.length) {
+      const empty = document.createElement('div');
+      empty.className = 'et-empty';
+      empty.textContent = 'Adicione uma parte pra ver a timeline.';
+      etTrack.appendChild(empty);
+      updatePlayhead();
+      return;
+    }
+    const timeline = getTimeline();
+    state.parts.forEach(function (part, index) {
+      const duration = partDurationSeconds(part);
+      const widthPct = timeline.total > 0 ? (duration / timeline.total) * 100 : 0;
+      const seg = document.createElement('div');
+      seg.className = 'et-seg ' + part.kind;
+      seg.style.width = widthPct + '%';
+      seg.setAttribute('data-index', String(index));
+      seg.title = part.kind === 'video' ? (part.clipTitle || 'Clipe') : (part.chapterTitle || 'Cena');
+      const label = document.createElement('span');
+      label.className = 'et-seg-label';
+      label.textContent = (index + 1) + '. ' + (part.kind === 'video' ? (part.clipTitle || 'Clipe') : (part.chapterTitle || 'Cena'));
+      seg.appendChild(label);
+      if (part.kind === 'video' && part.videoDataUrl) {
+        const leftHandle = document.createElement('div');
+        leftHandle.className = 'et-trim-handle left';
+        const rightHandle = document.createElement('div');
+        rightHandle.className = 'et-trim-handle right';
+        seg.appendChild(leftHandle);
+        seg.appendChild(rightHandle);
+        attachTrimHandle(leftHandle, part, 'start');
+        attachTrimHandle(rightHandle, part, 'end');
+      }
+      attachSegmentDrag(seg);
+      etTrack.appendChild(seg);
+    });
+    ensureDropIndicator().style.display = 'none';
+    updatePlayhead();
+  }
+
+  etRuler.addEventListener('pointerdown', function (e) {
+    if (isRecording) return;
+    etRuler.setPointerCapture(e.pointerId);
+    stopPlaybackForEdit();
+    scrubToClientX(e.clientX, etRuler.getBoundingClientRect());
+  });
+  etRuler.addEventListener('pointermove', function (e) {
+    if (e.buttons !== 1) return;
+    scrubToClientX(e.clientX, etRuler.getBoundingClientRect());
+  });
+
   function renderPartsList() {
     partsListEl.innerHTML = '';
     state.parts.forEach(function (part, index) {
       const card = document.createElement('div');
       card.className = 'card part-card';
+      card.setAttribute('data-part-id', String(part.id));
       card.appendChild(buildPartCardHead(part, index));
       if (part.kind === 'video') buildVideoFields(card, part);
       else buildAnimadoFields(card, part);
       partsListEl.appendChild(card);
     });
+    renderEditTimeline();
   }
   renderPartsList();
 
@@ -2914,6 +3513,11 @@
             videoDataUrl: p.videoDataUrl || null, videoFileName: p.videoFileName || null,
             videoDurationSec: p.videoDurationSec || null, transitionIn: p.transitionIn || 'corte-seco',
             effectsNotes: p.effectsNotes || '',
+            trimStartSec: p.trimStartSec || 0, videoSourceDurationSec: p.videoSourceDurationSec || null,
+            overlay: {
+              enabled: !!(p.overlay && p.overlay.enabled), text: (p.overlay && p.overlay.text) || '',
+              pos: { x: (p.overlay && p.overlay.pos && p.overlay.pos.x) || 50, y: (p.overlay && p.overlay.pos && p.overlay.pos.y) || 18 },
+            },
             complementaryTakes: (p.complementaryTakes || []).map(function (t) {
               return { id: t.id, note: t.note || '', fileDataUrl: t.fileDataUrl || null, fileName: t.fileName || null };
             }),
@@ -2925,6 +3529,10 @@
           iconTheme: p.iconTheme || 'nenhum',
           visualRefDataUrl: p.visualRefDataUrl || null, visualRefFileName: p.visualRefFileName || null,
           visualRefNote: p.visualRefNote || '',
+          overlay: {
+            enabled: !!(p.overlay && p.overlay.enabled), text: (p.overlay && p.overlay.text) || '',
+            pos: { x: (p.overlay && p.overlay.pos && p.overlay.pos.x) || 50, y: (p.overlay && p.overlay.pos && p.overlay.pos.y) || 18 },
+          },
         };
       }),
       tweetCarousel: {
@@ -2989,6 +3597,10 @@
           logoFilename.textContent = 'Nenhum logo enviado (PNG com fundo transparente).';
         }
         state.parts = (data.parts || []).map(function (p) {
+          const overlay = {
+            enabled: !!(p.overlay && p.overlay.enabled), text: (p.overlay && p.overlay.text) || '',
+            pos: { x: (p.overlay && p.overlay.pos && p.overlay.pos.x) || 50, y: (p.overlay && p.overlay.pos && p.overlay.pos.y) || 18 },
+          };
           if (p.kind === 'video') {
             return {
               id: p.id || nextId(), kind: 'video',
@@ -2996,6 +3608,8 @@
               videoDataUrl: p.videoDataUrl || null, videoFileName: p.videoFileName || null,
               videoDurationSec: p.videoDurationSec || null, transitionIn: p.transitionIn || 'corte-seco',
               effectsNotes: p.effectsNotes || '',
+              trimStartSec: p.trimStartSec || 0, videoSourceDurationSec: p.videoSourceDurationSec || null,
+              overlay: overlay,
               complementaryTakes: (p.complementaryTakes || []).map(function (t) {
                 return { id: t.id || nextTakeId(), note: t.note || '', fileDataUrl: t.fileDataUrl || null, fileName: t.fileName || null };
               }),
@@ -3008,6 +3622,7 @@
             iconTheme: p.iconTheme || 'nenhum',
             visualRefDataUrl: p.visualRefDataUrl || null, visualRefFileName: p.visualRefFileName || null,
             visualRefNote: p.visualRefNote || '',
+            overlay: overlay,
           };
           if (part.brollDataUrl) {
             loadBrollImageInto(part, part.brollDataUrl);
@@ -3046,8 +3661,9 @@
   // ---------------------------------------------------------------------
   // Abas
   // ---------------------------------------------------------------------
-  const tabButtons = [document.getElementById('tabBtnRoteiro'), document.getElementById('tabBtnCarousel'), document.getElementById('tabBtnMedia'), document.getElementById('tabBtnChat')];
+  const tabButtons = [document.getElementById('tabBtnProducao'), document.getElementById('tabBtnRoteiro'), document.getElementById('tabBtnCarousel'), document.getElementById('tabBtnMedia'), document.getElementById('tabBtnChat')];
   const tabPanels = {
+    producao: document.getElementById('tabPanelProducao'),
     roteiro: document.getElementById('tabPanelRoteiro'),
     carousel: document.getElementById('tabPanelCarousel'),
     media: document.getElementById('tabPanelMedia'),
@@ -3061,6 +3677,7 @@
       Object.keys(tabPanels).forEach(function (key) {
         tabPanels[key].style.display = key === tab ? 'block' : 'none';
       });
+      if (tab === 'producao') renderProducaoTab();
     });
   });
 
@@ -3167,6 +3784,8 @@
             index: i, kind: 'video', clipTitle: p.clipTitle, captionText: p.captionText,
             transitionIn: p.transitionIn, effectsNotes: p.effectsNotes,
             hasVideoFile: !!p.videoDataUrl, takesCount: (p.complementaryTakes || []).length,
+            trimStartSec: p.trimStartSec || 0, videoDurationSec: p.videoDurationSec || null,
+            overlayText: (p.overlay && p.overlay.enabled && p.overlay.text) || null,
           };
         }
         return {
@@ -3177,6 +3796,7 @@
           iconTheme: p.iconTheme,
           hasBroll: !!p.brollDataUrl,
           hasAudio: !!p.audioDataUrl,
+          overlayText: (p.overlay && p.overlay.enabled && p.overlay.text) || null,
         };
       }),
     }, null, 2);
