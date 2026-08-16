@@ -524,6 +524,21 @@
       </div>
 
       <div id="csModel2Wrap" style="display:none;">
+        <div class="card cs-autogen-card" style="margin-bottom:14px;">
+          <div style="font-size:13px;font-weight:700;margin-bottom:8px;">Gerar carrossel automaticamente</div>
+          <div style="font-size:11.5px;color:var(--text-dim);margin-bottom:10px;">
+            Cole ou escreva aqui o texto completo do carrossel, escolha em quantas
+            páginas ele deve ser dividido e o app quebra o texto sozinho, criando
+            cada página já com o texto pronto (dá pra ajustar cada uma depois).
+            Isso substitui as páginas atuais deste modelo.
+          </div>
+          <textarea id="csAutogenText" placeholder="Cole aqui o texto completo do carrossel..." style="width:100%;min-height:110px;background:var(--panel-2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:inherit;font-size:12.5px;padding:8px 10px;resize:vertical;"></textarea>
+          <div class="cs-tweet-row" style="margin-top:10px;">
+            <label style="font-size:11.5px;color:var(--text-dim);flex:0 0 auto;">Quantidade de páginas</label>
+            <input type="number" id="csAutogenCount" min="1" max="15" value="5" style="width:70px;background:var(--panel-2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:inherit;font-size:12.5px;padding:6px 8px;">
+            <button type="button" class="btn" id="btnAutogenCarousel" style="margin-left:auto;">Gerar páginas</button>
+          </div>
+        </div>
         <div class="cs-tweet-editor" id="csTweetEditor"></div>
         <button class="btn" id="btnAddTweetSlide">+ Adicionar página</button>
         <div class="cs-tweet-rail-wrap">
@@ -2985,7 +3000,8 @@
           '<span class="tweet-zoom-label" style="font-size:11.5px;color:var(--text-dim);flex:0 0 auto;">' + zoomPct + '%</span>' +
           '<button type="button" class="btn btn-sm tweet-reset-pos" data-id="' + slide.id + '" title="Centralizar a posição da imagem arrastada">Centralizar</button>' +
         '</div>' +
-        '<input type="text" class="tweet-credit-input" data-id="' + slide.id + '" placeholder="Fonte / crédito da informação..." value="' + escapeHtml(slide.credit || '') + '" style="width:100%;background:var(--panel-2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:inherit;font-size:11.5px;padding:7px 8px;">';
+        '<label style="font-size:10.5px;color:var(--text-dim);display:block;margin:6px 0 3px;">Crédito (de onde veio essa informação)</label>' +
+        '<input type="text" class="tweet-credit-input" data-id="' + slide.id + '" placeholder="Ex: Fonte: IBGE, 2024 / Foto: Nome do fotógrafo" value="' + escapeHtml(slide.credit || '') + '" style="width:100%;background:var(--panel-2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:inherit;font-size:11.5px;padding:7px 8px;">';
       csTweetEditor.appendChild(row);
     });
 
@@ -3063,6 +3079,94 @@
     const nextImg = TWEET_DEFAULT_IMAGES[state.tweetCarousel.slides.length % TWEET_DEFAULT_IMAGES.length];
     state.tweetCarousel.slides.push({ id: nextTweetId(), text: '', imageUrl: nextImg, imageDataUrl: null, imageZoom: 1, imagePos: { x: 0, y: 0 }, credit: 'Fonte: inserir fonte da informação aqui' });
     renderTweetEditor(); renderTweetRail();
+  });
+
+  // ---------------------------------------------------------------------
+  // Carousel Studio — geração automática de páginas (Estilo Tweet/X):
+  // o usuário cola um texto único, escolhe quantas páginas quer, e a gente
+  // quebra o texto em frases/parágrafos e distribui em N páginas com
+  // tamanho parecido, sem cortar frase no meio.
+  // ---------------------------------------------------------------------
+  function autogenSplitSentences(text) {
+    const normalized = (text || '').replace(/\r\n/g, '\n').trim();
+    if (!normalized) return [];
+    // Quebra em parágrafos (linha em branco) primeiro, pra não misturar
+    // ideias de parágrafos diferentes numa mesma frase.
+    const paragraphs = normalized.split(/\n\s*\n/).map(function (p) { return p.trim(); }).filter(Boolean);
+    const sentences = [];
+    paragraphs.forEach(function (p) {
+      const parts = p.split(/(?<=[.!?…])(?=\s|\n|$)/g).map(function (s) { return s.trim(); }).filter(Boolean);
+      if (parts.length) {
+        sentences.push.apply(sentences, parts);
+      } else {
+        sentences.push(p);
+      }
+    });
+    return sentences.length ? sentences : [normalized];
+  }
+
+  function autogenDistributeIntoPages(sentences, pageCount) {
+    const total = sentences.length;
+    const n = Math.max(1, Math.min(pageCount, total));
+    if (n <= 1) return [sentences.join(' ')];
+    const lens = sentences.map(function (s) { return s.length; });
+    const totalLen = lens.reduce(function (a, b) { return a + b; }, 0);
+    const target = totalLen / n;
+    const pages = [];
+    let start = 0;
+    for (let groupIdx = 0; groupIdx < n; groupIdx++) {
+      const isLastGroup = groupIdx === n - 1;
+      if (isLastGroup) {
+        pages.push(sentences.slice(start).join(' '));
+        break;
+      }
+      // Nunca pode consumir tanto que sobrem menos frases do que grupos
+      // restantes (cada grupo precisa de pelo menos 1 frase).
+      const remainingGroupsAfter = n - groupIdx - 1;
+      const maxEnd = total - remainingGroupsAfter;
+      let cum = 0, i = start;
+      while (i < maxEnd) { cum += lens[i]; i++; if (cum >= target) break; }
+      const end = Math.max(start + 1, Math.min(i, maxEnd));
+      pages.push(sentences.slice(start, end).join(' '));
+      start = end;
+    }
+    return pages;
+  }
+
+  document.getElementById('btnAutogenCarousel').addEventListener('click', function () {
+    const textEl = document.getElementById('csAutogenText');
+    const countEl = document.getElementById('csAutogenCount');
+    const rawText = (textEl.value || '').trim();
+    if (!rawText) { alert('Cole ou escreva o texto do carrossel antes de gerar as páginas.'); return; }
+    let requestedCount = parseInt(countEl.value, 10);
+    if (!requestedCount || requestedCount < 1) requestedCount = 1;
+    if (requestedCount > 15) requestedCount = 15;
+
+    const hasExistingContent = state.tweetCarousel.slides.some(function (s) { return (s.text || '').trim(); });
+    if (hasExistingContent) {
+      const ok = confirm('Isso vai substituir as ' + state.tweetCarousel.slides.length + ' página(s) atuais deste modelo pelas novas páginas geradas. Continuar?');
+      if (!ok) return;
+    }
+
+    const sentences = autogenSplitSentences(rawText);
+    const pageTexts = autogenDistributeIntoPages(sentences, requestedCount);
+
+    state.tweetCarousel.slides = pageTexts.map(function (text, i) {
+      return {
+        id: nextTweetId(),
+        text: text,
+        imageUrl: TWEET_DEFAULT_IMAGES[i % TWEET_DEFAULT_IMAGES.length],
+        imageDataUrl: null, imageZoom: 1, imagePos: { x: 0, y: 0 },
+        credit: 'Fonte: inserir fonte da informação aqui',
+      };
+    });
+
+    renderTweetEditor(); renderTweetRail();
+    if (pageTexts.length < requestedCount) {
+      showMbToast('Gerado com ' + pageTexts.length + ' página(s) — não havia texto suficiente pra ' + requestedCount + '.');
+    } else {
+      showMbToast('Carrossel gerado com ' + pageTexts.length + ' página(s). Ajuste o texto e o crédito de cada uma se precisar.');
+    }
   });
 
   renderTweetEditor();
