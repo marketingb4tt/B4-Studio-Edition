@@ -614,7 +614,9 @@
           <div class="clip-caption-overlay" id="clipCaptionOverlay"></div>
         </div>
         <div class="overlay-badge-layer" id="overlayBadgeLayer">
-          <div class="overlay-badge" id="overlayBadge" style="display:none;"></div>
+          <div class="overlay-badge" id="overlayBadge0" style="display:none;"></div>
+          <div class="overlay-badge" id="overlayBadge1" style="display:none;"></div>
+          <div class="overlay-badge" id="overlayBadge2" style="display:none;"></div>
         </div>
       </div>
 
@@ -633,7 +635,7 @@
         <button class="btn btn-primary" id="btnExport">Exportar vídeo</button>
         <button class="btn" id="btnExportPlan">Exportar plano de edição (.txt)</button>
         <div class="note" id="exportNote">
-          Exporta em .webm (ou .mp4, se o navegador suportar).
+          Exporta em .webm (ou .mp4, se o navegador suportar), em alta qualidade (16 Mbps de vídeo — bem acima do que Reels/TikTok/Shorts pedem).
         </div>
       </div>
     </div>
@@ -645,7 +647,9 @@
           <div class="clip-caption-overlay" id="vcClipCaptionOverlay"></div>
         </div>
         <div class="overlay-badge-layer" id="vcOverlayBadgeLayer">
-          <div class="overlay-badge" id="vcOverlayBadge" style="display:none;"></div>
+          <div class="overlay-badge" id="vcOverlayBadge0" style="display:none;"></div>
+          <div class="overlay-badge" id="vcOverlayBadge1" style="display:none;"></div>
+          <div class="overlay-badge" id="vcOverlayBadge2" style="display:none;"></div>
         </div>
       </div>
 
@@ -1289,6 +1293,39 @@
   let takeIdCounter = 1;
   function nextTakeId() { return 'take-' + (takeIdCounter++); }
 
+  // Camadas de overlay — até 3 por parte/clipe, independentes entre si
+  // (texto, posição e fadeIn/fadeOut em segundos próprios). Ver
+  // drawOverlayBadges() / setupOverlayLayer() mais abaixo.
+  function makeOverlay(i) {
+    return { enabled: false, text: '', pos: { x: 50, y: 18 + (i || 0) * 16 }, fadeIn: 0, fadeOut: 0 };
+  }
+  function makeOverlays() { return [makeOverlay(0), makeOverlay(1), makeOverlay(2)]; }
+  function serializeOverlays(overlays) {
+    return (overlays || []).map(function (ov) {
+      return {
+        enabled: !!(ov && ov.enabled), text: (ov && ov.text) || '',
+        pos: { x: (ov && ov.pos && ov.pos.x) || 50, y: (ov && ov.pos && ov.pos.y) || 18 },
+        fadeIn: (ov && ov.fadeIn) || 0, fadeOut: (ov && ov.fadeOut) || 0,
+      };
+    });
+  }
+  // Lê camadas salvas, aceitando tanto o formato novo (overlays[], até 3)
+  // quanto o antigo (overlay único, de projetos salvos antes de existirem
+  // múltiplas camadas) — sempre devolve exatamente 3 camadas.
+  function deserializeOverlays(obj) {
+    const src = obj && Array.isArray(obj.overlays) ? obj.overlays : (obj && obj.overlay ? [obj.overlay] : []);
+    const result = [];
+    for (let i = 0; i < 3; i++) {
+      const ov = src[i];
+      result.push({
+        enabled: !!(ov && ov.enabled), text: (ov && ov.text) || '',
+        pos: { x: (ov && ov.pos && ov.pos.x) || 50, y: (ov && ov.pos && ov.pos.y) || 18 + i * 16 },
+        fadeIn: (ov && ov.fadeIn) || 0, fadeOut: (ov && ov.fadeOut) || 0,
+      });
+    }
+    return result;
+  }
+
   // Fábricas de parte — 'animado' é o fluxo original (cartela + narração +
   // B-roll, 100% gerado); 'video' é um clipe pré-gravado importado, onde só
   // planejamos legenda/transição/efeitos/takes por cima (ver notas no topo
@@ -1300,7 +1337,7 @@
       brollDataUrl: null, brollImg: null, audioDataUrl: null, audioFileName: null,
       iconTheme: 'nenhum',
       visualRefDataUrl: null, visualRefFileName: null, visualRefNote: '',
-      overlay: { enabled: false, text: '', pos: { x: 50, y: 18 } },
+      overlays: makeOverlays(),
     }, overrides || {});
   }
   function makeVideoPart(overrides) {
@@ -1312,7 +1349,7 @@
       // / attachTrimHandle() pra arrastar as bordas do clipe na timeline.
       trimStartSec: 0, videoSourceDurationSec: null,
       transitionIn: 'corte-seco', effectsNotes: '', complementaryTakes: [],
-      overlay: { enabled: false, text: '', pos: { x: 50, y: 18 } },
+      overlays: makeOverlays(),
     }, overrides || {});
   }
   // ---------------------------------------------------------------------
@@ -1348,7 +1385,10 @@
       // filter no <video> da prévia (ver vcApplyClipStyle()).
       brightness: 100, contrast: 100, saturation: 100,
       transitionIn: 'corte-seco', effectsNotes: '',
-      overlay: { enabled: false, text: '', pos: { x: 50, y: 18 } },
+      overlays: makeOverlays(),
+      // Miniatura (frame capturado da take ativa) pra mostrar na timeline —
+      // ver captureVideoFrameThumb().
+      thumbDataUrl: null,
     }, overrides || {});
   }
   function activeTakeOf(clip) {
@@ -1366,6 +1406,25 @@
     clip.videoDataUrl = take.videoDataUrl;
     clip.videoFileName = take.videoFileName;
     clip.videoSourceDurationSec = take.videoSourceDurationSec;
+  }
+  // Captura um frame do <video> (depois de decodificado) como miniatura pra
+  // mostrar na timeline da aba Vídeo — busca um ponto um pouco depois do
+  // início (evita pegar preto/transição no frame 0 de alguns arquivos).
+  function captureVideoFrameThumb(videoEl, cb) {
+    if (!isFinite(videoEl.duration) || videoEl.duration <= 0) return;
+    const targetT = Math.min(0.3, videoEl.duration / 2);
+    function onSeeked() {
+      videoEl.removeEventListener('seeked', onSeeked);
+      try {
+        const w = 90, h = Math.round(w * ((videoEl.videoHeight / videoEl.videoWidth) || (16 / 9)));
+        const c = document.createElement('canvas');
+        c.width = w; c.height = h;
+        c.getContext('2d').drawImage(videoEl, 0, 0, w, h);
+        cb(c.toDataURL('image/jpeg', 0.6));
+      } catch (e) { /* fonte sem CORS ou frame ainda não pronto — sem miniatura, sem problema */ }
+    }
+    videoEl.addEventListener('seeked', onSeeked);
+    try { videoEl.currentTime = targetT; } catch (e) {}
   }
   // Carrega o B-roll de uma parte animada a partir de uma URL (arquivo local
   // em data URL, OU imagem remota do Banco de Mídia). crossOrigin=anonymous
@@ -1663,29 +1722,43 @@
     }
   }
 
-  // ---- Overlay (selo/texto extra, opcional, arrastável na prévia) ----
-  // Camada independente do B-roll e da legenda de narração — um selo curto
-  // (ex: "OFERTA", "NOVO") posicionável livremente, usado em cenas animadas
-  // (desenhado aqui, entra no vídeo exportado) e em clipes pré-gravados
-  // (desenhado em HTML sobre a prévia — ver syncOverlayBadge()).
-  function drawOverlayBadge(c, part, theme) {
-    const ov = part && part.overlay;
-    if (!ov || !ov.enabled || !(ov.text || '').trim()) return;
-    const pos = ov.pos || { x: 50, y: 18 };
-    const text = ov.text.toUpperCase();
-    c.save();
-    c.font = '800 34px ' + theme.font;
-    const padX = 26, padY = 16;
-    const textWidth = c.measureText(text).width;
-    const boxW = textWidth + padX * 2, boxH = 34 + padY * 2;
-    const cx = WIDTH * (pos.x / 100), cy = HEIGHT * (pos.y / 100);
-    c.fillStyle = theme.accent;
-    roundRectPath(c, cx - boxW / 2, cy - boxH / 2, boxW, boxH, boxH / 2);
-    c.fill();
-    c.fillStyle = '#0B0B12';
-    c.textAlign = 'center'; c.textBaseline = 'middle';
-    c.fillText(text, cx, cy + 2);
-    c.restore();
+  // ---- Overlay (até 3 camadas de selo/texto extra, arrastáveis na prévia,
+  // independentes entre si e do B-roll/legenda) ----
+  // Cada camada (part.overlays[0..2]) tem posição, fadeIn/fadeOut (segundos)
+  // próprios — dá pra ter, por ex., "OFERTA" entrando com fade em cima e
+  // "NOVO" saindo com fade embaixo, ao mesmo tempo, editados separado. Em
+  // cena animada é desenhado aqui (entra no vídeo exportado); em clipe
+  // pré-gravado é HTML sobre a prévia (ver vcSyncOverlayBadges()).
+  function overlayOpacityAt(ov, localT, duration) {
+    let op = 1;
+    const fadeIn = ov.fadeIn || 0, fadeOut = ov.fadeOut || 0;
+    if (fadeIn > 0 && localT < fadeIn) op = Math.min(op, Math.max(0, localT / fadeIn));
+    if (fadeOut > 0 && (duration - localT) < fadeOut) op = Math.min(op, Math.max(0, (duration - localT) / fadeOut));
+    return op;
+  }
+  function drawOverlayBadges(c, part, theme, localT, duration) {
+    const overlays = (part && part.overlays) || [];
+    overlays.forEach(function (ov) {
+      if (!ov || !ov.enabled || !(ov.text || '').trim()) return;
+      const opacity = overlayOpacityAt(ov, localT || 0, duration || 0);
+      if (opacity <= 0.02) return;
+      const pos = ov.pos || { x: 50, y: 18 };
+      const text = ov.text.toUpperCase();
+      c.save();
+      c.globalAlpha = opacity;
+      c.font = '800 34px ' + theme.font;
+      const padX = 26, padY = 16;
+      const textWidth = c.measureText(text).width;
+      const boxW = textWidth + padX * 2, boxH = 34 + padY * 2;
+      const cx = WIDTH * (pos.x / 100), cy = HEIGHT * (pos.y / 100);
+      c.fillStyle = theme.accent;
+      roundRectPath(c, cx - boxW / 2, cy - boxH / 2, boxW, boxH, boxH / 2);
+      c.fill();
+      c.fillStyle = '#0B0B12';
+      c.textAlign = 'center'; c.textBaseline = 'middle';
+      c.fillText(text, cx, cy + 2);
+      c.restore();
+    });
   }
 
   // ---- Cartela de capítulo ----
@@ -1921,7 +1994,7 @@
         else {
           drawBroll(ctx, active.block, theme, active.localT);
           drawCaptions(ctx, active.block, theme, active.localT);
-          drawOverlayBadge(ctx, active.block.part, theme);
+          drawOverlayBadges(ctx, active.block.part, theme, active.localT, active.block.duration);
         }
       }
     }
@@ -2041,53 +2114,69 @@
     }
   }
 
-  // ---- Badge de overlay (selo/texto extra) — sincroniza + arrasta ----
-  // Elemento HTML único, reaproveitado tanto pra cena animada (que também
-  // desenha o mesmo selo no canvas — ver drawOverlayBadge() — pra entrar no
-  // vídeo exportado) quanto pra clipe pré-gravado (aqui o HTML é a única
-  // representação, já que exportação fica bloqueada quando há clipes).
-  const previewStage = document.getElementById('previewStage');
-  const overlayBadge = document.getElementById('overlayBadge');
-  let overlayDragPart = null;
-
-  function syncOverlayBadge(active) {
-    const showable = !!(active && (active.block.type === 'narration' || active.block.type === 'videoclip'));
-    const part = showable ? active.block.part : null;
-    const ov = part && part.overlay;
-    if (ov && ov.enabled && (ov.text || '').trim()) {
-      const pos = ov.pos || { x: 50, y: 18 };
-      overlayBadge.style.display = 'block';
-      overlayBadge.textContent = ov.text;
-      overlayBadge.style.left = pos.x + '%';
-      overlayBadge.style.top = pos.y + '%';
-      overlayDragPart = part;
-    } else {
-      overlayBadge.style.display = 'none';
-      overlayDragPart = null;
-    }
+  // ---- Badges de overlay (até 3 camadas) — sincroniza + arrasta ----
+  // Fábrica genérica (reaproveitada pro Roteiro E pra aba Vídeo, ver
+  // vcOverlayLayer mais abaixo): recebe o elemento da prévia e os 3 divs de
+  // badge, devolve um controlador com .sync(part, localT, duration) chamado
+  // a cada frame do loop de playback. Cena animada também desenha o mesmo
+  // selo no canvas (ver drawOverlayBadges()) pra entrar no vídeo exportado;
+  // clipe pré-gravado só tem a versão HTML mesmo (sem export de canvas).
+  function setupOverlayLayer(stageEl, badgeEls) {
+    const dragState = badgeEls.map(function () { return { dragging: false, frameRect: null, part: null }; });
+    badgeEls.forEach(function (badgeEl, idx) {
+      badgeEl.addEventListener('pointerdown', function (e) {
+        const st = dragState[idx];
+        if (!st.part) return;
+        st.dragging = true;
+        st.frameRect = stageEl.getBoundingClientRect();
+        badgeEl.setPointerCapture(e.pointerId);
+        e.preventDefault();
+      });
+      badgeEl.addEventListener('pointermove', function (e) {
+        const st = dragState[idx];
+        if (!st.dragging || !st.part || !st.frameRect) return;
+        const x = Math.min(1, Math.max(0, (e.clientX - st.frameRect.left) / st.frameRect.width));
+        const y = Math.min(1, Math.max(0, (e.clientY - st.frameRect.top) / st.frameRect.height));
+        st.part.overlays[idx].pos = { x: x * 100, y: y * 100 };
+        badgeEl.style.left = (x * 100) + '%';
+        badgeEl.style.top = (y * 100) + '%';
+      });
+      function endDrag() { dragState[idx].dragging = false; dragState[idx].frameRect = null; }
+      badgeEl.addEventListener('pointerup', endDrag);
+      badgeEl.addEventListener('pointercancel', endDrag);
+    });
+    return {
+      sync: function (part, localT, duration) {
+        badgeEls.forEach(function (badgeEl, idx) {
+          const ov = part && part.overlays && part.overlays[idx];
+          const st = dragState[idx];
+          if (ov && ov.enabled && (ov.text || '').trim()) {
+            const opacity = overlayOpacityAt(ov, localT || 0, duration || 0);
+            if (opacity <= 0.02) { badgeEl.style.display = 'none'; st.part = null; return; }
+            const pos = ov.pos || { x: 50, y: 18 };
+            badgeEl.style.display = 'block';
+            badgeEl.style.opacity = String(opacity);
+            badgeEl.textContent = ov.text;
+            badgeEl.style.left = pos.x + '%';
+            badgeEl.style.top = pos.y + '%';
+            st.part = part;
+          } else {
+            badgeEl.style.display = 'none';
+            st.part = null;
+          }
+        });
+      },
+    };
   }
 
-  (function attachOverlayBadgeDrag() {
-    let dragging = false, frameRect = null;
-    overlayBadge.addEventListener('pointerdown', function (e) {
-      if (!overlayDragPart) return;
-      dragging = true;
-      frameRect = previewStage.getBoundingClientRect();
-      overlayBadge.setPointerCapture(e.pointerId);
-      e.preventDefault();
-    });
-    overlayBadge.addEventListener('pointermove', function (e) {
-      if (!dragging || !overlayDragPart || !frameRect) return;
-      const x = Math.min(1, Math.max(0, (e.clientX - frameRect.left) / frameRect.width));
-      const y = Math.min(1, Math.max(0, (e.clientY - frameRect.top) / frameRect.height));
-      overlayDragPart.overlay.pos = { x: x * 100, y: y * 100 };
-      overlayBadge.style.left = (x * 100) + '%';
-      overlayBadge.style.top = (y * 100) + '%';
-    });
-    function endDrag() { dragging = false; frameRect = null; }
-    overlayBadge.addEventListener('pointerup', endDrag);
-    overlayBadge.addEventListener('pointercancel', endDrag);
-  })();
+  const previewStage = document.getElementById('previewStage');
+  const overlayLayer = setupOverlayLayer(previewStage, [
+    document.getElementById('overlayBadge0'), document.getElementById('overlayBadge1'), document.getElementById('overlayBadge2'),
+  ]);
+  function syncOverlayBadge(active) {
+    const showable = !!(active && active.block.type === 'narration');
+    overlayLayer.sync(showable ? active.block.part : null, active ? active.localT : 0, active ? active.block.duration : 0);
+  }
 
   function fmt(s) {
     s = Math.max(0, s);
@@ -2156,8 +2245,9 @@
   const vcClipPreviewVideo = document.getElementById('vcClipPreviewVideo');
   const vcClipCaptionOverlay = document.getElementById('vcClipCaptionOverlay');
   const vcPreviewStage = document.getElementById('vcPreviewStage');
-  const vcOverlayBadge = document.getElementById('vcOverlayBadge');
-  let vcOverlayDragClip = null;
+  const vcOverlayLayer = setupOverlayLayer(vcPreviewStage, [
+    document.getElementById('vcOverlayBadge0'), document.getElementById('vcOverlayBadge1'), document.getElementById('vcOverlayBadge2'),
+  ]);
 
   // Transição de entrada + cor/filtro do clipe, aplicados juntos como CSS no
   // <video> da prévia (a transição também usa TRANSITION_DUR/easeOutCubic/
@@ -2212,42 +2302,8 @@
   }
 
   function vcSyncOverlayBadge(active) {
-    const clip = active ? active.block.part : null;
-    const ov = clip && clip.overlay;
-    if (ov && ov.enabled && (ov.text || '').trim()) {
-      const pos = ov.pos || { x: 50, y: 18 };
-      vcOverlayBadge.style.display = 'block';
-      vcOverlayBadge.textContent = ov.text;
-      vcOverlayBadge.style.left = pos.x + '%';
-      vcOverlayBadge.style.top = pos.y + '%';
-      vcOverlayDragClip = clip;
-    } else {
-      vcOverlayBadge.style.display = 'none';
-      vcOverlayDragClip = null;
-    }
+    vcOverlayLayer.sync(active ? active.block.part : null, active ? active.localT : 0, active ? active.block.duration : 0);
   }
-
-  (function attachVcOverlayBadgeDrag() {
-    let dragging = false, frameRect = null;
-    vcOverlayBadge.addEventListener('pointerdown', function (e) {
-      if (!vcOverlayDragClip) return;
-      dragging = true;
-      frameRect = vcPreviewStage.getBoundingClientRect();
-      vcOverlayBadge.setPointerCapture(e.pointerId);
-      e.preventDefault();
-    });
-    vcOverlayBadge.addEventListener('pointermove', function (e) {
-      if (!dragging || !vcOverlayDragClip || !frameRect) return;
-      const x = Math.min(1, Math.max(0, (e.clientX - frameRect.left) / frameRect.width));
-      const y = Math.min(1, Math.max(0, (e.clientY - frameRect.top) / frameRect.height));
-      vcOverlayDragClip.overlay.pos = { x: x * 100, y: y * 100 };
-      vcOverlayBadge.style.left = (x * 100) + '%';
-      vcOverlayBadge.style.top = (y * 100) + '%';
-    });
-    function endDrag() { dragging = false; frameRect = null; }
-    vcOverlayBadge.addEventListener('pointerup', endDrag);
-    vcOverlayBadge.addEventListener('pointercancel', endDrag);
-  })();
 
   const vcPlayPauseBtn = document.getElementById('vcBtnPlayPause');
   const vcTimeLabel = document.getElementById('vcTimeLabel');
@@ -2338,11 +2394,21 @@
       return window.MediaRecorder && MediaRecorder.isTypeSupported && MediaRecorder.isTypeSupported(m);
     }) || '';
 
+    // Bitrate alto explícito — sem isso o navegador usa um valor default
+    // (às vezes baixo demais pra 1080x1920, deixando texto/movimento
+    // borrado). 16 Mbps de vídeo é bem acima do que Reels/TikTok/Shorts
+    // pedem, então a qualidade não é o gargalo na hora de subir o vídeo.
+    const recorderOpts = { videoBitsPerSecond: 16000000, audioBitsPerSecond: 192000 };
+    if (mime) recorderOpts.mimeType = mime;
     try {
-      mediaRecorder = mime ? new MediaRecorder(combined, { mimeType: mime }) : new MediaRecorder(combined);
+      mediaRecorder = new MediaRecorder(combined, recorderOpts);
     } catch (e) {
-      alert('Seu navegador não conseguiu iniciar a gravação: ' + e.message);
-      return;
+      try {
+        mediaRecorder = mime ? new MediaRecorder(combined, { mimeType: mime }) : new MediaRecorder(combined);
+      } catch (e2) {
+        alert('Seu navegador não conseguiu iniciar a gravação: ' + e2.message);
+        return;
+      }
     }
 
     recordedChunks = [];
@@ -2387,7 +2453,7 @@
         lines.push('Recorte (in/out): ' + (trimInfoLabel(part) || '(vídeo ainda não enviado)'));
         lines.push('Transição de entrada: ' + (TRANSITION_LABELS[part.transitionIn] || part.transitionIn));
         lines.push('Legenda planejada: ' + (part.captionText ? '"' + part.captionText + '"' : '(nenhuma)'));
-        lines.push('Overlay: ' + (part.overlay && part.overlay.enabled && part.overlay.text ? '"' + part.overlay.text + '"' : '(nenhum)'));
+        lines.push('Overlay: ' + overlaysSummary(part));
         lines.push('Efeitos planejados: ' + (part.effectsNotes || '(nenhum)'));
         if (part.complementaryTakes && part.complementaryTakes.length) {
           lines.push('Takes complementares:');
@@ -2403,7 +2469,7 @@
         lines.push('Palavras-chave: ' + ((part.keywords || []).join(', ') || '(nenhuma)'));
         lines.push('Tema de ícone: ' + (ICON_THEME_LABELS[part.iconTheme] || 'Nenhum'));
         lines.push('B-roll enviado: ' + (part.brollDataUrl ? 'sim' : 'não (usa placeholder)'));
-        lines.push('Overlay: ' + (part.overlay && part.overlay.enabled && part.overlay.text ? '"' + part.overlay.text + '"' : '(nenhum)'));
+        lines.push('Overlay: ' + overlaysSummary(part));
         lines.push('Áudio de narração enviado: ' + (part.audioDataUrl ? 'sim (' + (part.audioFileName || '') + ')' : 'não (timing estimado por texto)'));
         lines.push('Referência visual: ' + (part.visualRefNote || '(nenhuma nota)') + (part.visualRefFileName ? ' — anexo: ' + part.visualRefFileName : ''));
       }
@@ -2442,7 +2508,7 @@
       lines.push('Cor/filtro: brilho ' + (clip.brightness || 100) + '% · contraste ' + (clip.contrast || 100) + '% · saturação ' + (clip.saturation || 100) + '%');
       lines.push('Transição de entrada: ' + (TRANSITION_LABELS[clip.transitionIn] || clip.transitionIn));
       lines.push('Legenda planejada: ' + (clip.captionText ? '"' + clip.captionText + '"' : '(nenhuma)'));
-      lines.push('Overlay: ' + (clip.overlay && clip.overlay.enabled && clip.overlay.text ? '"' + clip.overlay.text + '"' : '(nenhum)'));
+      lines.push('Overlay: ' + overlaysSummary(clip));
       lines.push('Efeitos planejados: ' + (clip.effectsNotes || '(nenhum)'));
       lines.push('');
     });
@@ -2525,7 +2591,7 @@
         row.addEventListener('click', function () { goToPart(Number(row.getAttribute('data-prod-index'))); });
       });
     }
-    prodExportNote.textContent = 'Exporta em .webm (ou .mp4, se o navegador suportar).';
+    prodExportNote.textContent = 'Exporta em .webm (ou .mp4, se o navegador suportar), em alta qualidade (16 Mbps de vídeo — bem acima do que Reels/TikTok/Shorts pedem).';
 
     // ---- Vídeo (clipes) ----
     const vcTimeline = getVideoTimeline();
@@ -3063,41 +3129,80 @@
     return head;
   }
 
-  // Camada de overlay (selo/texto extra opcional, independente do B-roll e
-  // da legenda) — compartilhada entre cena animada e clipe pré-gravado.
-  // Depois de ativado e com texto, o selo aparece na prévia (ao lado) e dá
-  // pra arrastar direto nela pra reposicionar.
+  // Camadas de overlay (até 3 selos independentes, opcionais — texto,
+  // posição e fadeIn/fadeOut próprios) — compartilhado entre cena animada e
+  // clipe pré-gravado. Cada camada ativada aparece na prévia (ao lado) e dá
+  // pra arrastar direto nela pra reposicionar; várias podem estar ativas ao
+  // mesmo tempo (ex: selo "OFERTA" em cima + selo "NOVO" embaixo).
   function appendOverlayField(card, part) {
-    if (!part.overlay) part.overlay = { enabled: false, text: '', pos: { x: 50, y: 18 } };
-    const ovField = document.createElement('div');
-    ovField.className = 'field';
-    ovField.style.marginTop = '10px';
-    const ovLabel = document.createElement('label');
-    ovLabel.textContent = 'Overlay (opcional)';
-    const ovRow = document.createElement('div');
-    ovRow.className = 'row';
-    ovRow.style.alignItems = 'center';
-    const ovCheckWrap = document.createElement('label');
-    ovCheckWrap.style.cssText = 'display:flex;align-items:center;gap:6px;flex:0 0 auto;font-size:12px;color:var(--text-dim);cursor:pointer;';
-    const ovCheck = document.createElement('input');
-    ovCheck.type = 'checkbox';
-    ovCheck.checked = !!part.overlay.enabled;
-    ovCheckWrap.appendChild(ovCheck);
-    ovCheckWrap.appendChild(document.createTextNode('Ativar'));
-    const ovText = document.createElement('input');
-    ovText.type = 'text';
-    ovText.placeholder = 'Selo — arraste na prévia pra posicionar. Ex: OFERTA';
-    ovText.value = part.overlay.text || '';
-    ovText.style.flex = '1';
-    ovText.disabled = !ovCheck.checked;
-    ovCheck.addEventListener('change', function () {
-      part.overlay.enabled = ovCheck.checked;
+    if (!part.overlays) part.overlays = makeOverlays();
+    const wrap = document.createElement('div');
+    wrap.className = 'field';
+    wrap.style.marginTop = '10px';
+    const wrapLabel = document.createElement('label');
+    wrapLabel.textContent = 'Camadas de overlay (opcional, até 3 ao mesmo tempo)';
+    wrap.appendChild(wrapLabel);
+
+    part.overlays.forEach(function (ov, idx) {
+      const ovBox = document.createElement('div');
+      ovBox.style.cssText = 'background:var(--panel-2);border:1px solid var(--border);border-radius:8px;padding:8px;margin-top:6px;';
+
+      const ovRow = document.createElement('div');
+      ovRow.className = 'row';
+      ovRow.style.alignItems = 'center';
+      const ovCheckWrap = document.createElement('label');
+      ovCheckWrap.style.cssText = 'display:flex;align-items:center;gap:6px;flex:0 0 auto;font-size:12px;color:var(--text-dim);cursor:pointer;';
+      const ovCheck = document.createElement('input');
+      ovCheck.type = 'checkbox';
+      ovCheck.checked = !!ov.enabled;
+      ovCheckWrap.appendChild(ovCheck);
+      ovCheckWrap.appendChild(document.createTextNode('Camada ' + (idx + 1)));
+      const ovText = document.createElement('input');
+      ovText.type = 'text';
+      ovText.placeholder = 'Selo — arraste na prévia pra posicionar. Ex: OFERTA';
+      ovText.value = ov.text || '';
+      ovText.style.flex = '1';
       ovText.disabled = !ovCheck.checked;
+      ovRow.appendChild(ovCheckWrap); ovRow.appendChild(ovText);
+      ovBox.appendChild(ovRow);
+
+      const fadeRow = document.createElement('div');
+      fadeRow.className = 'row';
+      fadeRow.style.cssText = 'align-items:center;margin-top:6px;';
+      const fadeInWrap = document.createElement('label');
+      fadeInWrap.style.cssText = 'display:flex;align-items:center;gap:6px;font-size:11.5px;color:var(--text-dim);flex:1;';
+      const fadeInInput = document.createElement('input');
+      fadeInInput.type = 'number'; fadeInInput.min = '0'; fadeInInput.step = '0.1';
+      fadeInInput.value = String(ov.fadeIn || 0);
+      fadeInInput.style.cssText = 'width:60px;';
+      fadeInInput.disabled = !ovCheck.checked;
+      fadeInWrap.appendChild(document.createTextNode('Fade in (s)'));
+      fadeInWrap.appendChild(fadeInInput);
+      const fadeOutWrap = document.createElement('label');
+      fadeOutWrap.style.cssText = 'display:flex;align-items:center;gap:6px;font-size:11.5px;color:var(--text-dim);flex:1;';
+      const fadeOutInput = document.createElement('input');
+      fadeOutInput.type = 'number'; fadeOutInput.min = '0'; fadeOutInput.step = '0.1';
+      fadeOutInput.value = String(ov.fadeOut || 0);
+      fadeOutInput.style.cssText = 'width:60px;';
+      fadeOutInput.disabled = !ovCheck.checked;
+      fadeOutWrap.appendChild(document.createTextNode('Fade out (s)'));
+      fadeOutWrap.appendChild(fadeOutInput);
+      fadeRow.appendChild(fadeInWrap); fadeRow.appendChild(fadeOutWrap);
+      ovBox.appendChild(fadeRow);
+
+      ovCheck.addEventListener('change', function () {
+        ov.enabled = ovCheck.checked;
+        ovText.disabled = !ovCheck.checked;
+        fadeInInput.disabled = !ovCheck.checked;
+        fadeOutInput.disabled = !ovCheck.checked;
+      });
+      ovText.oninput = function () { ov.text = ovText.value; };
+      fadeInInput.oninput = function () { ov.fadeIn = Math.max(0, Number(fadeInInput.value) || 0); };
+      fadeOutInput.oninput = function () { ov.fadeOut = Math.max(0, Number(fadeOutInput.value) || 0); };
+
+      wrap.appendChild(ovBox);
     });
-    ovText.oninput = function () { part.overlay.text = ovText.value; };
-    ovRow.appendChild(ovCheckWrap); ovRow.appendChild(ovText);
-    ovField.appendChild(ovLabel); ovField.appendChild(ovRow);
-    card.appendChild(ovField);
+    card.appendChild(wrap);
   }
 
   function buildAnimadoFields(card, part) {
@@ -3176,6 +3281,7 @@
         loadBrollImageInto(part, reader.result);
         brollThumb.src = reader.result;
         brollFilename.textContent = file.name;
+        renderEditTimeline();
       };
       reader.readAsDataURL(file);
     };
@@ -3456,6 +3562,16 @@
     for (let i = 0; i < index; i++) t += partDurationSeconds(state.parts[i]);
     return t;
   }
+  // Resumo em texto das camadas de overlay ativas (usado nos planos de
+  // edição em .txt) — inclui fadeIn/fadeOut quando configurados.
+  function overlaysSummary(part) {
+    const active = ((part && part.overlays) || []).filter(function (ov) { return ov.enabled && (ov.text || '').trim(); });
+    if (!active.length) return '(nenhum)';
+    return active.map(function (ov) {
+      return '"' + ov.text + '"' + ((ov.fadeIn || ov.fadeOut) ? ' (fade in ' + (ov.fadeIn || 0) + 's / out ' + (ov.fadeOut || 0) + 's)' : '');
+    }).join('; ');
+  }
+
   function trimInfoLabel(part) {
     const src = part.videoSourceDurationSec;
     if (!src) return '';
@@ -3637,9 +3753,15 @@
       seg.style.width = widthPct + '%';
       seg.setAttribute('data-index', String(index));
       seg.title = part.kind === 'video' ? (part.clipTitle || 'Clipe') : (part.chapterTitle || 'Cena');
+      if (part.brollDataUrl) {
+        seg.style.backgroundImage = 'url(' + part.brollDataUrl + ')';
+        seg.style.backgroundSize = 'cover';
+        seg.style.backgroundPosition = 'center';
+      }
       const label = document.createElement('span');
       label.className = 'et-seg-label';
       label.textContent = (index + 1) + '. ' + (part.kind === 'video' ? (part.clipTitle || 'Clipe') : (part.chapterTitle || 'Cena'));
+      if (part.brollDataUrl) { label.style.background = 'rgba(0,0,0,.55)'; label.style.borderRadius = '3px'; label.style.padding = '1px 5px'; }
       seg.appendChild(label);
       if (part.kind === 'video' && part.videoDataUrl) {
         const leftHandle = document.createElement('div');
@@ -3884,9 +4006,15 @@
       seg.style.width = widthPct + '%';
       seg.setAttribute('data-index', String(index));
       seg.title = clip.clipTitle || 'Clipe';
+      if (clip.thumbDataUrl) {
+        seg.style.backgroundImage = 'url(' + clip.thumbDataUrl + ')';
+        seg.style.backgroundSize = 'cover';
+        seg.style.backgroundPosition = 'center';
+      }
       const label = document.createElement('span');
       label.className = 'et-seg-label';
       label.textContent = (index + 1) + '. ' + (clip.clipTitle || 'Clipe');
+      if (clip.thumbDataUrl) { label.style.background = 'rgba(0,0,0,.55)'; label.style.borderRadius = '3px'; label.style.padding = '1px 5px'; }
       seg.appendChild(label);
       if (clip.videoDataUrl) {
         const leftHandle = document.createElement('div');
@@ -4003,6 +4131,10 @@
       }
       refreshDurBadges();
       renderVcEditTimeline();
+      captureVideoFrameThumb(videoPreview, function (dataUrl) {
+        clip.thumbDataUrl = dataUrl;
+        renderVcEditTimeline();
+      });
     };
     refreshPreviewSrc();
     refreshDurBadges();
@@ -4410,10 +4542,7 @@
           iconTheme: p.iconTheme || 'nenhum',
           visualRefDataUrl: p.visualRefDataUrl || null, visualRefFileName: p.visualRefFileName || null,
           visualRefNote: p.visualRefNote || '',
-          overlay: {
-            enabled: !!(p.overlay && p.overlay.enabled), text: (p.overlay && p.overlay.text) || '',
-            pos: { x: (p.overlay && p.overlay.pos && p.overlay.pos.x) || 50, y: (p.overlay && p.overlay.pos && p.overlay.pos.y) || 18 },
-          },
+          overlays: serializeOverlays(p.overlays),
         };
       }),
       videoClips: state.videoClips.map(function (c) {
@@ -4428,10 +4557,8 @@
           speed: c.speed || 1, brightness: c.brightness == null ? 100 : c.brightness,
           contrast: c.contrast == null ? 100 : c.contrast, saturation: c.saturation == null ? 100 : c.saturation,
           transitionIn: c.transitionIn || 'corte-seco', effectsNotes: c.effectsNotes || '',
-          overlay: {
-            enabled: !!(c.overlay && c.overlay.enabled), text: (c.overlay && c.overlay.text) || '',
-            pos: { x: (c.overlay && c.overlay.pos && c.overlay.pos.x) || 50, y: (c.overlay && c.overlay.pos && c.overlay.pos.y) || 18 },
-          },
+          overlays: serializeOverlays(c.overlays),
+          thumbDataUrl: c.thumbDataUrl || null,
         };
       }),
       tweetCarousel: {
@@ -4501,10 +4628,6 @@
         // em state.parts, que agora é só cena animada.
         const migratedClips = [];
         state.parts = (data.parts || []).filter(function (p) { return p.kind !== 'video'; }).map(function (p) {
-          const overlay = {
-            enabled: !!(p.overlay && p.overlay.enabled), text: (p.overlay && p.overlay.text) || '',
-            pos: { x: (p.overlay && p.overlay.pos && p.overlay.pos.x) || 50, y: (p.overlay && p.overlay.pos && p.overlay.pos.y) || 18 },
-          };
           const part = {
             id: p.id || nextId(), kind: 'animado', chapterTitle: p.chapterTitle || '', text: p.text || '',
             keywords: p.keywords || [], brollDataUrl: p.brollDataUrl || null, brollImg: null,
@@ -4512,7 +4635,7 @@
             iconTheme: p.iconTheme || 'nenhum',
             visualRefDataUrl: p.visualRefDataUrl || null, visualRefFileName: p.visualRefFileName || null,
             visualRefNote: p.visualRefNote || '',
-            overlay: overlay,
+            overlays: deserializeOverlays(p),
           };
           if (part.brollDataUrl) {
             loadBrollImageInto(part, part.brollDataUrl);
@@ -4529,10 +4652,7 @@
             takes: [take], activeTakeId: take.id,
             videoDurationSec: p.videoDurationSec || null, trimStartSec: p.trimStartSec || 0,
             transitionIn: p.transitionIn || 'corte-seco', effectsNotes: p.effectsNotes || '',
-            overlay: {
-              enabled: !!(p.overlay && p.overlay.enabled), text: (p.overlay && p.overlay.text) || '',
-              pos: { x: (p.overlay && p.overlay.pos && p.overlay.pos.x) || 50, y: (p.overlay && p.overlay.pos && p.overlay.pos.y) || 18 },
-            },
+            overlays: deserializeOverlays(p),
           });
           syncClipActiveTake(clip);
           migratedClips.push(clip);
@@ -4549,10 +4669,8 @@
             speed: c.speed || 1, brightness: c.brightness == null ? 100 : c.brightness,
             contrast: c.contrast == null ? 100 : c.contrast, saturation: c.saturation == null ? 100 : c.saturation,
             transitionIn: c.transitionIn || 'corte-seco', effectsNotes: c.effectsNotes || '',
-            overlay: {
-              enabled: !!(c.overlay && c.overlay.enabled), text: (c.overlay && c.overlay.text) || '',
-              pos: { x: (c.overlay && c.overlay.pos && c.overlay.pos.x) || 50, y: (c.overlay && c.overlay.pos && c.overlay.pos.y) || 18 },
-            },
+            overlays: deserializeOverlays(c),
+            thumbDataUrl: c.thumbDataUrl || null,
           });
           syncClipActiveTake(clip);
           return clip;
@@ -4720,7 +4838,7 @@
           iconTheme: p.iconTheme,
           hasBroll: !!p.brollDataUrl,
           hasAudio: !!p.audioDataUrl,
-          overlayText: (p.overlay && p.overlay.enabled && p.overlay.text) || null,
+          overlayText: overlaysSummary(p) !== '(nenhum)' ? overlaysSummary(p) : null,
         };
       }),
       totalVideoClips: state.videoClips.length,
