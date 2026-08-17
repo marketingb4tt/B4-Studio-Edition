@@ -322,7 +322,16 @@
   .tw-handle { font-size: 26px; color: #697077; }
   .tw-body-wrap { flex: 1 1 auto; overflow: hidden; padding-bottom: 32px; display: flex; align-items: center; }
   .tw-body-wrap.no-image { padding-bottom: 0; }
+  .tw-text-col { width: 100%; }
+  /* Título opcional (1ª linha antes de uma linha em branco no texto da
+     página — ver convenção documentada na aba Texto / Script): maior e
+     mais forte que o corpo, pensado pra capa e CTA. */
+  .tw-title { font-weight: 800; line-height: 1.2; color: #0f1419; margin-bottom: 14px; white-space: pre-wrap; }
   .tw-body { font-size: 34px; line-height: 1.5; color: #0f1419; white-space: pre-wrap; }
+  /* Negrito com leve destaque de escala (em vez de só peso/cor) — cresce
+     proporcionalmente ao tamanho do corpo de cada slide, mas pouco, pra não
+     quebrar a linha nem chamar atenção demais. */
+  .tw-body b { font-weight: 600; color: inherit; font-size: 1.08em; }
   /* Imagem sempre limitada a metade da altura do formato 4:5 do card
      (proporção própria ~8:5), nunca "flex: 1" — é isso que garante que ela
      nunca vira o slide inteiro e que sobra espaço grande pro texto acima. */
@@ -339,6 +348,36 @@
   .tw-arrow.left { left: 16px; }
   .tw-arrow.right { right: 16px; }
   .tw-noimg { display: flex; align-items: center; justify-content: center; height: 100%; color: #9aa5b1; font-size: 26px; text-align: center; padding: 40px; }
+
+  /* ---- Padrão Tecnológico — identidade oficial da B4 Business ----
+     Mesmas dimensões/escala do card Tweet/X (1080x1350, 4:5) e a mesma
+     regra de imagem em metade do card (aspect-ratio 8:5) pra manter
+     consistência entre os dois modelos. */
+  .b4-card {
+    width: 1080px; height: 1350px; transform: scale(.2796); transform-origin: top left;
+    box-sizing: border-box; padding: 64px; display: flex; flex-direction: column;
+    background: radial-gradient(ellipse 900px 700px at 12% 0%, #16324f 0%, transparent 55%), linear-gradient(160deg, #0D1B2A 0%, #0f2438 50%, #0D1B2A 100%);
+    font-family: 'Inter', Arial, sans-serif; color: #FFFFFF;
+  }
+  .b4-topbar { display: flex; align-items: center; justify-content: space-between; flex: 0 0 auto; padding-bottom: 34px; }
+  .b4-logo { display: flex; align-items: center; gap: 14px; }
+  .b4-logo-mark { display: block; width: 46px; height: 46px; flex: 0 0 auto; overflow: hidden; border-radius: 8px; }
+  .b4-logo-mark img, .b4-logo-mark > div { width: 100%; height: 100%; }
+  .b4-logo span:last-child { font-family: 'Sora', 'Inter', sans-serif; font-weight: 800; font-size: 20px; letter-spacing: .04em; }
+  .b4-page-index { font-size: 18px; color: #00C9A7; letter-spacing: .08em; font-weight: 600; }
+  .b4-text-col { flex: 1 1 auto; overflow: hidden; display: flex; flex-direction: column; justify-content: center; padding-bottom: 24px; }
+  .b4-title { font-family: 'Sora', 'Inter', sans-serif; font-weight: 800; line-height: 1.18; color: #FFFFFF; margin-bottom: 16px; white-space: pre-wrap; }
+  .b4-body { line-height: 1.5; color: #FFFFFF; white-space: pre-wrap; }
+  /* Negrito sutil: peso um pouco maior + leve toque teal (desaturado, não
+     o teal puro de CTA) + leve aumento de escala — marca a palavra sem
+     "gritar" no meio do texto. */
+  .b4-body b { font-weight: 600; color: #B7E4DA; font-size: 1.08em; }
+  .b4-image-wrap { position: relative; flex: 0 0 auto; width: 100%; aspect-ratio: 8 / 5; border-radius: 20px; overflow: hidden; background: #16324f; border: 1px solid rgba(0,201,167,.3); }
+  .b4-image-wrap img { width: 100%; height: 100%; object-fit: cover; display: block; transform-origin: center; cursor: grab; touch-action: none; }
+  .b4-image-wrap img:active { cursor: grabbing; }
+  .b4-footer { display: flex; align-items: center; justify-content: space-between; flex: 0 0 auto; padding-top: 24px; font-size: 17px; }
+  .b4-handle { color: #00C9A7; font-weight: 600; }
+  .b4-credit { color: #B0B0B0; max-width: 60%; text-align: right; line-height: 1.4; }
   .chat-messages { display: flex; flex-direction: column; gap: 8px; margin-top: 14px; max-height: 50vh; overflow-y: auto; padding-right: 2px; }
   .bubble { padding: 10px 12px; border-radius: 10px; font-size: 13px; line-height: 1.5; white-space: pre-wrap; }
   .bubble.user { background: var(--accent); color: #16130a; align-self: flex-end; max-width: 85%; font-weight: 600; }
@@ -386,84 +425,63 @@
 
       <div class="cs-switcher">
         <button class="cs-switch-btn active" id="csBtnModel2" data-cs-target="model2">Estilo Tweet/X</button>
-        <button class="cs-switch-btn" id="csBtnModel1" data-cs-target="model1">Padrão Tecnológico (opcional)</button>
+        <button class="cs-switch-btn" id="csBtnModel1" data-cs-target="model1">Padrão Tecnológico</button>
       </div>
 
-      <div id="csModel1Wrap" style="display:none;">
-        <div class="cs-iframe-wrap">
-          <iframe id="csFrameModel1" class="cs-iframe" title="Modelo — Padrão Tecnológico"></iframe>
-        </div>
-        <div class="card" style="margin-top:12px;">
-          <div style="font-size:11.5px;color:var(--text-dim);margin-bottom:10px;">
-            Zoom e posição das fotos de fundo (slides 1, 2 e 5) — amplia a
-            imagem dentro do quadro e, pra reposicionar, arraste a foto direto
-            no preview acima (segure e arraste).
-          </div>
-          <div class="cs-tweet-row" style="margin-bottom:8px;">
-            <label style="font-size:11.5px;color:var(--text-dim);flex:0 0 90px;">Slide 1 (capa)</label>
-            <input type="range" id="cs1Zoom1" min="100" max="250" step="5" value="100" style="flex:1;">
-            <span id="cs1Zoom1Label" style="font-size:11.5px;color:var(--text-dim);flex:0 0 auto;">100%</span>
-            <button class="btn btn-sm" id="cs1Reset1" type="button">Centralizar</button>
-          </div>
-          <div class="cs-tweet-row" style="margin-bottom:8px;">
-            <label style="font-size:11.5px;color:var(--text-dim);flex:0 0 90px;">Slide 2</label>
-            <input type="range" id="cs1Zoom2" min="100" max="250" step="5" value="100" style="flex:1;">
-            <span id="cs1Zoom2Label" style="font-size:11.5px;color:var(--text-dim);flex:0 0 auto;">100%</span>
-            <button class="btn btn-sm" id="cs1Reset2" type="button">Centralizar</button>
-          </div>
-          <div class="cs-tweet-row">
-            <label style="font-size:11.5px;color:var(--text-dim);flex:0 0 90px;">Slide 5</label>
-            <input type="range" id="cs1Zoom5" min="100" max="250" step="5" value="100" style="flex:1;">
-            <span id="cs1Zoom5Label" style="font-size:11.5px;color:var(--text-dim);flex:0 0 auto;">100%</span>
-            <button class="btn btn-sm" id="cs1Reset5" type="button">Centralizar</button>
-          </div>
-        </div>
-        <div class="note" style="margin-top:12px;">
-          Modelo trazido do <b>B4 Carousel Studio</b> original. O logo usado
-          nos slides é o que você envia no card <b>Logo B4</b> acima — suba
-          o logo ali e ele aparece automaticamente aqui.
-        </div>
-        <div class="note" style="margin-top:8px;">
-          Algumas imagens de fundo dos slides vêm de links do Canva
-          (temporários, com expiração) e do Unsplash. Se algum fundo aparecer
-          só como gradiente escuro, é porque o link do Canva expirou —
-          exporte a imagem de novo e me envie que eu incorporo de forma
-          permanente.
-        </div>
+      <div class="note" style="margin-bottom:14px;">
+        Os dois modelos usam o <b>mesmo conteúdo</b> (texto, título, negrito,
+        imagem e crédito de cada página) — só muda o visual. Troque de
+        modelo a qualquer momento sem perder o que já foi escrito; edite o
+        texto uma vez só, abaixo, e veja o resultado nos dois estilos.
       </div>
 
-      <div id="csModel2Wrap">
-        <div class="card cs-autogen-card" style="margin-bottom:14px;">
-          <div style="font-size:13px;font-weight:700;margin-bottom:8px;">Gerar carrossel automaticamente</div>
-          <div style="font-size:11.5px;color:var(--text-dim);margin-bottom:10px;">
-            Cole ou escreva aqui o texto completo do carrossel, escolha em quantas
-            páginas ele deve ser dividido e o app quebra o texto sozinho, criando
-            cada página já com o texto pronto (dá pra ajustar cada uma depois).
-            Isso substitui as páginas atuais deste modelo.
-          </div>
-          <textarea id="csAutogenText" placeholder="Cole aqui o texto completo do carrossel..." style="width:100%;min-height:110px;background:var(--panel-2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:inherit;font-size:12.5px;padding:8px 10px;resize:vertical;"></textarea>
-          <div class="cs-tweet-row" style="margin-top:10px;">
-            <label style="font-size:11.5px;color:var(--text-dim);flex:0 0 auto;">Quantidade de páginas</label>
-            <input type="number" id="csAutogenCount" min="1" max="15" value="5" style="width:70px;background:var(--panel-2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:inherit;font-size:12.5px;padding:6px 8px;">
-            <button type="button" class="btn" id="btnAutogenCarousel" style="margin-left:auto;">Gerar páginas</button>
-          </div>
+      <div class="card cs-autogen-card" style="margin-bottom:14px;">
+        <div style="font-size:13px;font-weight:700;margin-bottom:8px;">Gerar carrossel automaticamente</div>
+        <div style="font-size:11.5px;color:var(--text-dim);margin-bottom:10px;">
+          Cole ou escreva aqui o texto completo do carrossel, escolha em quantas
+          páginas ele deve ser dividido e o app quebra o texto sozinho, criando
+          cada página já com o texto pronto (dá pra ajustar cada uma depois).
+          Isso substitui as páginas atuais.
         </div>
-        <div class="cs-tweet-editor" id="csTweetEditor"></div>
-        <button class="btn" id="btnAddTweetSlide">+ Adicionar página</button>
+        <textarea id="csAutogenText" placeholder="Cole aqui o texto completo do carrossel..." style="width:100%;min-height:110px;background:var(--panel-2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:inherit;font-size:12.5px;padding:8px 10px;resize:vertical;"></textarea>
+        <div class="cs-tweet-row" style="margin-top:10px;">
+          <label style="font-size:11.5px;color:var(--text-dim);flex:0 0 auto;">Quantidade de páginas</label>
+          <input type="number" id="csAutogenCount" min="1" max="15" value="5" style="width:70px;background:var(--panel-2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:inherit;font-size:12.5px;padding:6px 8px;">
+          <button type="button" class="btn" id="btnAutogenCarousel" style="margin-left:auto;">Gerar páginas</button>
+        </div>
+      </div>
+      <div class="cs-tweet-editor" id="csTweetEditor"></div>
+      <button class="btn" id="btnAddTweetSlide">+ Adicionar página</button>
+
+      <div id="csModel2Wrap" style="margin-top:16px;">
         <div class="cs-tweet-rail-wrap">
           <div class="cs-tweet-rail" id="csTweetRail"></div>
         </div>
         <div class="note" style="margin-top:12px;">
           Perfil fixo neste modelo: foto, nome e selo de verificado de
           <b>Matheus Serpa | Consórcio</b> (@matheushserpa), a partir do print
-          que você enviou. Escreva o texto de cada página ao lado e, se
-          quiser, envie sua própria imagem por página — sem imagem enviada,
-          uso uma foto de banco (Unsplash) como referência até você trocar.
+          que você enviou. Sem imagem enviada numa página, uso uma foto de
+          banco (Unsplash) como referência até você trocar.
         </div>
         <div class="note" style="margin-top:8px;">
-          Pra ajustar o zoom, use o controle ao lado. Pra reposicionar, arraste
-          a imagem direto dentro do card (segure e arraste); o botão
-          <b>Centralizar</b> volta a posição pro centro.
+          Pra ajustar o zoom da imagem de cada página, use o controle no
+          editor acima. Pra reposicionar, arraste a imagem direto dentro do
+          card no preview (segure e arraste); o botão <b>Centralizar</b>
+          volta a posição pro centro.
+        </div>
+      </div>
+
+      <div id="csModel1Wrap" style="display:none;margin-top:16px;">
+        <div class="cs-tweet-rail-wrap">
+          <div class="cs-tweet-rail" id="csBrandRail"></div>
+        </div>
+        <div class="note" style="margin-top:12px;">
+          Identidade visual oficial da <b>B4 Business</b>: fundo navy
+          (<code>#0D1B2A</code>), acentos teal (<code>#00C9A7</code>), logo
+          B4 no topo (envie no card <b>Logo B4</b> acima) e crédito da fonte
+          em cinza claro no rodapé. Usa o mesmo texto/título/negrito/imagem
+          de cada página do editor acima — gere ou edite ali, o preview
+          atualiza nos dois modelos ao mesmo tempo.
         </div>
       </div>
     </div>
@@ -509,13 +527,21 @@
 
     <div id="tabPanelScript" class="tab-panel">
       <h2>Texto / Script</h2>
+
+      <div class="field" style="margin-bottom:14px;">
+        <label>Gerar no modelo</label>
+        <div class="cs-switcher" style="margin-bottom:0;">
+          <button type="button" class="cs-switch-btn active" id="scriptBtnModel2" data-cs-target="model2">Estilo Tweet/X</button>
+          <button type="button" class="cs-switch-btn" id="scriptBtnModel1" data-cs-target="model1">Padrão Tecnológico</button>
+        </div>
+      </div>
+
       <div class="note" style="margin-bottom:12px;">
         Cole aqui o roteiro/script do vídeo (ou o texto do conteúdo), escolha
         em quantas páginas o carrossel deve ser dividido e clique em
         <b>Gerar carrossel</b> — o app quebra o texto sozinho e já monta cada
-        página no modelo Estilo Tweet/X (isso substitui as páginas atuais
-        desse modelo). O texto fica salvo junto com o projeto mesmo sem
-        gerar.
+        página no modelo escolhido acima (isso substitui as páginas atuais).
+        O texto fica salvo junto com o projeto mesmo sem gerar.
         <br><br>
         Se você colar um briefing com tabela (colunas como
         <b>#, Papel, Texto do slide</b>), o app reconhece o formato
@@ -524,6 +550,16 @@
         — título do carrossel, paleta de cores, número/papel da linha e um
         eventual "(Fonte: ...)" no final do texto, que vira o crédito da
         página em vez de aparecer no corpo do slide.
+        <br><br>
+        <b>Título e negrito dentro do texto de cada página</b> (funciona
+        colando texto corrido ou dentro de uma célula da tabela): coloque
+        <code>**palavra**</code> em qualquer trecho pra ele sair em
+        <b>negrito</b> — use nos dados de impacto, termo-chave do pilar ou
+        verbo de virada, sem negritar a frase inteira. Pra dar um título
+        (maior e mais forte que o resto, pensado pra capa e CTA), escreva a
+        primeira linha curta, pule uma linha em branco, e siga com o resto
+        do texto — a primeira linha vira título automaticamente. Sem linha
+        em branco, o texto inteiro é tratado como corpo normal.
       </div>
       <div class="card">
         <textarea id="scriptTextArea" placeholder="Cole ou escreva aqui o texto/script do conteúdo..." style="width:100%;min-height:320px;background:var(--panel-2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:inherit;font-size:12.5px;padding:10px 12px;resize:vertical;"></textarea>
@@ -535,6 +571,21 @@
           <input type="number" id="scriptAutogenCount" min="1" max="15" value="5" style="width:70px;background:var(--panel-2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:inherit;font-size:12.5px;padding:6px 8px;">
           <button type="button" class="btn btn-primary" id="btnGenerateFromScript" style="margin-left:auto;">Gerar carrossel</button>
         </div>
+      </div>
+
+      <div class="card" id="scriptComplianceCard" style="margin-top:12px;">
+        <div style="font-size:13px;font-weight:700;margin-bottom:6px;">Correção de texto — vocabulário de marca</div>
+        <div style="font-size:11.5px;color:var(--text-dim);margin-bottom:8px;">
+          Checagem automática antes de gerar: termos como "investimento",
+          "rendimento garantido", "renda passiva", "juros", "lucro fixo" ou
+          "aplicação financeira" são permitidos quando o texto fala do
+          consórcio/imóvel pro cliente final, mas <b>proibidos</b> quando o
+          texto toca na mecânica do Método MAIS, na participação no
+          ecossistema Gfi Hub ou na remuneração de quem indica/vende. Isso
+          aqui não bloqueia gerar o carrossel — é um alerta pra você revisar
+          o contexto antes de publicar.
+        </div>
+        <div id="scriptComplianceResult" style="font-size:12px;line-height:1.6;"></div>
       </div>
     </div>
   </div>
@@ -648,417 +699,6 @@
   ];
 
   // ---------------------------------------------------------------------
-  // Carousel Studio — modelos enviados pelo usuário (arquivos originais da
-  // B4 Business), embutidos como HTML self-contained e renderizados num
-  // <iframe srcdoc>. {{LOGO_MARK}} é substituído em tempo real pelo logo
-  // enviado no card "Logo B4" da aba Carousel Studio (ou por um selo
-  // "B4" de reserva, se não houver logo enviado ainda).
-  //
-  // AVISO: as imagens de fundo dos slides 1, 2 e 5 vêm de links do Canva
-  // (temporários, com assinatura e expiração) e do Unsplash. Os links do
-  // Canva provavelmente já expiraram — quando isso acontece, o navegador
-  // simplesmente não pinta a foto e mostra o gradiente escuro por baixo
-  // (degrada bem, não quebra o layout). Pra corrigir de vez, exporte essas
-  // imagens do Canva como arquivo e me envie — eu incorporo permanentemente.
-  // ---------------------------------------------------------------------
-  const CAROUSEL_MODEL_APOSENTADORIA_HTML = `<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-<meta charset="UTF-8">
-<title>B4 Business — Carrossel Aposentadoria</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-<style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body {
-    background: #0d1117;
-    padding: 40px 24px;
-    font-family: 'Inter', sans-serif;
-  }
-  .toolbar {
-    max-width: 1660px;
-    margin: 0 auto 20px;
-    color: #7c93ad;
-    font-size: 13px;
-    letter-spacing: .04em;
-    text-transform: uppercase;
-  }
-  .rail {
-    display: flex;
-    gap: 20px;
-    overflow-x: auto;
-    padding-bottom: 20px;
-    max-width: 1660px;
-    margin: 0 auto;
-  }
-  .frame {
-    flex: 0 0 auto;
-    width: 302px;
-    height: 378px;
-    overflow: hidden;
-    position: relative;
-    border-radius: 6px;
-    box-shadow: 0 8px 30px rgba(0,0,0,.45);
-  }
-  .slide {
-    width: 1080px;
-    height: 1350px;
-    transform: scale(0.2796);
-    transform-origin: top left;
-    position: relative;
-    background:
-      radial-gradient(ellipse 900px 700px at 15% 0%, #1a3a63 0%, transparent 55%),
-      linear-gradient(160deg, #0a1730 0%, #0d2246 45%, #091428 100%);
-    overflow: hidden;
-    color: #f4f8fc;
-    font-family: 'Sora', sans-serif;
-  }
-  .photo-overlay {
-    position: absolute; inset: 0;
-    background: linear-gradient(180deg, rgba(8,17,36,.55) 0%, rgba(8,17,36,.35) 35%, rgba(8,17,36,.92) 78%, #0a1730 100%);
-    pointer-events: none;
-  }
-  .photo-layer {
-    position: absolute; inset: 0;
-    background-size: cover; background-position: center;
-    transform-origin: center;
-    cursor: grab;
-    touch-action: none;
-  }
-  .photo-layer:active { cursor: grabbing; }
-  .photo-credit {
-    position: absolute; bottom: 8px; right: 12px;
-    font-family: 'Inter'; font-size: 9px; color: rgba(255,255,255,.35);
-    z-index: 3; letter-spacing: .02em;
-  }
-  .grid-overlay {
-    position: absolute; inset: 0;
-    background-image:
-      linear-gradient(rgba(23,230,201,.05) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(23,230,201,.05) 1px, transparent 1px);
-    background-size: 54px 54px;
-    pointer-events: none;
-  }
-  .scanline {
-    position: absolute; left: 0; right: 0; height: 240px;
-    background: linear-gradient(180deg, transparent, rgba(23,230,201,.10), transparent);
-    animation: sweep 6s linear infinite;
-    pointer-events: none;
-  }
-  @keyframes sweep {
-    0% { top: -240px; }
-    100% { top: 1350px; }
-  }
-  .bracket {
-    position: absolute; width: 46px; height: 46px;
-    border: 2px solid rgba(23,230,201,.55);
-  }
-  .bracket.tl { top: 44px; left: 44px; border-right: none; border-bottom: none; }
-  .bracket.br { bottom: 44px; right: 44px; border-left: none; border-top: none; }
-
-  .logo {
-    position: absolute; top: 56px; left: 56px;
-    display: flex; align-items: center; gap: 14px;
-    z-index: 3;
-  }
-  .logo-mark {
-    width: 44px; height: auto;
-  }
-  .logo-text { font-size: 15px; font-weight: 700; letter-spacing: .06em; }
-  .logo-sub { font-size: 10px; color: #7fd9c9; letter-spacing: .12em; font-family: 'Inter'; }
-
-  .page-index {
-    position: absolute; top: 60px; right: 56px;
-    font-family: 'Inter'; font-size: 13px; color: #7fd9c9;
-    letter-spacing: .08em; z-index: 3;
-  }
-
-  .icon-badge {
-    position: absolute; z-index: 3;
-    width: 76px; height: 76px; border-radius: 18px;
-    background: rgba(23,230,201,.08);
-    border: 1px solid rgba(23,230,201,.4);
-    display: flex; align-items: center; justify-content: center;
-    box-shadow: 0 0 26px rgba(23,230,201,.25);
-  }
-  .icon-badge svg { width: 36px; height: 36px; stroke: #4be9d3; }
-
-  .content { position: absolute; left: 56px; right: 56px; z-index: 3; }
-
-  .eyebrow {
-    font-family: 'Inter'; font-size: 13px; font-weight: 600;
-    color: #4be9d3; letter-spacing: .14em; text-transform: uppercase;
-    margin-bottom: 18px;
-  }
-  h1.headline {
-    font-size: 58px; font-weight: 800; line-height: 1.14;
-    letter-spacing: -.01em;
-  }
-  h1.headline.md { font-size: 46px; }
-  .support {
-    font-family: 'Inter'; font-size: 22px; line-height: 1.55;
-    color: #b9cbde; font-weight: 400; margin-top: 26px;
-  }
-  .support b, .support strong { color: #f4f8fc; font-weight: 600; }
-
-  .node-line {
-    position: absolute; left: 56px; right: 56px; top: 690px;
-    height: 2px; background: linear-gradient(90deg, rgba(23,230,201,.6), rgba(23,230,201,.05));
-    z-index: 2;
-  }
-  .node-dot {
-    position: absolute; top: 684px; width: 14px; height: 14px; border-radius: 50%;
-    background: #17e6c9; box-shadow: 0 0 14px rgba(23,230,201,.8); z-index: 3;
-  }
-
-  .list-item {
-    display: flex; align-items: center; gap: 16px;
-    padding: 22px 0; border-bottom: 1px solid rgba(255,255,255,.08);
-    font-family: 'Inter'; font-size: 24px; font-weight: 500;
-  }
-  .list-item svg { width: 26px; height: 26px; stroke: #4be9d3; flex-shrink: 0; }
-
-  .glass-card {
-    background: rgba(255,255,255,.05);
-    border: 1px solid rgba(255,255,255,.12);
-    border-radius: 16px; padding: 32px;
-    backdrop-filter: blur(6px);
-  }
-
-  .cta-btn {
-    display: inline-flex; align-items: center; gap: 10px;
-    background: linear-gradient(135deg,#17e6c9,#0b8f79);
-    color: #04342c; font-family: 'Inter'; font-weight: 600; font-size: 20px;
-    padding: 18px 32px; border-radius: 999px; margin-top: 30px;
-  }
-  .cta-btn svg { width: 20px; height: 20px; stroke: #04342c; }
-
-  .footer-row {
-    position: absolute; bottom: 56px; left: 56px; right: 56px;
-    display: flex; justify-content: space-between; align-items: center;
-    z-index: 3;
-  }
-  .nav-circle {
-    width: 60px; height: 60px; border-radius: 50%;
-    border: 1.5px solid rgba(23,230,201,.6);
-    display: flex; align-items: center; justify-content: center;
-  }
-  .nav-circle svg { width: 24px; height: 24px; stroke: #4be9d3; }
-
-  .social-row { display: flex; gap: 22px; }
-  .social-row svg { width: 30px; height: 30px; stroke: #b9cbde; }
-</style>
-</head>
-<body>
-
-<div class="toolbar">B4 Business — carrossel padrão · aposentadoria · 6 páginas · 1080×1350</div>
-
-<div class="rail">
-
-  <div class="frame"><div class="slide">
-    <div class="photo-layer" data-photo-slide="1" data-zoom="{{ZOOM_1}}" data-pos-x="{{POSX_1}}" data-pos-y="{{POSY_1}}" style="background-image:url('https://export-download.canva.com/ASTLs/DAHSCUASTLs/-1/0/0001-8839952674640892778.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&amp;X-Amz-Credential=AKIAQYCGKMUH5AO7UJ26%2F20260812%2Fus-east-1%2Fs3%2Faws4_request&amp;X-Amz-Date=20260812T202913Z&amp;X-Amz-Expires=18549&amp;X-Amz-Signature=0c576e1dd72700d760c3078f07e31b570cbad7788c3bba5f0e2f0b2446bc0d6b&amp;X-Amz-SignedHeaders=host%3Bx-amz-expected-bucket-owner&amp;response-expires=Thu%2C%2013%20Aug%202026%2001%3A38%3A22%20GMT'); transform:scale({{ZOOM_1}}) translate({{POSX_1}}%, {{POSY_1}}%);"></div>
-    <div class="photo-overlay"></div>
-    <div class="grid-overlay"></div><div class="scanline"></div>
-    <div class="bracket tl"></div><div class="bracket br"></div>
-    <div class="logo">{{LOGO_MARK}}<div><div class="logo-text">B4 BUSINESS</div><div class="logo-sub">GESTÃO PATRIMONIAL</div></div></div>
-    <div class="page-index">01 / 06</div>
-    <div class="icon-badge" style="top:56px; right:150px;">
-      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><path d="M3 17l6-6 4 4 8-8"/><path d="M15 7h6v6"/></svg>
-    </div>
-    <div class="content" style="top:420px;">
-      <div class="eyebrow">Cenário fiscal</div>
-      <h1 class="headline">O Brasil já deve mais de R$ 9,27 trilhões.</h1>
-      <p class="support">Você ainda pretende deixar sua aposentadoria nas mãos dele?</p>
-    </div>
-    <div class="footer-row">
-      <span></span>
-      <div class="nav-circle"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></div>
-    </div>
-  </div></div>
-
-  <div class="frame"><div class="slide">
-    <div class="photo-layer" data-photo-slide="2" data-zoom="{{ZOOM_2}}" data-pos-x="{{POSX_2}}" data-pos-y="{{POSY_2}}" style="background-image:url('https://export-download.canva.com/bE3dY/DAHSGRbE3dY/-1/0/0001-4990500895234276463.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&amp;X-Amz-Credential=AKIAQYCGKMUH5AO7UJ26%2F20260812%2Fus-east-1%2Fs3%2Faws4_request&amp;X-Amz-Date=20260812T221205Z&amp;X-Amz-Expires=12202&amp;X-Amz-Signature=60314481265c42d9dbf2dbb1b538f69067be4e10693b6a9688c49d6ea23b17e5&amp;X-Amz-SignedHeaders=host%3Bx-amz-expected-bucket-owner&amp;response-expires=Thu%2C%2013%20Aug%202026%2001%3A35%3A27%20GMT'); transform:scale({{ZOOM_2}}) translate({{POSX_2}}%, {{POSY_2}}%);"></div>
-    <div class="photo-overlay"></div>
-    <div class="grid-overlay"></div><div class="scanline" style="animation-delay:-1s"></div>
-    <div class="bracket tl"></div><div class="bracket br"></div>
-    <div class="logo">{{LOGO_MARK}}<div><div class="logo-text">B4 BUSINESS</div><div class="logo-sub">GESTÃO PATRIMONIAL</div></div></div>
-    <div class="page-index">02 / 06</div>
-    <div class="icon-badge" style="top:56px; right:150px;">
-      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l6-6 4 4 8-8"/><path d="M15 7h6v6"/></svg>
-    </div>
-    <div class="content" style="top:340px;">
-      <div class="eyebrow">Custo da dívida</div>
-      <h1 class="headline md">Somente em junho, o valor aumentou aproximadamente 2,6%.</h1>
-      <p class="support"><b>Quanto maior a dívida e os juros, maior o desafio para equilibrar as contas do país.</b></p>
-    </div>
-    <div class="node-line"></div><div class="node-dot" style="left:50px;"></div>
-    <div class="content" style="top:760px;">
-      <p class="support">Isso não significa que a aposentadoria pública acabará.</p>
-    </div>
-    <div class="footer-row">
-      <span></span>
-      <div class="nav-circle"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></div>
-    </div>
-  </div></div>
-
-  <div class="frame"><div class="slide">
-    <div class="grid-overlay"></div><div class="scanline" style="animation-delay:-2s"></div>
-    <div class="bracket tl"></div><div class="bracket br"></div>
-    <div class="logo">{{LOGO_MARK}}<div><div class="logo-text">B4 BUSINESS</div><div class="logo-sub">GESTÃO PATRIMONIAL</div></div></div>
-    <div class="page-index">03 / 06</div>
-    <div class="icon-badge" style="top:56px; right:150px;">
-      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l9 4.5v6c0 5-3.6 8.7-9 9.5-5.4-.8-9-4.5-9-9.5v-6L12 2z"/></svg>
-    </div>
-    <div class="content" style="top:200px;">
-      <div class="eyebrow">Fatores fora do seu controle</div>
-      <h1 class="headline" style="font-size:40px;">Mas depender somente dela significa entregar o seu futuro a fatores que você não controla:</h1>
-    </div>
-    <div class="content" style="top:560px;">
-      <div class="list-item"><svg viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9 12l2 2 4-4"/></svg>Mudanças nas regras</div>
-      <div class="list-item"><svg viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9 12l2 2 4-4"/></svg>Inflação</div>
-      <div class="list-item"><svg viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9 12l2 2 4-4"/></svg>Idade mínima</div>
-      <div class="list-item" style="border-bottom:none;"><svg viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9 12l2 2 4-4"/></svg>Capacidade financeira do país</div>
-    </div>
-    <div class="footer-row">
-      <span></span>
-      <div class="nav-circle"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></div>
-    </div>
-  </div></div>
-
-  <div class="frame"><div class="slide">
-    <div class="grid-overlay"></div><div class="scanline" style="animation-delay:-3s"></div>
-    <div class="bracket tl"></div><div class="bracket br"></div>
-    <div class="logo">{{LOGO_MARK}}<div><div class="logo-text">B4 BUSINESS</div><div class="logo-sub">GESTÃO PATRIMONIAL</div></div></div>
-    <div class="page-index">04 / 06</div>
-    <div class="icon-badge" style="top:56px; right:150px;">
-      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="9" rx="2"/><path d="M8 11V7a4 4 0 018 0v4"/></svg>
-    </div>
-    <div class="content" style="top:320px;">
-      <div class="eyebrow">O que você pode mudar</div>
-      <h1 class="headline md">Você não controla as contas do governo.</h1>
-      <p class="support">Mas pode controlar o patrimônio que começa a construir hoje.</p>
-    </div>
-    <div class="content" style="top:760px;">
-      <div class="glass-card">
-        <p class="support" style="margin:0; font-size:23px;">Sua aposentadoria não deveria ser apenas um benefício mensal.</p>
-      </div>
-    </div>
-    <div class="footer-row">
-      <span></span>
-      <div class="nav-circle"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></div>
-    </div>
-  </div></div>
-
-  <div class="frame"><div class="slide">
-    <div class="photo-layer" data-photo-slide="5" data-zoom="{{ZOOM_5}}" data-pos-x="{{POSX_5}}" data-pos-y="{{POSY_5}}" style="background-image:url('https://images.unsplash.com/photo-1752007085312-6894a6afb19c?crop=entropy&amp;cs=tinysrgb&amp;fit=max&amp;fm=jpg&amp;q=80&amp;w=1080'); transform:scale({{ZOOM_5}}) translate({{POSX_5}}%, {{POSY_5}}%);"></div>
-    <div class="photo-overlay"></div>
-    <div class="photo-credit">Foto: Benjamin Chambon / Unsplash</div>
-    <div class="grid-overlay"></div><div class="scanline" style="animation-delay:-4s"></div>
-    <div class="bracket tl"></div><div class="bracket br"></div>
-    <div class="logo">{{LOGO_MARK}}<div><div class="logo-text">B4 BUSINESS</div><div class="logo-sub">GESTÃO PATRIMONIAL</div></div></div>
-    <div class="page-index">05 / 06</div>
-    <div class="icon-badge" style="top:56px; right:150px;">
-      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r="1"/></svg>
-    </div>
-    <div class="content" style="top:300px;">
-      <div class="eyebrow">O caminho certo</div>
-      <h1 class="headline md">Deveria ser um conjunto de ativos capaz de gerar renda para sua família.</h1>
-    </div>
-    <div class="content" style="top:760px;">
-      <p class="support">O governo administra as contas do país.<br><b>Você precisa administrar o seu futuro.</b></p>
-    </div>
-    <div class="footer-row">
-      <span></span>
-      <div class="nav-circle"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></div>
-    </div>
-  </div></div>
-
-  <div class="frame"><div class="slide">
-    <div class="grid-overlay"></div><div class="scanline" style="animation-delay:-5s"></div>
-    <div class="bracket tl"></div><div class="bracket br"></div>
-    <div class="logo">{{LOGO_MARK}}<div><div class="logo-text">B4 BUSINESS</div><div class="logo-sub">GESTÃO PATRIMONIAL</div></div></div>
-    <div class="page-index">06 / 06</div>
-    <div class="content" style="top:300px;">
-      <h1 class="headline" style="font-size:50px;">Pare de apenas esperar pela aposentadoria.<br><span style="color:#4be9d3;">Comece a construir a sua.</span></h1>
-      <p class="support">Solicite um diagnóstico patrimonial gratuito e descubra uma estratégia para a sua realidade.</p>
-      <div class="cta-btn">Comente APOSENTADORIA
-        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
-      </div>
-    </div>
-    <div class="footer-row">
-      <div class="social-row">
-        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 00-7.8 0L12 5.6l-1-1a5.5 5.5 0 00-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 000-7.8z"/></svg>
-        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.4 8.4 0 01-9 8.4A8.5 8.5 0 013 12a8.4 8.4 0 018.4-8.4h.1a8.4 8.4 0 018.4 8.4z"/></svg>
-        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4 20-7z"/></svg>
-        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z"/></svg>
-      </div>
-    </div>
-  </div></div>
-
-</div>
-
-<script>
-(function () {
-  // Arrastar a imagem de fundo (slides 1, 2 e 5) pra reposicionar o
-  // enquadramento — combina com os sliders de zoom da aba principal. A
-  // posição final é avisada ao app principal (fora do iframe) via
-  // postMessage pra ficar salva e sobreviver a novas renderizações
-  // (mudar zoom, subir logo, salvar/abrir projeto).
-  var CLAMP = 45;
-  var layers = document.querySelectorAll('.photo-layer[data-photo-slide]');
-  for (var i = 0; i < layers.length; i++) {
-    (function (el) {
-      var frame = el.closest('.frame');
-      var dragging = false, startX = 0, startY = 0, baseX = 0, baseY = 0, frameRect = null;
-
-      function applyTransform(x, y) {
-        var zoom = parseFloat(el.getAttribute('data-zoom')) || 1;
-        el.style.transform = 'scale(' + zoom + ') translate(' + x + '%, ' + y + '%)';
-      }
-
-      el.addEventListener('pointerdown', function (e) {
-        dragging = true;
-        startX = e.clientX; startY = e.clientY;
-        baseX = parseFloat(el.getAttribute('data-pos-x')) || 0;
-        baseY = parseFloat(el.getAttribute('data-pos-y')) || 0;
-        frameRect = frame.getBoundingClientRect();
-        try { el.setPointerCapture(e.pointerId); } catch (err) {}
-        el.style.cursor = 'grabbing';
-        e.preventDefault();
-      });
-
-      el.addEventListener('pointermove', function (e) {
-        if (!dragging) return;
-        var zoom = parseFloat(el.getAttribute('data-zoom')) || 1;
-        var dxPct = ((e.clientX - startX) / (frameRect.width * zoom)) * 100;
-        var dyPct = ((e.clientY - startY) / (frameRect.height * zoom)) * 100;
-        var nx = Math.max(-CLAMP, Math.min(CLAMP, baseX + dxPct));
-        var ny = Math.max(-CLAMP, Math.min(CLAMP, baseY + dyPct));
-        el.setAttribute('data-pos-x', String(nx));
-        el.setAttribute('data-pos-y', String(ny));
-        applyTransform(nx, ny);
-      });
-
-      function endDrag() {
-        if (!dragging) return;
-        dragging = false;
-        el.style.cursor = 'grab';
-        var slide = el.getAttribute('data-photo-slide');
-        var x = parseFloat(el.getAttribute('data-pos-x')) || 0;
-        var y = parseFloat(el.getAttribute('data-pos-y')) || 0;
-        try { window.parent.postMessage({ type: 'b4-photo-pos', slide: slide, x: x, y: y }, '*'); } catch (err) {}
-      }
-      el.addEventListener('pointerup', endDrag);
-      el.addEventListener('pointercancel', endDrag);
-    })(layers[i]);
-  }
-})();
-<\/script>
-</body>
-</html>
-`;
-
-  // ---------------------------------------------------------------------
   // Carousel Studio — Estilo Tweet/X: modelo próprio (o arquivo original
   // nunca foi enviado / se perdeu), recriado do zero a partir dos prints
   // de referência que você mandou. Perfil fixo (foto real, recortada do
@@ -1085,15 +725,10 @@
   const state = {
     logoDataUrl: null,
     logoImg: null,
-    // Zoom das 3 fotos de fundo do modelo Padrão Tecnológico (slides 1, 2 e 5
-    // — os únicos com foto). 1 = tamanho normal (cover); acima disso amplia
-    // a imagem dentro do quadro, cortando as bordas — útil pra recentralizar
-    // o que importa na foto quando o enquadramento padrão corta errado.
-    carousel1Zoom: { 1: 1, 2: 1, 5: 1 },
-    // Posição das mesmas 3 fotos (x/y em % de deslocamento), ajustada
-    // arrastando a imagem direto no preview — ver script injetado no
-    // CAROUSEL_MODEL_APOSENTADORIA_HTML e o listener de 'message' abaixo.
-    carousel1Pos: { 1: { x: 0, y: 0 }, 2: { x: 0, y: 0 }, 5: { x: 0, y: 0 } },
+    // Estilo de preview ativo do carrossel: 'model2' (Estilo Tweet/X) ou
+    // 'model1' (Padrão Tecnológico) — os dois renderizam o MESMO conteúdo
+    // de tweetCarousel.slides, só com skins visuais diferentes.
+    carouselStyle: 'model2',
     // Filtro atual do Banco de Mídia (não faz parte do projeto salvo — é só
     // estado de navegação da biblioteca curada, não conteúdo do usuário).
     mediaBankFilter: { category: 'todas', query: '' },
@@ -1144,17 +779,18 @@
       img.src = reader.result;
       logoThumb.src = reader.result;
       logoFilename.textContent = file.name;
-      renderCarouselTab();
+      renderTweetRail();
     };
     reader.readAsDataURL(file);
   });
 
   // ---------------------------------------------------------------------
-  // Carousel Studio — aba. Modelo 1 (Padrão Tecnológico) renderiza o HTML
-  // embutido num <iframe srcdoc>, injetando o logo compartilhado da aba
-  // Roteiro. Modelo 2 (Estilo Tweet/X) é montado ao vivo no próprio
-  // documento (não num iframe) porque cada página é editável — texto e
-  // imagem por página, vindos do state.tweetCarousel.
+  // Carousel Studio — aba. Os dois modelos (Estilo Tweet/X e Padrão
+  // Tecnológico) renderizam o MESMO conteúdo (state.tweetCarousel.slides,
+  // editado uma única vez no editor compartilhado) com skins visuais
+  // diferentes — ver renderTweetSlideCardHtml (Tweet/X) e
+  // renderBrandSlideCardHtml (Padrão Tecnológico, identidade B4) mais
+  // abaixo. O cs-switcher só troca qual rail fica visível.
   // ---------------------------------------------------------------------
   function logoMarkHtml() {
     if (state.logoDataUrl) {
@@ -1163,67 +799,29 @@
     return '<div style="width:100%;height:100%;border-radius:10px;background:linear-gradient(135deg,#17e6c9,#0b8f79);display:flex;align-items:center;justify-content:center;font-family:\'Sora\',sans-serif;font-weight:800;color:#04342c;font-size:15px;">B4</div>';
   }
 
-  const csFrameModel1 = document.getElementById('csFrameModel1');
-
-  function renderCarouselTab() {
-    const mark = logoMarkHtml();
-    if (CAROUSEL_MODEL_APOSENTADORIA_HTML) {
-      csFrameModel1.srcdoc = CAROUSEL_MODEL_APOSENTADORIA_HTML
-        .replaceAll('{{LOGO_MARK}}', mark)
-        .replaceAll('{{ZOOM_1}}', state.carousel1Zoom[1])
-        .replaceAll('{{ZOOM_2}}', state.carousel1Zoom[2])
-        .replaceAll('{{ZOOM_5}}', state.carousel1Zoom[5])
-        .replaceAll('{{POSX_1}}', state.carousel1Pos[1].x).replaceAll('{{POSY_1}}', state.carousel1Pos[1].y)
-        .replaceAll('{{POSX_2}}', state.carousel1Pos[2].x).replaceAll('{{POSY_2}}', state.carousel1Pos[2].y)
-        .replaceAll('{{POSX_5}}', state.carousel1Pos[5].x).replaceAll('{{POSY_5}}', state.carousel1Pos[5].y);
-    }
-  }
-  renderCarouselTab();
-
-  // Recebe a posição arrastada dentro do iframe do Padrão Tecnológico (ver
-  // script injetado no template) e guarda no state — sem re-renderizar o
-  // iframe aqui, pra não interromper o próprio arrasto em andamento (o
-  // preview já está mostrando a posição nova ao vivo, dentro do iframe).
-  window.addEventListener('message', function (e) {
-    const data = e.data;
-    if (!data || data.type !== 'b4-photo-pos') return;
-    const slide = Number(data.slide);
-    if (!state.carousel1Pos[slide]) return;
-    state.carousel1Pos[slide] = { x: Number(data.x) || 0, y: Number(data.y) || 0 };
-  });
-
-  // ---- Sliders de zoom das fotos do Padrão Tecnológico ----
-  ['1', '2', '5'].forEach(function (slideNum) {
-    const range = document.getElementById('cs1Zoom' + slideNum);
-    const label = document.getElementById('cs1Zoom' + slideNum + 'Label');
-    if (!range) return;
-    range.addEventListener('input', function () {
-      state.carousel1Zoom[slideNum] = Number(range.value) / 100;
-      if (label) label.textContent = range.value + '%';
-      renderCarouselTab();
-    });
-  });
-
-  // ---- Botões "Centralizar" — reseta a posição arrastada da foto ----
-  ['1', '2', '5'].forEach(function (slideNum) {
-    const resetBtn = document.getElementById('cs1Reset' + slideNum);
-    if (!resetBtn) return;
-    resetBtn.addEventListener('click', function () {
-      state.carousel1Pos[slideNum] = { x: 0, y: 0 };
-      renderCarouselTab();
-    });
-  });
-
   const csSwitchButtons = [document.getElementById('csBtnModel1'), document.getElementById('csBtnModel2')];
   const csWraps = { model1: document.getElementById('csModel1Wrap'), model2: document.getElementById('csModel2Wrap') };
+
+  // Estilo do carrossel é um estado único (state.carouselStyle) com duas UIs
+  // que o controlam em sincronia: o switcher dentro de Carousel Studio e a
+  // pergunta "Gerar no modelo" na aba Texto / Script (onde o carrossel é
+  // gerado) — as duas sempre refletem a mesma escolha.
+  function setCarouselStyle(style) {
+    state.carouselStyle = style === 'model1' ? 'model1' : 'model2';
+    csSwitchButtons.forEach(function (b) {
+      b.classList.toggle('active', b.getAttribute('data-cs-target') === state.carouselStyle);
+    });
+    Object.keys(csWraps).forEach(function (key) {
+      csWraps[key].style.display = key === state.carouselStyle ? 'block' : 'none';
+    });
+    scriptStyleButtons.forEach(function (b) {
+      b.classList.toggle('active', b.getAttribute('data-cs-target') === state.carouselStyle);
+    });
+  }
+
   csSwitchButtons.forEach(function (btn) {
     btn.addEventListener('click', function () {
-      csSwitchButtons.forEach(function (b) { b.classList.remove('active'); });
-      btn.classList.add('active');
-      const target = btn.getAttribute('data-cs-target');
-      Object.keys(csWraps).forEach(function (key) {
-        csWraps[key].style.display = key === target ? 'block' : 'none';
-      });
+      setCarouselStyle(btn.getAttribute('data-cs-target'));
     });
   });
 
@@ -1235,6 +833,36 @@
 
   function tweetSlideImageSrc(slide) {
     return slide.imageDataUrl || slide.imageUrl || '';
+  }
+
+  // ---------------------------------------------------------------------
+  // Convenção de autoria pro texto de cada página (documentada na aba
+  // Texto / Script):
+  //  - **palavra** vira negrito dentro do corpo (ou do título).
+  //  - Se o texto tiver uma linha em branco separando um primeiro trecho
+  //    curto (até 80 caracteres, sem quebra de linha) do resto, esse
+  //    primeiro trecho vira Título — maior e mais forte que o corpo. Sem
+  //    linha em branco, o texto inteiro é tratado como corpo (comportamento
+  //    de antes, sem quebrar nada que já existia). Pensado principalmente
+  //    pra capa e CTA, que pedem um título com peso tipográfico maior.
+  // ---------------------------------------------------------------------
+  function parseSlideMarkup(rawText) {
+    const text = (rawText || '').replace(/\r\n/g, '\n');
+    const paragraphs = text.split(/\n\s*\n/);
+    if (paragraphs.length > 1) {
+      const first = paragraphs[0].trim();
+      if (first && first.length <= 80 && first.indexOf('\n') === -1) {
+        return { title: first, body: paragraphs.slice(1).join('\n\n').trim() };
+      }
+    }
+    return { title: null, body: text };
+  }
+
+  // Aplica **negrito** num texto que JÁ passou por escapeHtml (por isso é
+  // seguro usar regex direto — não sobra HTML cru vindo do usuário pra
+  // injetar nada; só os `**` literais, que escapeHtml não mexe).
+  function applyInlineBold(escapedText) {
+    return escapedText.replace(/\*\*(.+?)\*\*/g, '<b>$1</b>');
   }
 
   // Regra de "texto se adapta ao espaço amarelo": sem medir o DOM (o card é
@@ -1263,8 +891,17 @@
     const dotsHtml = Array.from({ length: total }).map(function (_, i) {
       return '<div class="tw-dot' + (i === index ? ' active' : '') + '"></div>';
     }).join('');
-    const bodyHtml = escapeHtml(slide.text || 'Escreva o texto desta página ao lado...').replace(/\n/g, '<br>');
-    const fontSize = tweetBodyFontSize(slide.text, !!imgSrc);
+    const parsed = parseSlideMarkup(slide.text);
+    const hasTitle = !!parsed.title;
+    const bodyRaw = parsed.body || (hasTitle ? '' : 'Escreva o texto desta página ao lado...');
+    const bodyHtml = applyInlineBold(escapeHtml(bodyRaw)).replace(/\n/g, '<br>');
+    const fontSize = tweetBodyFontSize(parsed.body, !!imgSrc);
+    // Título fica proporcionalmente maior que o corpo (mesma escala do
+    // corpo, então também cresce quando há mais espaço disponível).
+    const titleFontSize = Math.round(fontSize * 1.4);
+    const titleHtml = hasTitle
+      ? '<div class="tw-title" style="font-size:' + titleFontSize + 'px;">' + applyInlineBold(escapeHtml(parsed.title)) + '</div>'
+      : '';
     const creditText = escapeHtml(slide.credit || 'Fonte: inserir fonte da informação aqui');
     return (
       '<div class="tw-card">' +
@@ -1276,7 +913,10 @@
           '</div>' +
         '</div>' +
         '<div class="tw-body-wrap' + (imgSrc ? '' : ' no-image') + '">' +
-          '<div class="tw-body" style="font-size:' + fontSize + 'px;">' + bodyHtml + '</div>' +
+          '<div class="tw-text-col">' +
+            titleHtml +
+            '<div class="tw-body" style="font-size:' + fontSize + 'px;">' + bodyHtml + '</div>' +
+          '</div>' +
           (imgSrc ? '' : '<div class="tw-credit below-text">' + creditText + '</div>') +
         '</div>' +
         (imgSrc ?
@@ -1291,7 +931,65 @@
     );
   }
 
+  // ---------------------------------------------------------------------
+  // Padrão Tecnológico — skin visual com a identidade oficial da B4
+  // Business (fundo navy #0D1B2A, acentos teal #00C9A7, logo, título +
+  // negrito). Usa o MESMO conteúdo de state.tweetCarousel.slides que o
+  // Estilo Tweet/X — é só uma forma diferente de desenhar a mesma página.
+  // ---------------------------------------------------------------------
+  function brandBodyFontSize(text, hasImage) {
+    const len = (text || '').length;
+    const steps = hasImage
+      ? [[100, 42], [180, 36], [280, 30], [420, 25], [Infinity, 21]]
+      : [[300, 42], [500, 36], [750, 30], [1100, 25], [Infinity, 21]];
+    for (let i = 0; i < steps.length; i++) {
+      if (len <= steps[i][0]) return steps[i][1];
+    }
+    return 21;
+  }
+
+  function renderBrandSlideCardHtml(slide, index, total) {
+    const imgSrc = tweetSlideImageSrc(slide);
+    const zoom = slide.imageZoom || 1;
+    const pos = slide.imagePos || { x: 0, y: 0 };
+    const imageHtml = imgSrc ? '<img data-brand-slide-id="' + slide.id + '" src="' + imgSrc + '" alt="Imagem da página ' + (index + 1) + '" style="transform:scale(' + zoom + ') translate(' + pos.x + '%, ' + pos.y + '%);">' : '';
+    const parsed = parseSlideMarkup(slide.text);
+    const hasTitle = !!parsed.title;
+    const bodyRaw = parsed.body || (hasTitle ? '' : 'Escreva o texto desta página ao lado...');
+    const bodyHtml = applyInlineBold(escapeHtml(bodyRaw)).replace(/\n/g, '<br>');
+    const fontSize = brandBodyFontSize(parsed.body, !!imgSrc);
+    const titleFontSize = Math.round(fontSize * 1.45);
+    const titleHtml = hasTitle
+      ? '<div class="b4-title" style="font-size:' + titleFontSize + 'px;">' + applyInlineBold(escapeHtml(parsed.title)) + '</div>'
+      : '';
+    // Segue a diretriz oficial de marca: assinatura discreta (@perfil) no
+    // rodapé em vez de "Fonte: ..." escrito em cima da arte; a citação
+    // detalhada da fonte do dado continua guardada no campo de crédito de
+    // cada página (visível no editor), pra usar na legenda do post.
+    const creditText = escapeHtml(slide.credit || 'Fonte: inserir fonte da informação aqui');
+    return (
+      '<div class="b4-card">' +
+        '<div class="b4-topbar">' +
+          '<div class="b4-logo"><span class="b4-logo-mark">' + logoMarkHtml() + '</span><span>B4 BUSINESS</span></div>' +
+          '<div class="b4-page-index">' + String(index + 1).padStart(2, '0') + ' / ' + String(total).padStart(2, '0') + '</div>' +
+        '</div>' +
+        '<div class="b4-text-col' + (imgSrc ? '' : ' full') + '">' +
+          titleHtml +
+          '<div class="b4-body" style="font-size:' + fontSize + 'px;">' + bodyHtml + '</div>' +
+        '</div>' +
+        (imgSrc ?
+          '<div class="b4-image-wrap">' + imageHtml + '</div>'
+          : '') +
+        '<div class="b4-footer">' +
+          '<span class="b4-handle">@b4businessoficial</span>' +
+          '<span class="b4-credit">' + creditText + '</span>' +
+        '</div>' +
+      '</div>'
+    );
+  }
+
   const csTweetRail = document.getElementById('csTweetRail');
+  const csBrandRail = document.getElementById('csBrandRail');
   const csTweetEditor = document.getElementById('csTweetEditor');
 
   function renderTweetRail() {
@@ -1299,16 +997,25 @@
     csTweetRail.innerHTML = slides.map(function (slide, i) {
       return '<div class="tw-frame">' + renderTweetSlideCardHtml(slide, i, slides.length) + '</div>';
     }).join('');
+    if (csBrandRail) {
+      csBrandRail.innerHTML = slides.map(function (slide, i) {
+        return '<div class="tw-frame">' + renderBrandSlideCardHtml(slide, i, slides.length) + '</div>';
+      }).join('');
+    }
     attachTweetImageDrag();
   }
 
   // ---- Arrastar imagem de fundo de cada página do carrossel Estilo Tweet/X ----
-  function attachTweetImageDrag() {
+  // Reaproveitável pros dois skins (Tweet/X e Padrão Tecnológico) — ambos
+  // arrastam a mesma imagem/posição salva em slide.imagePos, só o
+  // atributo/seletor de cada card muda.
+  function wireImageDrag(railEl, dataAttr) {
+    if (!railEl) return;
     const CLAMP = 45;
-    csTweetRail.querySelectorAll('.tw-image-wrap img[data-tweet-slide-id]').forEach(function (imgEl) {
+    railEl.querySelectorAll('img[' + dataAttr + ']').forEach(function (imgEl) {
       let dragging = false, startX = 0, startY = 0, baseX = 0, baseY = 0, frameRect = null;
       imgEl.addEventListener('pointerdown', function (e) {
-        const id = imgEl.getAttribute('data-tweet-slide-id');
+        const id = imgEl.getAttribute(dataAttr);
         const slide = state.tweetCarousel.slides.find(function (s) { return s.id === id; });
         if (!slide) return;
         dragging = true;
@@ -1322,7 +1029,7 @@
       });
       imgEl.addEventListener('pointermove', function (e) {
         if (!dragging) return;
-        const id = imgEl.getAttribute('data-tweet-slide-id');
+        const id = imgEl.getAttribute(dataAttr);
         const slide = state.tweetCarousel.slides.find(function (s) { return s.id === id; });
         if (!slide) return;
         const zoom = slide.imageZoom || 1;
@@ -1343,6 +1050,11 @@
     });
   }
 
+  function attachTweetImageDrag() {
+    wireImageDrag(csTweetRail, 'data-tweet-slide-id');
+    wireImageDrag(csBrandRail, 'data-brand-slide-id');
+  }
+
   function renderTweetEditor() {
     const slides = state.tweetCarousel.slides;
     csTweetEditor.innerHTML = '';
@@ -1355,7 +1067,7 @@
         '<div class="cs-tweet-row"><b>Página ' + (i + 1) + '</b>' +
         (slides.length > 1 ? '<button type="button" class="btn btn-sm btn-tweet-remove" data-id="' + slide.id + '">Remover</button>' : '') +
         '</div>' +
-        '<textarea data-id="' + slide.id + '" placeholder="Texto desta página...">' + escapeHtml(slide.text || '') + '</textarea>' +
+        '<textarea data-id="' + slide.id + '" placeholder="Texto desta página... (opcional: título curto, linha em branco, resto do texto — e **palavra** pra negrito)">' + escapeHtml(slide.text || '') + '</textarea>' +
         '<div class="cs-tweet-row">' +
           '<img class="cs-tweet-thumb" src="' + tweetSlideImageSrc(slide) + '" alt="">' +
           '<input type="file" accept="image/*" class="tweet-image-input" data-id="' + slide.id + '">' +
@@ -1725,8 +1437,8 @@
           });
           renderTweetEditor(); renderTweetRail();
           document.getElementById('tabBtnCarousel').click();
-          document.getElementById('csBtnModel2').click();
-          showMbToast('Adicionado como nova página no Carousel Estilo Tweet/X.');
+          setCarouselStyle(state.carouselStyle);
+          showMbToast('Adicionado como nova página no carrossel.');
         }
       });
     });
@@ -1783,7 +1495,7 @@
         });
         renderTweetEditor(); renderTweetRail();
         document.getElementById('tabBtnCarousel').click();
-        document.getElementById('csBtnModel2').click();
+        setCarouselStyle(state.carouselStyle);
       });
     });
 
@@ -1823,6 +1535,17 @@
   const scriptTextCount = document.getElementById('scriptTextCount');
   const scriptAutogenCount = document.getElementById('scriptAutogenCount');
   const btnGenerateFromScript = document.getElementById('btnGenerateFromScript');
+  const scriptComplianceResult = document.getElementById('scriptComplianceResult');
+
+  // Pergunta "Gerar no modelo" — mesma escolha do switcher da aba Carousel
+  // Studio (setCarouselStyle mantém as duas UIs sincronizadas).
+  const scriptStyleButtons = [document.getElementById('scriptBtnModel2'), document.getElementById('scriptBtnModel1')];
+  scriptStyleButtons.forEach(function (btn) {
+    if (!btn) return;
+    btn.addEventListener('click', function () {
+      setCarouselStyle(btn.getAttribute('data-cs-target'));
+    });
+  });
 
   function updateScriptTextCount() {
     if (!scriptTextCount) return;
@@ -1830,13 +1553,52 @@
     scriptTextCount.textContent = len + ' caractere' + (len === 1 ? '' : 's');
   }
 
+  // ---------------------------------------------------------------------
+  // Correção de texto — vocabulário de marca. Termos que só podem aparecer
+  // falando do consórcio/imóvel pro cliente final, nunca falando da
+  // mecânica do Método MAIS / participação no ecossistema Gfi Hub /
+  // remuneração de quem indica ou vende (regra oficial da B4 Business).
+  // Não bloqueia gerar — só avisa, porque a validade depende do contexto.
+  // ---------------------------------------------------------------------
+  const BRAND_SENSITIVE_TERMS = [
+    'investimento', 'investimentos', 'investir',
+    'rendimento garantido', 'rendimento',
+    'renda passiva',
+    'juros',
+    'lucro fixo',
+    'aplicação financeira',
+    'retorno garantido',
+  ];
+  function checkBrandVocabulary(text) {
+    const normalized = (text || '');
+    const found = [];
+    BRAND_SENSITIVE_TERMS.forEach(function (term) {
+      const re = new RegExp('(^|[^\\p{L}\\p{N}])' + term.replace(/ /g, '\\s+') + '([^\\p{L}\\p{N}]|$)', 'iu');
+      if (re.test(normalized) && found.indexOf(term) === -1) found.push(term);
+    });
+    return found;
+  }
+  function renderScriptCompliance() {
+    if (!scriptComplianceResult) return;
+    const found = checkBrandVocabulary(state.scriptText);
+    if (!found.length) {
+      scriptComplianceResult.innerHTML = '<span style="color:#4be9d3;">✓ Nenhum termo sensível encontrado no texto colado.</span>';
+      return;
+    }
+    scriptComplianceResult.innerHTML =
+      '<span style="color:#e6b800;">⚠ Termo(s) sensível(is) encontrado(s): <b>' + found.map(escapeHtmlAttr).join(', ') + '</b>.</span><br>' +
+      'Revise o contexto: se o texto fala da mecânica do Método MAIS, da participação no ecossistema ou da remuneração de quem indica/vende, troque por termos como "adesão ao ecossistema", "participação econômica" ou "resultado líquido distribuível" — nunca ' + found.map(escapeHtmlAttr).join(', ') + '.';
+  }
+
   if (scriptTextArea) {
     scriptTextArea.addEventListener('input', function () {
       state.scriptText = scriptTextArea.value;
       updateScriptTextCount();
+      renderScriptCompliance();
     });
   }
   updateScriptTextCount();
+  renderScriptCompliance();
 
   // Gera o carrossel direto a partir do script desta aba — mesma lógica do
   // card "Gerar carrossel automaticamente" da aba Carousel Studio, só que
@@ -1853,7 +1615,10 @@
       if (csAutogenText) csAutogenText.value = scriptTextArea ? scriptTextArea.value : '';
       if (csAutogenCount && scriptAutogenCount) csAutogenCount.value = scriptAutogenCount.value;
       document.getElementById('tabBtnCarousel').click();
-      document.getElementById('csBtnModel2').click();
+      // Leva pro modelo que foi escolhido na pergunta acima (Estilo Tweet/X
+      // ou Padrão Tecnológico) — os dois já foram gerados juntos, já que
+      // compartilham o mesmo conteúdo.
+      setCarouselStyle(state.carouselStyle);
     });
   }
 
@@ -1864,12 +1629,7 @@
     const data = {
       version: 2,
       logoDataUrl: state.logoDataUrl || null,
-      carousel1Zoom: { 1: state.carousel1Zoom[1], 2: state.carousel1Zoom[2], 5: state.carousel1Zoom[5] },
-      carousel1Pos: {
-        1: { x: state.carousel1Pos[1].x, y: state.carousel1Pos[1].y },
-        2: { x: state.carousel1Pos[2].x, y: state.carousel1Pos[2].y },
-        5: { x: state.carousel1Pos[5].x, y: state.carousel1Pos[5].y },
-      },
+      carouselStyle: state.carouselStyle || 'model2',
       tweetCarousel: {
         slides: state.tweetCarousel.slides.map(function (s) {
           return {
@@ -1904,24 +1664,7 @@
         const data = JSON.parse(reader.result);
         state.logoDataUrl = data.logoDataUrl || null;
         state.logoImg = null;
-        state.carousel1Zoom = {
-          1: (data.carousel1Zoom && data.carousel1Zoom[1]) || 1,
-          2: (data.carousel1Zoom && data.carousel1Zoom[2]) || 1,
-          5: (data.carousel1Zoom && data.carousel1Zoom[5]) || 1,
-        };
-        state.carousel1Pos = {
-          1: { x: (data.carousel1Pos && data.carousel1Pos[1] && data.carousel1Pos[1].x) || 0, y: (data.carousel1Pos && data.carousel1Pos[1] && data.carousel1Pos[1].y) || 0 },
-          2: { x: (data.carousel1Pos && data.carousel1Pos[2] && data.carousel1Pos[2].x) || 0, y: (data.carousel1Pos && data.carousel1Pos[2] && data.carousel1Pos[2].y) || 0 },
-          5: { x: (data.carousel1Pos && data.carousel1Pos[5] && data.carousel1Pos[5].x) || 0, y: (data.carousel1Pos && data.carousel1Pos[5] && data.carousel1Pos[5].y) || 0 },
-        };
-        ['1', '2', '5'].forEach(function (n) {
-          const range = document.getElementById('cs1Zoom' + n);
-          const label = document.getElementById('cs1Zoom' + n + 'Label');
-          const pct = Math.round(state.carousel1Zoom[n] * 100);
-          if (range) range.value = pct;
-          if (label) label.textContent = pct + '%';
-        });
-        renderCarouselTab();
+        setCarouselStyle(data.carouselStyle === 'model1' ? 'model1' : 'model2');
         if (state.logoDataUrl) {
           const limg = new Image();
           limg.onload = function () { state.logoImg = limg; };
@@ -1957,6 +1700,7 @@
         state.scriptText = data.scriptText || '';
         if (scriptTextArea) scriptTextArea.value = state.scriptText;
         updateScriptTextCount();
+        renderScriptCompliance();
       } catch (e) {
         alert('Arquivo de projeto inválido: ' + e.message);
       }
