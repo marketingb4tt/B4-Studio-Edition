@@ -355,12 +355,6 @@
   .tw-image-wrap { position: relative; flex: 0 0 auto; width: 100%; aspect-ratio: 8 / 5; border-radius: 24px; overflow: hidden; background: #e8ebee; min-height: 0; }
   .tw-image-wrap img { width: 100%; height: 100%; object-fit: cover; display: block; transform-origin: center; cursor: grab; touch-action: none; }
   .tw-image-wrap img:active { cursor: grabbing; }
-  .tw-credit { font-size: 20px; font-weight: 700; line-height: 1.35; color: #0b8f79; max-width: 90%; }
-  .tw-credit.on-image { position: absolute; left: 20px; bottom: 20px; color: #eafff9; text-shadow: 0 1px 6px rgba(0,0,0,.55); }
-  /* Sem imagem: crédito ancorado no canto inferior esquerdo do bloco de
-     texto — mesmo princípio do crédito sobre a imagem (canto oposto ao
-     indicador de continuidade), só que em texto escuro sobre fundo claro. */
-  .tw-credit.below-text { position: absolute; left: 0; bottom: 0; margin-top: 0; }
   .tw-dots { position: absolute; bottom: 18px; left: 50%; transform: translateX(-50%); display: flex; gap: 6px; }
   .tw-dot { width: 8px; height: 8px; border-radius: 50%; background: rgba(255,255,255,.55); }
   .tw-dot.active { background: #fff; width: 20px; border-radius: 5px; }
@@ -783,22 +777,22 @@
         {
           id: nextTweetId(),
           text: 'O carro parado na garagem não é o único que perde valor com o tempo.\n\nSeu dinheiro parado na poupança também está perdendo poder de compra todo mês — só que ninguém fala sobre isso.',
-          imageUrl: TWEET_DEFAULT_IMAGES[0], imageDataUrl: null, imageZoom: 1, imagePos: { x: 0, y: 0 }, credit: 'Fonte: inserir fonte da informação aqui',
+          imageUrl: TWEET_DEFAULT_IMAGES[0], imageDataUrl: null, imageZoom: 1, imagePos: { x: 0, y: 0 }, credit: '',
         },
         {
           id: nextTweetId(),
           text: 'Em 2021 te venderam a ideia de que esperar era a jogada mais segura.\n\nHoje, quem começou um plano de consórcio naquela época já está com a carta em mãos — e quem esperou, ainda está esperando.',
-          imageUrl: TWEET_DEFAULT_IMAGES[1], imageDataUrl: null, imageZoom: 1, imagePos: { x: 0, y: 0 }, credit: 'Fonte: inserir fonte da informação aqui',
+          imageUrl: TWEET_DEFAULT_IMAGES[1], imageDataUrl: null, imageZoom: 1, imagePos: { x: 0, y: 0 }, credit: '',
         },
         {
           id: nextTweetId(),
           text: 'Não é sobre ter sorte no sorteio.\n\nÉ sobre ter uma estratégia clara pra usar o consórcio a seu favor — com lances planejados e visão de longo prazo.',
-          imageUrl: TWEET_DEFAULT_IMAGES[2], imageDataUrl: null, imageZoom: 1, imagePos: { x: 0, y: 0 }, credit: 'Fonte: inserir fonte da informação aqui',
+          imageUrl: TWEET_DEFAULT_IMAGES[2], imageDataUrl: null, imageZoom: 1, imagePos: { x: 0, y: 0 }, credit: '',
         },
         {
           id: nextTweetId(),
           text: 'A pergunta não é "quando vou conseguir comprar".\n\nA pergunta é: você tem um plano rodando agora, ou ainda está só pensando nele?',
-          imageUrl: TWEET_DEFAULT_IMAGES[3], imageDataUrl: null, imageZoom: 1, imagePos: { x: 0, y: 0 }, credit: 'Fonte: inserir fonte da informação aqui',
+          imageUrl: TWEET_DEFAULT_IMAGES[3], imageDataUrl: null, imageZoom: 1, imagePos: { x: 0, y: 0 }, credit: '',
         },
       ],
     },
@@ -943,7 +937,9 @@
     const titleHtml = hasTitle
       ? '<div class="tw-title" style="font-size:' + titleFontSize + 'px;">' + applyInlineBold(escapeHtml(parsed.title)) + '</div>'
       : '';
-    const creditText = escapeHtml(slide.credit || 'Fonte: inserir fonte da informação aqui');
+    // O crédito da fonte (slide.credit) não é mais escrito em cima do
+    // cartão — atrapalhava a leitura nos cantos. O campo continua existindo
+    // no editor de cada página, só pra uso na legenda do post depois.
     const hasMore = index < total - 1;
     const continueHtml = hasMore ? '<div class="tw-continue">&bull;&bull;&bull;</div>' : '';
     return (
@@ -961,12 +957,10 @@
             '<div class="tw-body" style="font-size:' + fontSize + 'px;">' + bodyHtml + '</div>' +
             continueHtml +
           '</div>' +
-          (imgSrc ? '' : '<div class="tw-credit below-text">' + creditText + '</div>') +
         '</div>' +
         (imgSrc ?
           '<div class="tw-image-wrap">' +
             imageHtml +
-            '<div class="tw-credit on-image">' + creditText + '</div>' +
             (total > 1 ? '<div class="tw-dots">' + dotsHtml + '</div>' : '') +
           '</div>'
           : '') +
@@ -1010,7 +1004,9 @@
     // rodapé em vez de "Fonte: ..." escrito em cima da arte; a citação
     // detalhada da fonte do dado continua guardada no campo de crédito de
     // cada página (visível no editor), pra usar na legenda do post.
-    const creditText = escapeHtml(slide.credit || 'Fonte: inserir fonte da informação aqui');
+    // Sem placeholder de "inserir fonte..." — se a página não tiver crédito
+    // preenchido, o rodapé mostra só a assinatura @b4businessoficial.
+    const creditText = escapeHtml((slide.credit || '').trim());
     const hasMore = index < total - 1;
     const continueHtml = hasMore ? '<div class="b4-continue">&bull;&bull;&bull;</div>' : '';
     return (
@@ -1031,7 +1027,7 @@
         '</div>' +
         '<div class="b4-footer">' +
           '<span class="b4-handle">@b4businessoficial</span>' +
-          '<span class="b4-credit">' + creditText + '</span>' +
+          (creditText ? '<span class="b4-credit">' + creditText + '</span>' : '') +
         '</div>' +
       '</div>'
     );
@@ -1205,7 +1201,7 @@
 
   document.getElementById('btnAddTweetSlide').addEventListener('click', function () {
     const nextImg = TWEET_DEFAULT_IMAGES[state.tweetCarousel.slides.length % TWEET_DEFAULT_IMAGES.length];
-    state.tweetCarousel.slides.push({ id: nextTweetId(), text: '', imageUrl: nextImg, imageDataUrl: null, imageZoom: 1, imagePos: { x: 0, y: 0 }, credit: 'Fonte: inserir fonte da informação aqui' });
+    state.tweetCarousel.slides.push({ id: nextTweetId(), text: '', imageUrl: nextImg, imageDataUrl: null, imageZoom: 1, imagePos: { x: 0, y: 0 }, credit: '' });
     renderTweetEditor(); renderTweetRail();
   });
 
@@ -1455,7 +1451,7 @@
         text: entry.text,
         imageUrl: TWEET_DEFAULT_IMAGES[i % TWEET_DEFAULT_IMAGES.length],
         imageDataUrl: null, imageZoom: 1, imagePos: { x: 0, y: 0 },
-        credit: entry.credit || 'Fonte: inserir fonte da informação aqui',
+        credit: entry.credit || '',
       };
     });
 
@@ -1788,7 +1784,7 @@
             id: s.id, text: s.text, imageUrl: s.imageUrl || null,
             imageDataUrl: s.imageDataUrl || null, imageZoom: s.imageZoom || 1,
             imagePos: { x: (s.imagePos && s.imagePos.x) || 0, y: (s.imagePos && s.imagePos.y) || 0 },
-            credit: s.credit || 'Fonte: inserir fonte da informação aqui',
+            credit: s.credit || '',
           };
         }),
       },
@@ -1835,7 +1831,7 @@
                 imageUrl: s.imageUrl || TWEET_DEFAULT_IMAGES[0],
                 imageDataUrl: s.imageDataUrl || null, imageZoom: s.imageZoom || 1,
                 imagePos: { x: (s.imagePos && s.imagePos.x) || 0, y: (s.imagePos && s.imagePos.y) || 0 },
-                credit: s.credit || 'Fonte: inserir fonte da informação aqui',
+                credit: s.credit || '',
               };
             })
           : state.tweetCarousel.slides;
