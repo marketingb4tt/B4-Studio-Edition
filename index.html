@@ -328,13 +328,18 @@
      a altura do texto: o espaçamento entre cabeçalho e texto fica sempre
      o mesmo, e é o espaço sobrando (abaixo do texto / acima da imagem)
      que varia conforme o tamanho do conteúdo, não o contrário. */
-  .tw-body-wrap { flex: 0 1 auto; overflow: hidden; padding-bottom: 32px; display: flex; align-items: flex-start; }
-  .tw-body-wrap.no-image { padding-bottom: 0; }
+  /* position:relative pra ancorar os dois indicadores de canto (crédito da
+     fonte à esquerda, continuidade "..." à direita) na ponta da folha, sem
+     depender de onde a última linha do texto termina — e sem entrar no
+     fluxo do flex (que antes fazia o crédito "sem imagem" encavalar em
+     cima do texto, já que .tw-body-wrap é flex em linha). */
+  .tw-body-wrap { position: relative; flex: 0 1 auto; overflow: hidden; padding-bottom: 32px; display: flex; align-items: flex-start; }
+  .tw-body-wrap.no-image { padding-bottom: 46px; }
   .tw-text-col { width: 100%; }
   /* Indicador de continuidade: some quando ainda há mais páginas pra ler.
-     Fica colado no canto inferior direito do bloco de texto, na ponta da
+     Fica ancorado no canto inferior direito do bloco de texto, na ponta da
      folha — sutil, sem competir com os pontos de posição sobre a imagem. */
-  .tw-continue { text-align: right; margin-top: 16px; font-size: 30px; font-weight: 800; letter-spacing: 5px; color: rgba(15, 20, 25, .32); }
+  .tw-continue { position: absolute; right: 0; bottom: 0; font-size: 30px; font-weight: 800; letter-spacing: 5px; color: rgba(15, 20, 25, .32); }
   /* Título opcional (1ª linha antes de uma linha em branco no texto da
      página — ver convenção documentada na aba Texto / Script): maior e
      mais forte que o corpo, pensado pra capa e CTA. */
@@ -352,7 +357,10 @@
   .tw-image-wrap img:active { cursor: grabbing; }
   .tw-credit { font-size: 20px; font-weight: 700; line-height: 1.35; color: #0b8f79; max-width: 90%; }
   .tw-credit.on-image { position: absolute; left: 20px; bottom: 20px; color: #eafff9; text-shadow: 0 1px 6px rgba(0,0,0,.55); }
-  .tw-credit.below-text { margin-top: 12px; }
+  /* Sem imagem: crédito ancorado no canto inferior esquerdo do bloco de
+     texto — mesmo princípio do crédito sobre a imagem (canto oposto ao
+     indicador de continuidade), só que em texto escuro sobre fundo claro. */
+  .tw-credit.below-text { position: absolute; left: 0; bottom: 0; margin-top: 0; }
   .tw-dots { position: absolute; bottom: 18px; left: 50%; transform: translateX(-50%); display: flex; gap: 6px; }
   .tw-dot { width: 8px; height: 8px; border-radius: 50%; background: rgba(255,255,255,.55); }
   .tw-dot.active { background: #fff; width: 20px; border-radius: 5px; }
