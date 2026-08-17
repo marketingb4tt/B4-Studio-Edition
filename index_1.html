@@ -1,0 +1,1996 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>B4 Carousel Studio | B4 Technology</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d0d12;
+    --panel: #16161d;
+    --panel-2: #1d1d27;
+    --border: #2a2a36;
+    --text: #f2f2f5;
+    --text-dim: #9797a6;
+    --accent: #17E6C9;
+    --accent-2: #0B8F79;
+    --danger: #ff6b6b;
+    --ok: #4ade80;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: 'Inter', Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+  }
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 22px;
+    border-bottom: 1px solid var(--border);
+    background: var(--panel);
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  header h1 { font-size: 17px; margin: 0; font-weight: 800; font-family: 'Sora', 'Inter', sans-serif; }
+  header h1 span { color: var(--accent); }
+  header .byline { font-size: 11px; color: var(--text-dim); margin-top: 2px; letter-spacing: 0.02em; }
+  .header-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+  .swatch-row { display: flex; gap: 10px; flex-wrap: wrap; }
+  .swatch { display: flex; align-items: center; gap: 8px; background: var(--panel-2); border: 1px solid var(--border); border-radius: 8px; padding: 6px 10px; font-size: 12px; }
+  .swatch-dot { width: 16px; height: 16px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.25); flex-shrink: 0; }
+  .app {
+    display: flex;
+    align-items: flex-start;
+    gap: 0;
+    min-height: calc(100vh - 58px);
+  }
+  .sidebar {
+    flex: 1 1 480px;
+    min-width: 340px;
+    max-height: calc(100vh - 58px);
+    overflow-y: auto;
+    padding: 18px;
+    border-right: 1px solid var(--border);
+  }
+  .preview-col {
+    flex: 0 0 420px;
+    position: sticky;
+    top: 0;
+    padding: 18px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    max-height: calc(100vh - 58px);
+    overflow-y: auto;
+  }
+  /* Em telas estreitas (celular), o layout de 2 colunas lado a lado não
+     cabe — sem isso, a prévia/timeline/exportação (que ficam na coluna da
+     direita) saem da tela e só aparecem rolando pro lado, o que ninguém
+     faz. Abaixo de 860px, empilha tudo numa coluna só, com a prévia +
+     timeline + exportação PRIMEIRO (é o que se quer achar mais rápido) e
+     os campos de edição depois. */
+  @media (max-width: 860px) {
+    .app { flex-direction: column-reverse; }
+    .sidebar, .preview-col {
+      flex: 1 1 auto; width: 100%; min-width: 0; max-width: 100%;
+      max-height: none; overflow-y: visible; position: static;
+    }
+    .sidebar { border-right: none; border-top: 1px solid var(--border); }
+    .tabs { flex-wrap: wrap; }
+    .tab-btn { flex: 1 1 140px; }
+    .grid-3 { grid-template-columns: 1fr; }
+  }
+  h2 { font-size: 13px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-dim); margin: 22px 0 10px; }
+  h2:first-child { margin-top: 0; }
+  .card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px;
+  }
+  .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+  .field { margin-bottom: 10px; }
+  .field label { display: block; font-size: 12px; color: var(--text-dim); margin-bottom: 4px; }
+  select, input[type=text], textarea {
+    width: 100%;
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    border-radius: 8px;
+    padding: 8px 10px;
+    font-family: inherit;
+    font-size: 13px;
+  }
+  textarea { resize: vertical; min-height: 70px; line-height: 1.4; }
+  input[type=file] { font-size: 12px; color: var(--text-dim); }
+  .btn {
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    border-radius: 8px;
+    padding: 8px 14px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .btn:hover { border-color: var(--accent); }
+  .btn:disabled { opacity: 0.45; cursor: not-allowed; }
+  .btn-primary { background: var(--accent); color: #16130a; border-color: var(--accent); }
+  .btn-primary:hover { filter: brightness(1.05); }
+  .btn-danger { color: var(--danger); }
+  .btn-sm { padding: 4px 9px; font-size: 12px; }
+  .part-card { margin-bottom: 14px; }
+  .part-card-head {
+    display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;
+  }
+  .part-card-head strong { font-size: 14px; }
+  .part-card-head .actions { display: flex; gap: 6px; }
+  .row { display: flex; gap: 10px; }
+  .row > * { flex: 1; }
+  .thumb-row { display: flex; align-items: center; gap: 10px; margin-top: 6px; }
+  .thumb { width: 56px; height: 100px; object-fit: cover; border-radius: 6px; border: 1px solid var(--border); background: var(--panel-2); }
+  .dur-badge { font-size: 11px; color: var(--text-dim); }
+  .filename { font-size: 11px; color: var(--text-dim); word-break: break-all; }
+  .preview-stage { position: relative; width: 100%; max-width: 340px; aspect-ratio: 9 / 16; }
+  canvas#preview {
+    position: absolute; inset: 0;
+    width: 100%;
+    height: 100%;
+    background: #000;
+    border-radius: 14px;
+    border: 1px solid var(--border);
+    box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+  }
+  .clip-preview {
+    position: absolute; inset: 0;
+    border-radius: 14px;
+    overflow: hidden;
+    background: #000;
+    border: 1px solid var(--border);
+    box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+  }
+  .clip-preview video { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .clip-caption-overlay {
+    position: absolute; left: 20px; right: 20px; bottom: 56px;
+    color: #fff; font-family: 'Inter', Arial, sans-serif; font-weight: 700;
+    font-size: 15px; line-height: 1.4; text-align: center;
+    text-shadow: 0 2px 8px rgba(0,0,0,.7);
+    background: rgba(0,0,0,.38); border-radius: 10px; padding: 10px 14px;
+    white-space: pre-wrap;
+  }
+  .clip-caption-overlay:empty { display: none; }
+  .overlay-badge-layer { position: absolute; inset: 0; pointer-events: none; z-index: 5; }
+  .overlay-badge {
+    position: absolute; transform: translate(-50%, -50%);
+    background: var(--accent); color: #0b0b12; font-family: 'Sora', Arial, sans-serif;
+    font-weight: 800; font-size: 13px; letter-spacing: .02em; text-transform: uppercase;
+    padding: 7px 14px; border-radius: 999px; white-space: nowrap; cursor: grab;
+    box-shadow: 0 6px 16px rgba(0,0,0,.4); pointer-events: auto; touch-action: none;
+    max-width: 78%; overflow: hidden; text-overflow: ellipsis;
+  }
+  .overlay-badge:active { cursor: grabbing; }
+  .edit-timeline { position: relative; width: 100%; max-width: 340px; }
+  .et-ruler {
+    position: relative; height: 14px; margin-bottom: 4px; border-radius: 4px;
+    background: var(--panel-2); border: 1px solid var(--border); cursor: pointer; touch-action: none;
+  }
+  .et-track {
+    position: relative; display: flex; height: 46px; border-radius: 8px;
+    background: var(--panel-2); border: 1px solid var(--border); overflow: hidden;
+  }
+  .et-seg {
+    position: relative; height: 100%; flex: 0 0 auto; display: flex; align-items: center; justify-content: center;
+    overflow: hidden; cursor: grab; border-right: 1px solid var(--bg);
+    font-size: 10px; font-weight: 700; color: #0b0b12; user-select: none; touch-action: none;
+  }
+  .et-seg:last-child { border-right: none; }
+  .et-seg.animado { background: #4be9d3; }
+  .et-seg.video { background: #ffb74d; }
+  .et-seg.dragging { opacity: .55; }
+  .et-seg-label { padding: 0 5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; pointer-events: none; }
+  .et-trim-handle {
+    position: absolute; top: 0; bottom: 0; width: 11px; cursor: ew-resize;
+    background: rgba(11,11,18,.32); touch-action: none;
+  }
+  .et-trim-handle.left { left: 0; } .et-trim-handle.right { right: 0; }
+  .et-trim-handle::after {
+    content: ''; position: absolute; top: 50%; left: 50%; width: 3px; height: 16px;
+    background: #0b0b12; transform: translate(-50%, -50%); border-radius: 2px;
+  }
+  .et-drop-indicator {
+    position: absolute; top: -3px; bottom: -3px; width: 3px; background: var(--text);
+    border-radius: 2px; pointer-events: none; display: none; z-index: 4;
+  }
+  .et-playhead {
+    position: absolute; top: 0; bottom: 0; width: 2px; background: var(--text);
+    pointer-events: none; box-shadow: 0 0 6px rgba(255,255,255,.6); z-index: 3;
+  }
+  .et-playhead::before {
+    content: ''; position: absolute; top: -3px; left: 50%; transform: translate(-50%, 0);
+    width: 8px; height: 8px; border-radius: 50%; background: var(--text);
+  }
+  .et-empty { font-size: 11px; color: var(--text-dim); padding: 14px; text-align: center; width: 100%; }
+  .et-disabled { pointer-events: none; opacity: .5; }
+  .trim-info:empty { display: none; }
+  .part-card.et-focus { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 12px; transition: outline-color .3s ease; }
+  .trim-info { font-size: 11px; color: var(--text-dim); margin-top: 4px; }
+  .kind-switch { display: flex; gap: 8px; margin-bottom: 14px; }
+  .kind-switch .btn { flex: 1; }
+  .kind-badge {
+    font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em;
+    padding: 3px 8px; border-radius: 999px; margin-left: 8px;
+  }
+  .kind-badge.animado { background: rgba(23,230,201,.15); color: #4be9d3; }
+  .kind-badge.video { background: rgba(255,183,77,.15); color: #ffb74d; }
+  .take-row { display: flex; align-items: center; gap: 8px; margin-top: 8px; flex-wrap: wrap; background: var(--panel-2); border: 1px solid var(--border); border-radius: 8px; padding: 8px; }
+  .take-row input[type=text] { flex: 1 1 160px; }
+  .video-thumb { width: 100%; max-width: 220px; border-radius: 8px; border: 1px solid var(--border); background: #000; display: block; margin-top: 6px; }
+  .controls { display: flex; align-items: center; gap: 10px; width: 100%; max-width: 340px; }
+  .controls input[type=range] { flex: 1; }
+  .time-label { font-size: 12px; color: var(--text-dim); font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .export-box { width: 100%; max-width: 340px; display: flex; flex-direction: column; gap: 8px; }
+  .note { font-size: 11.5px; color: var(--text-dim); line-height: 1.5; background: var(--panel); border: 1px solid var(--border); border-radius: 10px; padding: 10px 12px; }
+  .note b { color: var(--text); }
+  .tabs { display: flex; gap: 6px; margin-bottom: 16px; }
+  .tab-btn {
+    flex: 1;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    border-radius: 8px;
+    padding: 9px 10px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .tab-btn.active { color: #16130a; background: var(--accent); border-color: var(--accent); }
+  .cs-switcher { display: flex; gap: 8px; background: var(--panel); border: 1px solid var(--border); padding: 6px; border-radius: 12px; margin-bottom: 14px; }
+  .cs-switch-btn {
+    flex: 1;
+    padding: 10px 12px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    font-family: inherit;
+    font-weight: 600;
+    font-size: 12.5px;
+    color: var(--text-dim);
+    background: transparent;
+  }
+  .cs-switch-btn.active { background: linear-gradient(135deg,#17e6c9,#0b8f79); color: #04342c; }
+  .cs-switch-btn:disabled { opacity: .45; cursor: not-allowed; }
+  .mb-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+  .mb-chip {
+    background: var(--panel-2); border: 1px solid var(--border); color: var(--text-dim);
+    border-radius: 999px; padding: 5px 12px; font-size: 12px; font-weight: 600;
+    cursor: pointer; font-family: inherit;
+  }
+  .mb-chip.active { background: var(--accent); color: #16130a; border-color: var(--accent); }
+  .mb-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; margin-top: 12px; }
+  .mb-card { background: var(--panel); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; display: flex; flex-direction: column; }
+  .mb-thumb-wrap { position: relative; width: 100%; aspect-ratio: 3 / 4; background: var(--panel-2); overflow: hidden; }
+  .mb-thumb-wrap img, .mb-thumb-wrap video { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .mb-video-badge {
+    position: absolute; top: 6px; right: 6px; background: rgba(0,0,0,.65); color: #fff;
+    font-size: 9.5px; font-weight: 800; letter-spacing: .04em; padding: 3px 6px; border-radius: 4px;
+    pointer-events: none;
+  }
+  .mb-body { padding: 8px; display: flex; flex-direction: column; gap: 6px; }
+  .mb-credit { font-size: 10.5px; color: var(--text-dim); line-height: 1.3; }
+  .mb-actions { display: flex; flex-direction: column; gap: 5px; }
+  .mb-actions .btn { width: 100%; text-align: center; }
+  .mb-empty { grid-column: 1 / -1; text-align: center; color: var(--text-dim); font-size: 13px; padding: 30px 10px; }
+  .mb-toast {
+    position: fixed; bottom: 22px; left: 50%; transform: translateX(-50%);
+    background: var(--accent); color: #16130a; font-weight: 700; font-size: 13px;
+    padding: 10px 18px; border-radius: 999px; box-shadow: 0 10px 30px rgba(0,0,0,.4);
+    z-index: 999; opacity: 0; pointer-events: none; transition: opacity .2s ease;
+  }
+  .mb-toast.show { opacity: 1; }
+  .cs-iframe-wrap { width: 100%; border-radius: 12px; overflow: hidden; border: 1px solid var(--border); background: #05090f; }
+  .cs-iframe { width: 100%; height: 640px; border: none; display: block; }
+  .cs-tweet-editor { display: flex; flex-direction: column; gap: 10px; margin-bottom: 12px; }
+  .cs-tweet-slide-edit { background: var(--panel); border: 1px solid var(--border); border-radius: 10px; padding: 12px; display: flex; flex-direction: column; gap: 8px; }
+  .cs-tweet-slide-edit textarea { width: 100%; min-height: 70px; background: var(--panel-2); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-family: inherit; font-size: 12.5px; padding: 8px; resize: vertical; }
+  .cs-tweet-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+  .cs-tweet-thumb { width: 52px; height: 52px; border-radius: 8px; object-fit: cover; background: var(--panel-2); flex: 0 0 auto; }
+  .cs-tweet-rail-wrap { border-radius: 12px; overflow: hidden; border: 1px solid var(--border); background: #05090f; padding: 16px; margin-top: 4px; }
+  .cs-tweet-rail { display: flex; gap: 20px; overflow-x: auto; padding-bottom: 8px; }
+  .tw-frame { flex: 0 0 auto; width: 302px; height: 378px; overflow: hidden; position: relative; border-radius: 6px; box-shadow: 0 8px 30px rgba(0,0,0,.45); background: #fff; }
+  /* Regras de borda do card Tweet/X (padrão pra todos os posts deste modelo):
+     64px de margem segura nos 4 lados. De cima pra baixo: cabeçalho (perfil),
+     texto (ocupa todo o espaço que sobra — "zona amarela" — e cresce a
+     fonte de acordo com o espaço disponível) e imagem (nunca a página
+     inteira: altura fixa em metade da proporção 4:5 do card, ou seja, a
+     imagem sozinha fica no formato ~8:5 — "zona vermelha" — cantos
+     arredondados). Sem imagem, o texto usa livremente o cartão inteiro. */
+  .tw-card { width: 1080px; height: 1350px; transform: scale(.2796); transform-origin: top left; box-sizing: border-box; padding: 64px; display: flex; flex-direction: column; background: #ffffff; font-family: 'Inter', Arial, sans-serif; color: #0f1419; }
+  .tw-header { display: flex; align-items: flex-start; gap: 20px; padding-bottom: 32px; flex: 0 0 auto; }
+  .tw-avatar { width: 88px; height: 88px; border-radius: 50%; object-fit: cover; flex: 0 0 auto; background: #eee; }
+  .tw-namecol { display: flex; flex-direction: column; gap: 4px; padding-top: 6px; }
+  .tw-name-row { display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 32px; color: #0f1419; }
+  .tw-check { width: 26px; height: 26px; flex: 0 0 auto; }
+  .tw-handle { font-size: 26px; color: #697077; }
+  .tw-body-wrap { flex: 1 1 auto; overflow: hidden; padding-bottom: 32px; display: flex; align-items: center; }
+  .tw-body-wrap.no-image { padding-bottom: 0; }
+  .tw-body { font-size: 34px; line-height: 1.5; color: #0f1419; white-space: pre-wrap; }
+  /* Imagem sempre limitada a metade da altura do formato 4:5 do card
+     (proporção própria ~8:5), nunca "flex: 1" — é isso que garante que ela
+     nunca vira o slide inteiro e que sobra espaço grande pro texto acima. */
+  .tw-image-wrap { position: relative; flex: 0 0 auto; width: 100%; aspect-ratio: 8 / 5; border-radius: 24px; overflow: hidden; background: #e8ebee; min-height: 0; }
+  .tw-image-wrap img { width: 100%; height: 100%; object-fit: cover; display: block; transform-origin: center; cursor: grab; touch-action: none; }
+  .tw-image-wrap img:active { cursor: grabbing; }
+  .tw-credit { font-size: 20px; font-weight: 700; line-height: 1.35; color: #0b8f79; max-width: 90%; }
+  .tw-credit.on-image { position: absolute; left: 20px; bottom: 20px; color: #eafff9; text-shadow: 0 1px 6px rgba(0,0,0,.55); }
+  .tw-credit.below-text { margin-top: 12px; }
+  .tw-dots { position: absolute; bottom: 18px; left: 50%; transform: translateX(-50%); display: flex; gap: 6px; }
+  .tw-dot { width: 8px; height: 8px; border-radius: 50%; background: rgba(255,255,255,.55); }
+  .tw-dot.active { background: #fff; width: 20px; border-radius: 5px; }
+  .tw-arrow { position: absolute; top: 50%; transform: translateY(-50%); width: 44px; height: 44px; border-radius: 50%; background: rgba(255,255,255,.92); display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 10px rgba(0,0,0,.25); font-size: 24px; color: #0f1419; font-weight: 700; }
+  .tw-arrow.left { left: 16px; }
+  .tw-arrow.right { right: 16px; }
+  .tw-noimg { display: flex; align-items: center; justify-content: center; height: 100%; color: #9aa5b1; font-size: 26px; text-align: center; padding: 40px; }
+  .chat-messages { display: flex; flex-direction: column; gap: 8px; margin-top: 14px; max-height: 50vh; overflow-y: auto; padding-right: 2px; }
+  .bubble { padding: 10px 12px; border-radius: 10px; font-size: 13px; line-height: 1.5; white-space: pre-wrap; }
+  .bubble.user { background: var(--accent); color: #16130a; align-self: flex-end; max-width: 85%; font-weight: 600; }
+  .bubble.assistant { background: var(--panel-2); border: 1px solid var(--border); align-self: flex-start; max-width: 92%; }
+  ::-webkit-scrollbar { width: 10px; }
+  ::-webkit-scrollbar-thumb { background: #2a2a36; border-radius: 6px; }
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <h1>B4 <span>Carousel Studio</span></h1>
+    <div class="byline">Sistema da B4 Technology para criação de carrosséis — a edição de vídeo agora vive num projeto separado (Remotion)</div>
+  </div>
+  <div class="header-actions">
+    <button class="btn" id="btnOpenProject">Abrir projeto</button>
+    <button class="btn" id="btnSaveProject">Salvar projeto</button>
+    <input type="file" id="fileOpenProject" accept="application/json" style="display:none" />
+  </div>
+</header>
+
+<div class="app">
+  <div class="sidebar" style="flex:1 1 auto;max-width:900px;margin:0 auto;border-right:none;">
+    <div class="tabs">
+      <button class="tab-btn active" id="tabBtnCarousel" data-tab="carousel">Carousel Studio</button>
+      <button class="tab-btn" id="tabBtnMedia" data-tab="media">Banco de Mídia</button>
+      <button class="tab-btn" id="tabBtnMaterials" data-tab="materials">Materiais</button>
+      <button class="tab-btn" id="tabBtnScript" data-tab="script">Texto / Script</button>
+    </div>
+
+    <div id="tabPanelCarousel" class="tab-panel">
+      <h2>Carousel Studio</h2>
+
+      <h2>Logo B4</h2>
+      <div class="card">
+        <div class="thumb-row">
+          <img id="logoThumb" class="thumb" style="width:80px;height:56px;object-fit:contain;" />
+          <div>
+            <input type="file" id="fileLogo" accept="image/*" />
+            <div class="filename" id="logoFilename">Nenhum logo enviado (PNG com fundo transparente).</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="cs-switcher">
+        <button class="cs-switch-btn active" id="csBtnModel1" data-cs-target="model1">Padrão Tecnológico</button>
+        <button class="cs-switch-btn" id="csBtnModel2" data-cs-target="model2">Estilo Tweet/X</button>
+      </div>
+
+      <div id="csModel1Wrap">
+        <div class="cs-iframe-wrap">
+          <iframe id="csFrameModel1" class="cs-iframe" title="Modelo — Padrão Tecnológico"></iframe>
+        </div>
+        <div class="card" style="margin-top:12px;">
+          <div style="font-size:11.5px;color:var(--text-dim);margin-bottom:10px;">
+            Zoom e posição das fotos de fundo (slides 1, 2 e 5) — amplia a
+            imagem dentro do quadro e, pra reposicionar, arraste a foto direto
+            no preview acima (segure e arraste).
+          </div>
+          <div class="cs-tweet-row" style="margin-bottom:8px;">
+            <label style="font-size:11.5px;color:var(--text-dim);flex:0 0 90px;">Slide 1 (capa)</label>
+            <input type="range" id="cs1Zoom1" min="100" max="250" step="5" value="100" style="flex:1;">
+            <span id="cs1Zoom1Label" style="font-size:11.5px;color:var(--text-dim);flex:0 0 auto;">100%</span>
+            <button class="btn btn-sm" id="cs1Reset1" type="button">Centralizar</button>
+          </div>
+          <div class="cs-tweet-row" style="margin-bottom:8px;">
+            <label style="font-size:11.5px;color:var(--text-dim);flex:0 0 90px;">Slide 2</label>
+            <input type="range" id="cs1Zoom2" min="100" max="250" step="5" value="100" style="flex:1;">
+            <span id="cs1Zoom2Label" style="font-size:11.5px;color:var(--text-dim);flex:0 0 auto;">100%</span>
+            <button class="btn btn-sm" id="cs1Reset2" type="button">Centralizar</button>
+          </div>
+          <div class="cs-tweet-row">
+            <label style="font-size:11.5px;color:var(--text-dim);flex:0 0 90px;">Slide 5</label>
+            <input type="range" id="cs1Zoom5" min="100" max="250" step="5" value="100" style="flex:1;">
+            <span id="cs1Zoom5Label" style="font-size:11.5px;color:var(--text-dim);flex:0 0 auto;">100%</span>
+            <button class="btn btn-sm" id="cs1Reset5" type="button">Centralizar</button>
+          </div>
+        </div>
+        <div class="note" style="margin-top:12px;">
+          Modelo trazido do <b>B4 Carousel Studio</b> original. O logo usado
+          nos slides é o que você envia no card <b>Logo B4</b> acima — suba
+          o logo ali e ele aparece automaticamente aqui.
+        </div>
+        <div class="note" style="margin-top:8px;">
+          Algumas imagens de fundo dos slides vêm de links do Canva
+          (temporários, com expiração) e do Unsplash. Se algum fundo aparecer
+          só como gradiente escuro, é porque o link do Canva expirou —
+          exporte a imagem de novo e me envie que eu incorporo de forma
+          permanente.
+        </div>
+      </div>
+
+      <div id="csModel2Wrap" style="display:none;">
+        <div class="card cs-autogen-card" style="margin-bottom:14px;">
+          <div style="font-size:13px;font-weight:700;margin-bottom:8px;">Gerar carrossel automaticamente</div>
+          <div style="font-size:11.5px;color:var(--text-dim);margin-bottom:10px;">
+            Cole ou escreva aqui o texto completo do carrossel, escolha em quantas
+            páginas ele deve ser dividido e o app quebra o texto sozinho, criando
+            cada página já com o texto pronto (dá pra ajustar cada uma depois).
+            Isso substitui as páginas atuais deste modelo.
+          </div>
+          <textarea id="csAutogenText" placeholder="Cole aqui o texto completo do carrossel..." style="width:100%;min-height:110px;background:var(--panel-2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:inherit;font-size:12.5px;padding:8px 10px;resize:vertical;"></textarea>
+          <div class="cs-tweet-row" style="margin-top:10px;">
+            <label style="font-size:11.5px;color:var(--text-dim);flex:0 0 auto;">Quantidade de páginas</label>
+            <input type="number" id="csAutogenCount" min="1" max="15" value="5" style="width:70px;background:var(--panel-2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:inherit;font-size:12.5px;padding:6px 8px;">
+            <button type="button" class="btn" id="btnAutogenCarousel" style="margin-left:auto;">Gerar páginas</button>
+          </div>
+        </div>
+        <div class="cs-tweet-editor" id="csTweetEditor"></div>
+        <button class="btn" id="btnAddTweetSlide">+ Adicionar página</button>
+        <div class="cs-tweet-rail-wrap">
+          <div class="cs-tweet-rail" id="csTweetRail"></div>
+        </div>
+        <div class="note" style="margin-top:12px;">
+          Perfil fixo neste modelo: foto, nome e selo de verificado de
+          <b>Matheus Serpa | Consórcio</b> (@matheushserpa), a partir do print
+          que você enviou. Escreva o texto de cada página ao lado e, se
+          quiser, envie sua própria imagem por página — sem imagem enviada,
+          uso uma foto de banco (Unsplash) como referência até você trocar.
+        </div>
+        <div class="note" style="margin-top:8px;">
+          Pra ajustar o zoom, use o controle ao lado. Pra reposicionar, arraste
+          a imagem direto dentro do card (segure e arraste); o botão
+          <b>Centralizar</b> volta a posição pro centro.
+        </div>
+      </div>
+    </div>
+
+    <div id="tabPanelMedia" class="tab-panel" style="display:none;">
+      <h2>Banco de Mídia</h2>
+      <div class="note" style="margin-bottom:12px;">
+        Fotos gratuitas (Unsplash e Pixabay, uso livre — sem direitos
+        autorais) direto aqui dentro. Busque por tema, baixe o arquivo
+        original ou mande com um clique pra virar imagem de página no
+        Carousel Studio (Estilo Tweet/X).
+        <b>Não é possível baixar fotos do Instagram, TikTok, YouTube ou
+        Pinterest por aqui</b> — isso violaria os Termos de Uso dessas
+        plataformas (a maioria proíbe até coleta automática/scraping) e
+        quase sempre envolveria reusar conteúdo de terceiros sem licença.
+      </div>
+      <div class="card">
+        <div class="field" style="margin-bottom:0;">
+          <label>Buscar por palavra-chave</label>
+          <input type="text" id="mediaBankSearch" placeholder="ex: dinheiro, carro, tempo, equipe, casa...">
+        </div>
+        <div class="mb-chips" id="mediaBankChips"></div>
+      </div>
+      <div class="mb-grid" id="mediaBankGrid"></div>
+    </div>
+
+    <div id="tabPanelMaterials" class="tab-panel" style="display:none;">
+      <h2>Materiais</h2>
+      <div class="note" style="margin-bottom:12px;">
+        Envie aqui suas próprias imagens (fotos, prints, artes) pra usar nos
+        carrosséis. Elas ficam guardadas neste projeto — dá pra usar direto
+        como imagem de uma página no Carousel Studio (Estilo Tweet/X) com um
+        clique, ou baixar de volta quando quiser.
+      </div>
+      <div class="card">
+        <div class="field" style="margin-bottom:0;">
+          <label>Adicionar imagens</label>
+          <input type="file" id="fileMaterials" accept="image/*" multiple>
+        </div>
+      </div>
+      <div class="mb-grid" id="materialsGrid"></div>
+    </div>
+
+    <div id="tabPanelScript" class="tab-panel" style="display:none;">
+      <h2>Texto / Script</h2>
+      <div class="note" style="margin-bottom:12px;">
+        Cole aqui o roteiro/script do vídeo (ou o texto do conteúdo), escolha
+        em quantas páginas o carrossel deve ser dividido e clique em
+        <b>Gerar carrossel</b> — o app quebra o texto sozinho e já monta cada
+        página no modelo Estilo Tweet/X (isso substitui as páginas atuais
+        desse modelo). O texto fica salvo junto com o projeto mesmo sem
+        gerar.
+        <br><br>
+        Se você colar um briefing com tabela (colunas como
+        <b>#, Papel, Texto do slide</b>), o app reconhece o formato
+        automaticamente: usa só o texto de cada linha, uma página por linha
+        (a quantidade acima é ignorada nesse caso), e já limpa textos extras
+        — título do carrossel, paleta de cores, número/papel da linha e um
+        eventual "(Fonte: ...)" no final do texto, que vira o crédito da
+        página em vez de aparecer no corpo do slide.
+      </div>
+      <div class="card">
+        <textarea id="scriptTextArea" placeholder="Cole ou escreva aqui o texto/script do conteúdo..." style="width:100%;min-height:320px;background:var(--panel-2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:inherit;font-size:12.5px;padding:10px 12px;resize:vertical;"></textarea>
+        <div class="cs-tweet-row" style="margin-top:10px;">
+          <span id="scriptTextCount" style="font-size:11.5px;color:var(--text-dim);"></span>
+        </div>
+        <div class="cs-tweet-row" style="margin-top:10px;">
+          <label style="font-size:11.5px;color:var(--text-dim);flex:0 0 auto;">Quantidade de páginas</label>
+          <input type="number" id="scriptAutogenCount" min="1" max="15" value="5" style="width:70px;background:var(--panel-2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:inherit;font-size:12.5px;padding:6px 8px;">
+          <button type="button" class="btn btn-primary" id="btnGenerateFromScript" style="margin-left:auto;">Gerar carrossel</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  // ---------------------------------------------------------------------
+  // B4 Carousel Studio — ferramenta independente pra montar carrosséis
+  // (Padrão Tecnológico + Estilo Tweet/X), 100% no navegador, sem instalar
+  // nada e sem servidor por trás. A edição de vídeo virou um projeto
+  // separado, em Remotion — este arquivo cuida só de carrossel + banco de
+  // mídia.
+  // ---------------------------------------------------------------------
+
+  // ---------------------------------------------------------------------
+  // Banco de Mídia — biblioteca curada de fotos gratuitas do Unsplash (uso
+  // livre, sem direitos autorais, licença Unsplash). Não é busca ao vivo
+  // (o app não tem servidor por trás) — é uma seleção fixa organizada por
+  // tema, pensada pros assuntos que a B4 Business e a B4 Technology mais
+  // usam. Baixar vídeo/foto de link de rede social (Instagram, TikTok,
+  // YouTube) não entra aqui — violaria os Termos de Uso dessas plataformas.
+  const MEDIA_BANK_CATEGORIES = {
+    'crescimento': 'Crescimento',
+    'dinheiro': 'Dinheiro',
+    'seguranca': 'Segurança',
+    'tempo': 'Tempo',
+    'estrategia': 'Estratégia',
+    'comunidade': 'Comunidade',
+    'tecnologia': 'Tecnologia',
+    'carro': 'Carro',
+    'casa': 'Casa / Imóvel',
+    'aposentadoria': 'Aposentadoria',
+    'cidade': 'Cidade',
+    'reuniao': 'Reunião',
+  };
+  function mbUrl(id) {
+    return 'https://images.unsplash.com/photo-' + id + '?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080';
+  }
+  const MEDIA_BANK = [
+    // Crescimento
+    { id: 'mb-1', category: 'crescimento', label: 'Gráfico de mercado no notebook', credit: 'Markus Winkler · Unsplash', url: mbUrl('1591696205602-2f950c417cb9') },
+    { id: 'mb-2', category: 'crescimento', label: 'Gráfico de velas na tela escura', credit: 'Maxim Hopman · Unsplash', url: mbUrl('1611974789855-9c2a0a7236a3') },
+    { id: 'mb-3', category: 'crescimento', label: 'Jornal financeiro com gráfico', credit: 'Markus Spiske · Unsplash', url: mbUrl('1618044733300-9472054094ee') },
+    { id: 'mb-4', category: 'crescimento', label: 'Gráfico de barras em fundo azul', credit: 'Алекс Арцибашев · Unsplash', url: mbUrl('1634117622592-114e3024ff27') },
+    // Dinheiro
+    { id: 'mb-5', category: 'dinheiro', label: 'Notas de dólar em leque', credit: 'Alexander Mils · Unsplash', url: mbUrl('1553729459-efe14ef6055d') },
+    { id: 'mb-6', category: 'dinheiro', label: 'Miniatura sentada sobre moedas lendo jornal', credit: 'Mathieu Stern · Unsplash', url: mbUrl('1604594849809-dfedbc827105') },
+    { id: 'mb-7', category: 'dinheiro', label: 'Moedas de ouro empilhadas', credit: 'Ibrahim Rifath · Unsplash', url: mbUrl('1534951009808-766178b47a4f') },
+    { id: 'mb-8', category: 'dinheiro', label: 'Casa feita de dinheiro', credit: 'Kostiantyn Li · Unsplash', url: mbUrl('1634757439914-23b8acb9d411') },
+    // Segurança
+    { id: 'mb-9', category: 'seguranca', label: 'Cadeado vermelho sobre teclado', credit: 'FlyD · Unsplash', url: mbUrl('1614064641938-3bbee52942c7') },
+    { id: 'mb-10', category: 'seguranca', label: 'Cadeado dourado sobre teclado', credit: 'Towfiqu barbhuiya · Unsplash', url: mbUrl('1633265486064-086b219458ec') },
+    { id: 'mb-11', category: 'seguranca', label: 'Cadeado prateado', credit: 'Zaqy Al Fattah · Unsplash', url: mbUrl('1555529902-5261145633bf') },
+    { id: 'mb-12', category: 'seguranca', label: 'Cadeado de aço em close', credit: 'Jose Fontano · Unsplash', url: mbUrl('1493129922668-fcb1a8514643') },
+    // Tempo
+    { id: 'mb-13', category: 'tempo', label: 'Relógios marrom e branco', credit: 'Akram Huseyn · Unsplash', url: mbUrl('1533749047139-189de3cf06d3') },
+    { id: 'mb-14', category: 'tempo', label: 'Despertador analógico preto e branco', credit: 'Virginia Marinova · Unsplash', url: mbUrl('1541480601022-2308c0f02487') },
+    { id: 'mb-15', category: 'tempo', label: 'Relógio analógico às 12h', credit: 'Djim Loic · Unsplash', url: mbUrl('1456574808786-d2ba7a6aa654') },
+    { id: 'mb-16', category: 'tempo', label: 'Relógio analógico redondo', credit: 'Thomas Bormans · Unsplash', url: mbUrl('1504197832061-98356e3dcdcf') },
+    // Estratégia
+    { id: 'mb-17', category: 'estrategia', label: 'Papel com "Marketing Strategy"', credit: 'Campaign Creators · Unsplash', url: mbUrl('1533750349088-cd871a92f312') },
+    { id: 'mb-18', category: 'estrategia', label: 'Equipe colaborando com post-its', credit: 'UX Indonesia · Unsplash', url: mbUrl('1586936893354-362ad6ae47ba') },
+    { id: 'mb-19', category: 'estrategia', label: 'Pessoa escrevendo no quadro branco', credit: 'Campaign Creators · Unsplash', url: mbUrl('1542744094-24638eff58bb') },
+    { id: 'mb-20', category: 'estrategia', label: 'Equipe diversa colaborando no escritório', credit: 'Vitaly Gariev · Unsplash', url: mbUrl('1758873269811-4e62e346b4b7') },
+    // Comunidade
+    { id: 'mb-21', category: 'comunidade', label: 'Grupo com mãos empilhadas', credit: 'Hannah Busing · Unsplash', url: mbUrl('1582213782179-e0d53f98f2ca') },
+    { id: 'mb-22', category: 'comunidade', label: 'Equipe em união de mãos', credit: 'Rineshkumar Ghirao · Unsplash', url: mbUrl('1630068846062-3ffe78aa5049') },
+    { id: 'mb-23', category: 'comunidade', label: 'Grupo unindo as mãos', credit: 'Outward Bound Costa Rica · Unsplash', url: mbUrl('1704386651981-0729a60da579') },
+    { id: 'mb-24', category: 'comunidade', label: 'Grupo de mãos dadas', credit: 'Marlis Trio Akbar · Unsplash', url: mbUrl('1651372381086-9861c9c81db5') },
+    // Tecnologia
+    { id: 'mb-25', category: 'tecnologia', label: 'Escritório com monitores', credit: 'Austin Distel · Unsplash', url: mbUrl('1556761175-4b46a572b786') },
+    { id: 'mb-26', category: 'tecnologia', label: 'Equipe colaborando em escritório aberto', credit: 'LYCS Architecture · Unsplash', url: mbUrl('1531973576160-7125cd663d86') },
+    { id: 'mb-27', category: 'tecnologia', label: 'Pessoas trabalhando no escritório', credit: 'Alex Kotliarskyi · Unsplash', url: mbUrl('1504384308090-c894fdcc538d') },
+    { id: 'mb-28', category: 'tecnologia', label: 'Monitor em mesa de madeira', credit: 'Annie Spratt · Unsplash', url: mbUrl('1498409785966-ab341407de6e') },
+    // Carro
+    { id: 'mb-29', category: 'carro', label: 'Carro vermelho sob árvore', credit: 'Adam Stefanca · Unsplash', url: mbUrl('1550355291-bbee04a92027') },
+    { id: 'mb-30', category: 'carro', label: 'BMW azul', credit: 'Stephan Louis · Unsplash', url: mbUrl('1614687153862-b0e115ebcef1') },
+    { id: 'mb-31', category: 'carro', label: 'Chave do carro na mão', credit: 'Swansway Motor Group · Unsplash', url: mbUrl('1671719367451-7bf05ae9549c') },
+    { id: 'mb-32', category: 'carro', label: 'Sedan cinza na estrada', credit: 'TopSphere Media · Unsplash', url: mbUrl('1578659258511-4a4e7dee7344') },
+    // Casa / Imóvel
+    { id: 'mb-33', category: 'casa', label: 'Miniatura de casa branca e vermelha', credit: 'Tierra Mallorca · Unsplash', url: mbUrl('1560518883-ce09059eeffa') },
+    { id: 'mb-34', category: 'casa', label: 'Segurando as chaves na entrada de casa', credit: 'Jakub Żerdzicki · Unsplash', url: mbUrl('1741156386380-0236c72eb6f9') },
+    { id: 'mb-35', category: 'casa', label: 'Chaves novas da casa com dinheiro', credit: 'Jakub Żerdzicki · Unsplash', url: mbUrl('1742318592061-15c5f19e1e47') },
+    { id: 'mb-36', category: 'casa', label: 'Molho de chaves sobre mesa de madeira', credit: 'Filip Szalbot · Unsplash', url: mbUrl('1643804926339-e94f0a655185') },
+    // Aposentadoria
+    { id: 'mb-37', category: 'aposentadoria', label: 'Casal sênior sorrindo no sofá', credit: 'Vitaly Gariev · Unsplash', url: mbUrl('1758691031402-5cfbeebc6162') },
+    { id: 'mb-38', category: 'aposentadoria', label: 'Casal sênior sorrindo um pro outro', credit: 'Vitaly Gariev · Unsplash', url: mbUrl('1758686253861-bbfd56e5ba7a') },
+    { id: 'mb-39', category: 'aposentadoria', label: 'Idosos tomando chá e compartilhando foto', credit: 'Vitaly Gariev · Unsplash', url: mbUrl('1758691031213-116dedd71c0f') },
+    { id: 'mb-40', category: 'aposentadoria', label: 'Três idosos fazendo quebra-cabeça juntos', credit: 'Vitaly Gariev · Unsplash', url: mbUrl('1758691031197-3ce709db9640') },
+    // Cidade
+    { id: 'mb-41', category: 'cidade', label: 'Skyline ao entardecer', credit: 'Calvin Ma · Unsplash', url: mbUrl('1672279410716-c676739163e9') },
+    { id: 'mb-42', category: 'cidade', label: 'Prédios altos durante o dia', credit: 'Venti Views · Unsplash', url: mbUrl('1601783210890-d921f8d008b3') },
+    { id: 'mb-43', category: 'cidade', label: 'Skyline com água em primeiro plano', credit: 'Jorge Ramírez · Unsplash', url: mbUrl('1650570725926-cd88ef8784bd') },
+    { id: 'mb-44', category: 'cidade', label: 'Vista aérea de prédios ao entardecer', credit: 'Andre Benz · Unsplash', url: mbUrl('1562351768-f68650f3ec54') },
+    // Reunião
+    { id: 'mb-45', category: 'reuniao', label: 'Aperto de mãos entre duas pessoas', credit: 'Cytonn Photography · Unsplash', url: mbUrl('1521791136064-7986c2920216') },
+    { id: 'mb-46', category: 'reuniao', label: 'Aperto de mãos sobre mesa de madeira', credit: 'Rock Staar · Unsplash', url: mbUrl('1638262052640-82e94d64664a') },
+    { id: 'mb-47', category: 'reuniao', label: 'Aperto de mãos em frente ao notebook', credit: 'Hunters Race · Unsplash', url: mbUrl('1686771416282-3888ddaf249b') },
+    { id: 'mb-48', category: 'reuniao', label: 'Sala de reunião com mesa oval', credit: 'Benjamin Child · Unsplash', url: mbUrl('1431540015161-0bf868a2d407') },
+    // Mais fotos gratuitas (Pixabay — licença Pixabay Content License, uso
+    // livre sem exigir crédito, mas mostramos o autor por boa prática).
+    { id: 'mb-73', category: 'dinheiro', type: 'image', label: 'Notas de dólar americano', credit: 'TBIT · Pixabay', url: 'https://cdn.pixabay.com/photo/2015/09/15/15/53/bank-notes-941246_1280.jpg' },
+    { id: 'mb-74', category: 'estrategia', type: 'image', label: 'Quadro de planejamento de ideias', credit: 'geralt · Pixabay', url: 'https://cdn.pixabay.com/photo/2018/09/17/12/46/business-idea-3683781_1280.jpg' },
+    { id: 'mb-75', category: 'comunidade', type: 'image', label: 'Equipe em brainstorming', credit: 'Mohamed_hassan · Pixabay', url: 'https://cdn.pixabay.com/photo/2018/03/10/12/00/teamwork-3213924_1280.jpg' },
+    { id: 'mb-76', category: 'crescimento', type: 'image', label: 'Alvo com dardo — meta atingida', credit: 'geralt · Pixabay', url: 'https://cdn.pixabay.com/photo/2018/07/13/09/33/target-3535310_1280.jpg' },
+    { id: 'mb-77', category: 'tecnologia', type: 'image', label: 'Escritório de startup, mesa de trabalho', credit: 'StartupStockPhotos · Pixabay', url: 'https://cdn.pixabay.com/photo/2015/01/09/11/11/office-594132_1280.jpg' },
+    { id: 'mb-78', category: 'reuniao', type: 'image', label: 'Reunião de negócios em escritório', credit: 'mwitt1337 · Pixabay', url: 'https://cdn.pixabay.com/photo/2017/05/04/16/37/meeting-2284501_1280.jpg' },
+  ];
+
+  // ---------------------------------------------------------------------
+  // Carousel Studio — modelos enviados pelo usuário (arquivos originais da
+  // B4 Business), embutidos como HTML self-contained e renderizados num
+  // <iframe srcdoc>. {{LOGO_MARK}} é substituído em tempo real pelo logo
+  // enviado no card "Logo B4" da aba Carousel Studio (ou por um selo
+  // "B4" de reserva, se não houver logo enviado ainda).
+  //
+  // AVISO: as imagens de fundo dos slides 1, 2 e 5 vêm de links do Canva
+  // (temporários, com assinatura e expiração) e do Unsplash. Os links do
+  // Canva provavelmente já expiraram — quando isso acontece, o navegador
+  // simplesmente não pinta a foto e mostra o gradiente escuro por baixo
+  // (degrada bem, não quebra o layout). Pra corrigir de vez, exporte essas
+  // imagens do Canva como arquivo e me envie — eu incorporo permanentemente.
+  // ---------------------------------------------------------------------
+  const CAROUSEL_MODEL_APOSENTADORIA_HTML = `<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>B4 Business — Carrossel Aposentadoria</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #0d1117;
+    padding: 40px 24px;
+    font-family: 'Inter', sans-serif;
+  }
+  .toolbar {
+    max-width: 1660px;
+    margin: 0 auto 20px;
+    color: #7c93ad;
+    font-size: 13px;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+  }
+  .rail {
+    display: flex;
+    gap: 20px;
+    overflow-x: auto;
+    padding-bottom: 20px;
+    max-width: 1660px;
+    margin: 0 auto;
+  }
+  .frame {
+    flex: 0 0 auto;
+    width: 302px;
+    height: 378px;
+    overflow: hidden;
+    position: relative;
+    border-radius: 6px;
+    box-shadow: 0 8px 30px rgba(0,0,0,.45);
+  }
+  .slide {
+    width: 1080px;
+    height: 1350px;
+    transform: scale(0.2796);
+    transform-origin: top left;
+    position: relative;
+    background:
+      radial-gradient(ellipse 900px 700px at 15% 0%, #1a3a63 0%, transparent 55%),
+      linear-gradient(160deg, #0a1730 0%, #0d2246 45%, #091428 100%);
+    overflow: hidden;
+    color: #f4f8fc;
+    font-family: 'Sora', sans-serif;
+  }
+  .photo-overlay {
+    position: absolute; inset: 0;
+    background: linear-gradient(180deg, rgba(8,17,36,.55) 0%, rgba(8,17,36,.35) 35%, rgba(8,17,36,.92) 78%, #0a1730 100%);
+    pointer-events: none;
+  }
+  .photo-layer {
+    position: absolute; inset: 0;
+    background-size: cover; background-position: center;
+    transform-origin: center;
+    cursor: grab;
+    touch-action: none;
+  }
+  .photo-layer:active { cursor: grabbing; }
+  .photo-credit {
+    position: absolute; bottom: 8px; right: 12px;
+    font-family: 'Inter'; font-size: 9px; color: rgba(255,255,255,.35);
+    z-index: 3; letter-spacing: .02em;
+  }
+  .grid-overlay {
+    position: absolute; inset: 0;
+    background-image:
+      linear-gradient(rgba(23,230,201,.05) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(23,230,201,.05) 1px, transparent 1px);
+    background-size: 54px 54px;
+    pointer-events: none;
+  }
+  .scanline {
+    position: absolute; left: 0; right: 0; height: 240px;
+    background: linear-gradient(180deg, transparent, rgba(23,230,201,.10), transparent);
+    animation: sweep 6s linear infinite;
+    pointer-events: none;
+  }
+  @keyframes sweep {
+    0% { top: -240px; }
+    100% { top: 1350px; }
+  }
+  .bracket {
+    position: absolute; width: 46px; height: 46px;
+    border: 2px solid rgba(23,230,201,.55);
+  }
+  .bracket.tl { top: 44px; left: 44px; border-right: none; border-bottom: none; }
+  .bracket.br { bottom: 44px; right: 44px; border-left: none; border-top: none; }
+
+  .logo {
+    position: absolute; top: 56px; left: 56px;
+    display: flex; align-items: center; gap: 14px;
+    z-index: 3;
+  }
+  .logo-mark {
+    width: 44px; height: auto;
+  }
+  .logo-text { font-size: 15px; font-weight: 700; letter-spacing: .06em; }
+  .logo-sub { font-size: 10px; color: #7fd9c9; letter-spacing: .12em; font-family: 'Inter'; }
+
+  .page-index {
+    position: absolute; top: 60px; right: 56px;
+    font-family: 'Inter'; font-size: 13px; color: #7fd9c9;
+    letter-spacing: .08em; z-index: 3;
+  }
+
+  .icon-badge {
+    position: absolute; z-index: 3;
+    width: 76px; height: 76px; border-radius: 18px;
+    background: rgba(23,230,201,.08);
+    border: 1px solid rgba(23,230,201,.4);
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 0 26px rgba(23,230,201,.25);
+  }
+  .icon-badge svg { width: 36px; height: 36px; stroke: #4be9d3; }
+
+  .content { position: absolute; left: 56px; right: 56px; z-index: 3; }
+
+  .eyebrow {
+    font-family: 'Inter'; font-size: 13px; font-weight: 600;
+    color: #4be9d3; letter-spacing: .14em; text-transform: uppercase;
+    margin-bottom: 18px;
+  }
+  h1.headline {
+    font-size: 58px; font-weight: 800; line-height: 1.14;
+    letter-spacing: -.01em;
+  }
+  h1.headline.md { font-size: 46px; }
+  .support {
+    font-family: 'Inter'; font-size: 22px; line-height: 1.55;
+    color: #b9cbde; font-weight: 400; margin-top: 26px;
+  }
+  .support b, .support strong { color: #f4f8fc; font-weight: 600; }
+
+  .node-line {
+    position: absolute; left: 56px; right: 56px; top: 690px;
+    height: 2px; background: linear-gradient(90deg, rgba(23,230,201,.6), rgba(23,230,201,.05));
+    z-index: 2;
+  }
+  .node-dot {
+    position: absolute; top: 684px; width: 14px; height: 14px; border-radius: 50%;
+    background: #17e6c9; box-shadow: 0 0 14px rgba(23,230,201,.8); z-index: 3;
+  }
+
+  .list-item {
+    display: flex; align-items: center; gap: 16px;
+    padding: 22px 0; border-bottom: 1px solid rgba(255,255,255,.08);
+    font-family: 'Inter'; font-size: 24px; font-weight: 500;
+  }
+  .list-item svg { width: 26px; height: 26px; stroke: #4be9d3; flex-shrink: 0; }
+
+  .glass-card {
+    background: rgba(255,255,255,.05);
+    border: 1px solid rgba(255,255,255,.12);
+    border-radius: 16px; padding: 32px;
+    backdrop-filter: blur(6px);
+  }
+
+  .cta-btn {
+    display: inline-flex; align-items: center; gap: 10px;
+    background: linear-gradient(135deg,#17e6c9,#0b8f79);
+    color: #04342c; font-family: 'Inter'; font-weight: 600; font-size: 20px;
+    padding: 18px 32px; border-radius: 999px; margin-top: 30px;
+  }
+  .cta-btn svg { width: 20px; height: 20px; stroke: #04342c; }
+
+  .footer-row {
+    position: absolute; bottom: 56px; left: 56px; right: 56px;
+    display: flex; justify-content: space-between; align-items: center;
+    z-index: 3;
+  }
+  .nav-circle {
+    width: 60px; height: 60px; border-radius: 50%;
+    border: 1.5px solid rgba(23,230,201,.6);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .nav-circle svg { width: 24px; height: 24px; stroke: #4be9d3; }
+
+  .social-row { display: flex; gap: 22px; }
+  .social-row svg { width: 30px; height: 30px; stroke: #b9cbde; }
+</style>
+</head>
+<body>
+
+<div class="toolbar">B4 Business — carrossel padrão · aposentadoria · 6 páginas · 1080×1350</div>
+
+<div class="rail">
+
+  <div class="frame"><div class="slide">
+    <div class="photo-layer" data-photo-slide="1" data-zoom="{{ZOOM_1}}" data-pos-x="{{POSX_1}}" data-pos-y="{{POSY_1}}" style="background-image:url('https://export-download.canva.com/ASTLs/DAHSCUASTLs/-1/0/0001-8839952674640892778.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&amp;X-Amz-Credential=AKIAQYCGKMUH5AO7UJ26%2F20260812%2Fus-east-1%2Fs3%2Faws4_request&amp;X-Amz-Date=20260812T202913Z&amp;X-Amz-Expires=18549&amp;X-Amz-Signature=0c576e1dd72700d760c3078f07e31b570cbad7788c3bba5f0e2f0b2446bc0d6b&amp;X-Amz-SignedHeaders=host%3Bx-amz-expected-bucket-owner&amp;response-expires=Thu%2C%2013%20Aug%202026%2001%3A38%3A22%20GMT'); transform:scale({{ZOOM_1}}) translate({{POSX_1}}%, {{POSY_1}}%);"></div>
+    <div class="photo-overlay"></div>
+    <div class="grid-overlay"></div><div class="scanline"></div>
+    <div class="bracket tl"></div><div class="bracket br"></div>
+    <div class="logo">{{LOGO_MARK}}<div><div class="logo-text">B4 BUSINESS</div><div class="logo-sub">GESTÃO PATRIMONIAL</div></div></div>
+    <div class="page-index">01 / 06</div>
+    <div class="icon-badge" style="top:56px; right:150px;">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><path d="M3 17l6-6 4 4 8-8"/><path d="M15 7h6v6"/></svg>
+    </div>
+    <div class="content" style="top:420px;">
+      <div class="eyebrow">Cenário fiscal</div>
+      <h1 class="headline">O Brasil já deve mais de R$ 9,27 trilhões.</h1>
+      <p class="support">Você ainda pretende deixar sua aposentadoria nas mãos dele?</p>
+    </div>
+    <div class="footer-row">
+      <span></span>
+      <div class="nav-circle"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></div>
+    </div>
+  </div></div>
+
+  <div class="frame"><div class="slide">
+    <div class="photo-layer" data-photo-slide="2" data-zoom="{{ZOOM_2}}" data-pos-x="{{POSX_2}}" data-pos-y="{{POSY_2}}" style="background-image:url('https://export-download.canva.com/bE3dY/DAHSGRbE3dY/-1/0/0001-4990500895234276463.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&amp;X-Amz-Credential=AKIAQYCGKMUH5AO7UJ26%2F20260812%2Fus-east-1%2Fs3%2Faws4_request&amp;X-Amz-Date=20260812T221205Z&amp;X-Amz-Expires=12202&amp;X-Amz-Signature=60314481265c42d9dbf2dbb1b538f69067be4e10693b6a9688c49d6ea23b17e5&amp;X-Amz-SignedHeaders=host%3Bx-amz-expected-bucket-owner&amp;response-expires=Thu%2C%2013%20Aug%202026%2001%3A35%3A27%20GMT'); transform:scale({{ZOOM_2}}) translate({{POSX_2}}%, {{POSY_2}}%);"></div>
+    <div class="photo-overlay"></div>
+    <div class="grid-overlay"></div><div class="scanline" style="animation-delay:-1s"></div>
+    <div class="bracket tl"></div><div class="bracket br"></div>
+    <div class="logo">{{LOGO_MARK}}<div><div class="logo-text">B4 BUSINESS</div><div class="logo-sub">GESTÃO PATRIMONIAL</div></div></div>
+    <div class="page-index">02 / 06</div>
+    <div class="icon-badge" style="top:56px; right:150px;">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l6-6 4 4 8-8"/><path d="M15 7h6v6"/></svg>
+    </div>
+    <div class="content" style="top:340px;">
+      <div class="eyebrow">Custo da dívida</div>
+      <h1 class="headline md">Somente em junho, o valor aumentou aproximadamente 2,6%.</h1>
+      <p class="support"><b>Quanto maior a dívida e os juros, maior o desafio para equilibrar as contas do país.</b></p>
+    </div>
+    <div class="node-line"></div><div class="node-dot" style="left:50px;"></div>
+    <div class="content" style="top:760px;">
+      <p class="support">Isso não significa que a aposentadoria pública acabará.</p>
+    </div>
+    <div class="footer-row">
+      <span></span>
+      <div class="nav-circle"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></div>
+    </div>
+  </div></div>
+
+  <div class="frame"><div class="slide">
+    <div class="grid-overlay"></div><div class="scanline" style="animation-delay:-2s"></div>
+    <div class="bracket tl"></div><div class="bracket br"></div>
+    <div class="logo">{{LOGO_MARK}}<div><div class="logo-text">B4 BUSINESS</div><div class="logo-sub">GESTÃO PATRIMONIAL</div></div></div>
+    <div class="page-index">03 / 06</div>
+    <div class="icon-badge" style="top:56px; right:150px;">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l9 4.5v6c0 5-3.6 8.7-9 9.5-5.4-.8-9-4.5-9-9.5v-6L12 2z"/></svg>
+    </div>
+    <div class="content" style="top:200px;">
+      <div class="eyebrow">Fatores fora do seu controle</div>
+      <h1 class="headline" style="font-size:40px;">Mas depender somente dela significa entregar o seu futuro a fatores que você não controla:</h1>
+    </div>
+    <div class="content" style="top:560px;">
+      <div class="list-item"><svg viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9 12l2 2 4-4"/></svg>Mudanças nas regras</div>
+      <div class="list-item"><svg viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9 12l2 2 4-4"/></svg>Inflação</div>
+      <div class="list-item"><svg viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9 12l2 2 4-4"/></svg>Idade mínima</div>
+      <div class="list-item" style="border-bottom:none;"><svg viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9 12l2 2 4-4"/></svg>Capacidade financeira do país</div>
+    </div>
+    <div class="footer-row">
+      <span></span>
+      <div class="nav-circle"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></div>
+    </div>
+  </div></div>
+
+  <div class="frame"><div class="slide">
+    <div class="grid-overlay"></div><div class="scanline" style="animation-delay:-3s"></div>
+    <div class="bracket tl"></div><div class="bracket br"></div>
+    <div class="logo">{{LOGO_MARK}}<div><div class="logo-text">B4 BUSINESS</div><div class="logo-sub">GESTÃO PATRIMONIAL</div></div></div>
+    <div class="page-index">04 / 06</div>
+    <div class="icon-badge" style="top:56px; right:150px;">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="9" rx="2"/><path d="M8 11V7a4 4 0 018 0v4"/></svg>
+    </div>
+    <div class="content" style="top:320px;">
+      <div class="eyebrow">O que você pode mudar</div>
+      <h1 class="headline md">Você não controla as contas do governo.</h1>
+      <p class="support">Mas pode controlar o patrimônio que começa a construir hoje.</p>
+    </div>
+    <div class="content" style="top:760px;">
+      <div class="glass-card">
+        <p class="support" style="margin:0; font-size:23px;">Sua aposentadoria não deveria ser apenas um benefício mensal.</p>
+      </div>
+    </div>
+    <div class="footer-row">
+      <span></span>
+      <div class="nav-circle"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></div>
+    </div>
+  </div></div>
+
+  <div class="frame"><div class="slide">
+    <div class="photo-layer" data-photo-slide="5" data-zoom="{{ZOOM_5}}" data-pos-x="{{POSX_5}}" data-pos-y="{{POSY_5}}" style="background-image:url('https://images.unsplash.com/photo-1752007085312-6894a6afb19c?crop=entropy&amp;cs=tinysrgb&amp;fit=max&amp;fm=jpg&amp;q=80&amp;w=1080'); transform:scale({{ZOOM_5}}) translate({{POSX_5}}%, {{POSY_5}}%);"></div>
+    <div class="photo-overlay"></div>
+    <div class="photo-credit">Foto: Benjamin Chambon / Unsplash</div>
+    <div class="grid-overlay"></div><div class="scanline" style="animation-delay:-4s"></div>
+    <div class="bracket tl"></div><div class="bracket br"></div>
+    <div class="logo">{{LOGO_MARK}}<div><div class="logo-text">B4 BUSINESS</div><div class="logo-sub">GESTÃO PATRIMONIAL</div></div></div>
+    <div class="page-index">05 / 06</div>
+    <div class="icon-badge" style="top:56px; right:150px;">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r="1"/></svg>
+    </div>
+    <div class="content" style="top:300px;">
+      <div class="eyebrow">O caminho certo</div>
+      <h1 class="headline md">Deveria ser um conjunto de ativos capaz de gerar renda para sua família.</h1>
+    </div>
+    <div class="content" style="top:760px;">
+      <p class="support">O governo administra as contas do país.<br><b>Você precisa administrar o seu futuro.</b></p>
+    </div>
+    <div class="footer-row">
+      <span></span>
+      <div class="nav-circle"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></div>
+    </div>
+  </div></div>
+
+  <div class="frame"><div class="slide">
+    <div class="grid-overlay"></div><div class="scanline" style="animation-delay:-5s"></div>
+    <div class="bracket tl"></div><div class="bracket br"></div>
+    <div class="logo">{{LOGO_MARK}}<div><div class="logo-text">B4 BUSINESS</div><div class="logo-sub">GESTÃO PATRIMONIAL</div></div></div>
+    <div class="page-index">06 / 06</div>
+    <div class="content" style="top:300px;">
+      <h1 class="headline" style="font-size:50px;">Pare de apenas esperar pela aposentadoria.<br><span style="color:#4be9d3;">Comece a construir a sua.</span></h1>
+      <p class="support">Solicite um diagnóstico patrimonial gratuito e descubra uma estratégia para a sua realidade.</p>
+      <div class="cta-btn">Comente APOSENTADORIA
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+      </div>
+    </div>
+    <div class="footer-row">
+      <div class="social-row">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 00-7.8 0L12 5.6l-1-1a5.5 5.5 0 00-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 000-7.8z"/></svg>
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.4 8.4 0 01-9 8.4A8.5 8.5 0 013 12a8.4 8.4 0 018.4-8.4h.1a8.4 8.4 0 018.4 8.4z"/></svg>
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4 20-7z"/></svg>
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z"/></svg>
+      </div>
+    </div>
+  </div></div>
+
+</div>
+
+<script>
+(function () {
+  // Arrastar a imagem de fundo (slides 1, 2 e 5) pra reposicionar o
+  // enquadramento — combina com os sliders de zoom da aba principal. A
+  // posição final é avisada ao app principal (fora do iframe) via
+  // postMessage pra ficar salva e sobreviver a novas renderizações
+  // (mudar zoom, subir logo, salvar/abrir projeto).
+  var CLAMP = 45;
+  var layers = document.querySelectorAll('.photo-layer[data-photo-slide]');
+  for (var i = 0; i < layers.length; i++) {
+    (function (el) {
+      var frame = el.closest('.frame');
+      var dragging = false, startX = 0, startY = 0, baseX = 0, baseY = 0, frameRect = null;
+
+      function applyTransform(x, y) {
+        var zoom = parseFloat(el.getAttribute('data-zoom')) || 1;
+        el.style.transform = 'scale(' + zoom + ') translate(' + x + '%, ' + y + '%)';
+      }
+
+      el.addEventListener('pointerdown', function (e) {
+        dragging = true;
+        startX = e.clientX; startY = e.clientY;
+        baseX = parseFloat(el.getAttribute('data-pos-x')) || 0;
+        baseY = parseFloat(el.getAttribute('data-pos-y')) || 0;
+        frameRect = frame.getBoundingClientRect();
+        try { el.setPointerCapture(e.pointerId); } catch (err) {}
+        el.style.cursor = 'grabbing';
+        e.preventDefault();
+      });
+
+      el.addEventListener('pointermove', function (e) {
+        if (!dragging) return;
+        var zoom = parseFloat(el.getAttribute('data-zoom')) || 1;
+        var dxPct = ((e.clientX - startX) / (frameRect.width * zoom)) * 100;
+        var dyPct = ((e.clientY - startY) / (frameRect.height * zoom)) * 100;
+        var nx = Math.max(-CLAMP, Math.min(CLAMP, baseX + dxPct));
+        var ny = Math.max(-CLAMP, Math.min(CLAMP, baseY + dyPct));
+        el.setAttribute('data-pos-x', String(nx));
+        el.setAttribute('data-pos-y', String(ny));
+        applyTransform(nx, ny);
+      });
+
+      function endDrag() {
+        if (!dragging) return;
+        dragging = false;
+        el.style.cursor = 'grab';
+        var slide = el.getAttribute('data-photo-slide');
+        var x = parseFloat(el.getAttribute('data-pos-x')) || 0;
+        var y = parseFloat(el.getAttribute('data-pos-y')) || 0;
+        try { window.parent.postMessage({ type: 'b4-photo-pos', slide: slide, x: x, y: y }, '*'); } catch (err) {}
+      }
+      el.addEventListener('pointerup', endDrag);
+      el.addEventListener('pointercancel', endDrag);
+    })(layers[i]);
+  }
+})();
+<\/script>
+</body>
+</html>
+`;
+
+  // ---------------------------------------------------------------------
+  // Carousel Studio — Estilo Tweet/X: modelo próprio (o arquivo original
+  // nunca foi enviado / se perdeu), recriado do zero a partir dos prints
+  // de referência que você mandou. Perfil fixo (foto real, recortada do
+  // print que você enviou de Matheus Serpa), com texto e imagem editáveis
+  // por página — veja renderTweetEditor()/renderTweetRail() mais abaixo.
+  // ---------------------------------------------------------------------
+  const TWEET_PROFILE = {
+    name: 'Matheus Serpa | Consórcio',
+    handle: '@matheushserpa',
+    avatar: 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAQDAwMDAgQDAwMEBAQFBgoGBgUFBgwICQcKDgwPDg4MDQ0PERYTDxAVEQ0NExoTFRcYGRkZDxIbHRsYHRYYGRj/2wBDAQQEBAYFBgsGBgsYEA0QGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBj/wAARCADwAPADASIAAhEBAxEB/8QAHQAAAAYDAQAAAAAAAAAAAAAAAAQFBgcIAgMJAf/EADoQAAEDAwMCBQIEBAUEAwAAAAECAwQABREGEiEHMQgTIkFRFGEVIzJxM0KBkVJicoKhCRaSsSRDwf/EABwBAAAHAQEAAAAAAAAAAAAAAAABAgMEBQYHCP/EACoRAAICAgEEAQQCAgMAAAAAAAABAgMEEQUGEiExQQcTIlEUMmFxFiOR/9oADAMBAAIRAxEAPwC/lChQoABXhJ717Xn2xRaADPFe15ivD3o+1CZP9Hp+1a1KwAayzxWtzBTzxj3o34FKXweqeUOQOKxU4XUgJ4OaTblqOzWmItybNabCRzlVRDrPxJaR05HcEWW284kcYPvUivBuu/pFj9eLZZ6JwfV5aQVLCf3NJ0m/2qC2VSpzKMfKhVD9ZeLu83BC24Ci0M4BBqF731v1ndgsrurwSfYKNaXA6PzcpeIjzopp82y/8OnMvqno6G6W3boxkf5hSY/1t0Ox3uTB/wBwrlHI1zqWQ6VruDyvvuNEnNS3579Ux3/yNXVX0+y96khmd+Kl4bOrSuv+hQvb+IM/+Qo1G66aEkKCRc2Af9QrkoLzdwveuU6R/qNZpvl5C9zcx1H+41Nf03yX/VDCy8f9nYqJ1D0pcWgWLoxz/mFLjFzgyUAsS2157YUK44wde6rgABq7PgD/ADGn/pjxGa4sryPMnOupR8qNR8j6a50I7SA8ij4Z1aRu/VkEfvWxLyDwDVGtEeMpbkhqNeU7U8AqJqyej+uGitVRkmPcGkunuCrFZHkOmc7Bf/ZBsNuL8pkqbjXnNFItwiSmQ6xIQ4k9sHNGN285SeKz8lOL00EkbQa9BrWDWWeKLT9sD8Hp70KFClIJMFChQoBgoUKFAAKFChQAA8DNawsEfNbPasSAgZSOTRedhfOwZwmtfmjzihXFYuOlocDKjTU1driyaPtDs66ym0rSkkJKhmnaa5WS7YryOQrnY9QQ5Jk+PBjrfkupbbSMkqOKrl1d8Ttp0zb3YFmWHpmSnck5FQJ1l8UF2v0l+22J5TcbJTlJqtEy7XK4yFyJT6nCo5JUc10/pb6fX58lbkLUR26+jDW5+ZEja0616r1FLe8y4PIbX2SlVRZNuk+UVF2S44T33HNAtuOLyawdZ2+1duxOi8LHqUVHyU+RzVtq1F6QSbQtSsrUTRsJbCMc1m2xu7Ct30ayOBWkwMKnGh2xiVE8jb8sKoQMe1Z7R7EVv+kUhsk0VIPmYANQ+V5nC4+vuta8AhGVj8AUCBnvW9MZam9yOT8Vm3GUGy4o8U4tG2V65Tyxs3hR4V8VzjN+rfH4z1CGywhx05fI1vLWhe11JBre3HQOcjn5qT3NDMw7uluapLiVEc/FOeZ0otU6K2uC+gLKc4BqNifWTAun2Tra/wBsdlxVqW0yB/pd7no4x7ij1svd2skjzIE95tSTnCVEU6r/ANPrzaZRSy0pSB7im2bOU7krSQsd810DB5LjuZr34eyvnbZjPyTV088UGqdMvNM3V5TzAIByc1c3pl4gdMa0htNuS2mX1AelRxzXMZFpK07SMUpWk3ayTES7dcHGnGzlICsVjepPp7iZqc6FpjlXMpvTOxbT7T7QcaWFpPIIrclXozVKOhPidLTzWn9XO7SMJS6s96uPbL1AvEBEyFIQ60sZBSc1wLmuEyeLtdVsfH7LeGXCz0KaVZTmh2rFKwRkHIrPvVKmvSHtfIBzXuKAr2gBHmK8rKsT3oBgyKFYq7igVYTxzQD0ZZrU8shohPc1ktaUIyTzTO19rS26J0hIu9wfQjaglIUe9Kjr5FVwc3pBDqP1FtWgtKuzZr6PPCcpSTzXN/qt1pvmudTSnFSXExFEpSgE4rT1i63TeomqH2/PX9IlZCADweaisnKMnvXc/p30fjZCWTc9gzcz+JHsq9mTbxCyXSSDW9GArcn+GaJdjmtyXeMV3mjGhVHsrWkZO2yU33S8sNoUN/asnWgsdqLIdGc1vS+KclHt9EdqSM2W8GjqNu3t2oi26ASa3eeERlnPtUPKslCuU/WhvtcnpiXdrqiPcUtJOU45rxudHdbyAN1NucvfclqzmvYEpAkbF9s15N6y5u/LzLYd3hM1OFVGMEtDlQ3LeUSNxZ+RSpZLnerE+VwW3VtnurHapY6OaRteplohPBJ3jPNWdsHQnS7Uby5LDZCvkVzC/K7Hpo0OPiqa3spM9qmU9+a887u7nd7UUa6lXeLeGxGkq8tJwQTV7Zfhj0NckqSEpSVfHFRrrHwVJ8pydYXwEoTuCPc03Vb9xtaHLauz5GFp3X0O/QhHmtpU5txk0zdXsRGrkpcVrAJyeKVLV0y1Jou8PO3+3vtRGjw4UnFF9Z3K2PNJEHaeOTW66F5rKo5CGPGb02UnK48ZVOWhlFaScAYobUd9xBor5gGTQLw4Ga9e0bspiznttTi9oMrZQrCkLKHhylYPNTZ0R8QN30ZeWrJfpK3oSlBIWo5wKggu/etSlgn/APfeqfmuncfk63XavJKw8mdUvJ160rqW2amsTVwtshLra0g8HOKcCFD5rmt0F6/zNDamYsN2eWq3uqCQtZ4FdErBeoN8tTNxgPJdadSFApOe9eZup+nLuGyHGS/B+mbHFvVsRayK9yK0nGe/NZDNZh+CVrwZ5Fee9eYzWXtRJsSnswczswKxxsY55NZ5zWp1YQn1kCjFJ7WkJ15usO0Wl2ZOcCENp3EmuaPip69S9W397Ttqkq+ibJSdquKsF4wOsQ03ptdjtMoCW6kpUAfaua8uS/OlLkSVlTi1FRJonHb0WCSoh/lmbEpTa9iu/fNLsaYXmAonntTaV6gM+1GI8tbagj2FdK6N6us4qxVWP8SlyaPvPY58ZTmhgiikSV5iQCaPEDy91en+K5KrPpVlb9lLdW4PSMQSPeswo4rDJr0HnmrJfpjO0bFOFIFYTJBRbyc14sFR4HHxRScHH20xkAhSuOazXVOV/G4+yX+GOU0980kN4u75ilZyK2sNb3soGTSjN0tc7elt9xham1ckpFHNOwkStRsQ28AKUArNeMc/J+9bOb+TV10dqSJq6Fzp8C9MrQlWAKu9pa8/Wx0JeB3VXfR+k4disLNxjJTuCRuJqRrH1N01Y1pRcHUFY9kmsllLcy+x49sScURnlPJcbWoDvTthSgmKATvOMYI96im1dY9GyWUl2UhlHytWKkax6nsF1iJVb5TDyTyCk5oU7h5GclNrwaNUabtur9LzbNPhN73GyEK2jIOK5cdRdPXLRfU2fZ5JUGEukN5+M11qaLTkoON98c1z58ZFtjQOo6JaAAtzk4rpv02wa8nlIORSci2qWivS3iD3rT553d6I/UuLAP2oeYQMnvXsOrHUIKMTGyr2KHnGvPNJNJxeXQ89zNSFT8CPsbDrjiHcIPpUOUqHsatx4VOujkGejRt+lEpyEtrWqqcrdVkFf/FGLfc5VquzF4hOqbeYUFAg4zzWU6p6dp5fDnCUfyRYYtjrZ2pYeQ+2hxs7kKGQoe9GB371A3ht6tN9Qen8eNIeQZrCAkjPJ4qdwrjB7jvXkTPwLMHIlj2rymX0Le+OzZXuaw3Hv7Vl7VCe/gWkYOEpRkU29ZXhmyaQl3WQ6EBptRyTinI7nyjj4qp/jQ6jf9rdMTaYr5TJlDACTSktj+NH8u4oV1n11K191PnzXHlKZacUhAzxwajetrhX5hU4rLjvrNa8GjiteQX2/ckeUPLydwr3FepJBx7U4pv2yP59BiM8ppeaWGJoWNuaRAU1m25scyCa6T0l1jdx0o1yf4ke+lSQ5EL3CgruKJRJSCAFGlAALTlNek+J5enkKVOuW2U1lTizLJbXycn2NL+hbMjUOpvJkkbU+59qbqE5Wk9xn3pS0reBZtfR1F0obWoBQHY1kfqTkdnFtb1sm8Wk7lsluSuz22auwywmS0U4C9v6ajGNpeSjqk27AymH5gO4dsZqwWqdJQZuj06phoZ/h5VtPJ4qHrJOecubgbOEoVg5ryAvKZr71FS8FlLHbZd4083bITnG3Bx71GGuulWsLZcfrm4j6mgc5GTmnz0y1A+HkJSop2nvVobGqHf7OI81tt0YwcgVTZH4z8lhBrs8HPO/Sbymw/S/hklLqeNyc1IXQO46/RehGaMj6ZoeYsrzwmrkyOnOjY7a5Ui3MODuQpIxROwWOwNzp8eyQ22FPslsFKQMZpuU9IKC2m2RHqXxXW7SV/atiG/qXWztdx7GoL8SWuLb1ElQLvBGxSkZUn4NK2uOiV5s3UaRJiQ0zlKWpbvmc4HeoX17IKL0YSWQ0to7VIHYV1z6SY87eRjKPwUHMSjGtoaGPKAFAnPNAnIwaxwa9h1x7dIxyb0e55oVjXueMU6w14BjKuaGRuwf0+4ofGKyUGygEH1UiUdrQRL3h66kPaA6mxQXyiG+sBQJ4rqdZrnFvVij3GK6lbbyArIPzXFNK1tuIdbJStBBBH2rpP4R+ozequnCLK+8VyI4xlR54rz79WemlDXIVL/ZaYVi12ssqAMBNZdqLtOFb2we1Ga4PF+EWhpedQxHW64QEpBJJ/auVPi7185q7rI5ZmXQuPEWUkA5rpd1Gun4P0xu84LCS2wogk49q40amui7v1DvF0fUVqceUQrv707Wtj1b1FjdcR6lE/y8Ci1b1O7pC0/1otkUvQwjKs0jIrVkVtbxs7ikhmYFZBOTQGKzSOakVPTWga37PG3i2uleLLyjvSOtAJzWSHS3yOw54redL9U3cXcu5/iR8ilOPgc6EuOsoSkY570nIjvSNUtMt53A9xTs6faQvWvTIZtaFKLCdx2jNKdu06bTenok5laZjKsZWnGa13XPVNHJ8cowfkjYWPKM9htWrNUWuwm0PSFfSY7KNJVoucdMkqJ9SzzijevGFp015ynSh0ewqMLfdHojW9eVDPevP8Y+Wy7la09MtZoW6Nx0JWFgJNTnp3Vsu2JStsKUF9uaptoXVUV+dHivyfKBIJyalLV3WoWJLFosMFUxxABK0pyP71WZlfcy7xbYOBYPqn1NuGm9GMz5DgKFDJSDzUb9PPFfY3NVMRpEJaFLIQSf/dV51r1XvOqbaIVyS4j2DZHAo90T09Z4uv8A8Q1MGlMKby0kqHemY1rt/IW7e59p0ffjWC86PmaqRhzeyV5z24rl/wBSZLEnqfc1xyNnnHAH71cW49TndM6An28I2Q32ylrJ9vtVLNUxV/jb1yUggSFFYP8AWvQn0XxIxtdhkebe32iEa8oUK9MLTezOJGNChQpewMFe4rwd6yowgJ4PNWB8J2vHNN9U27U4vY0+oD+9V+xml3SF0XYtc2+5NK2lLqeR+9ZXrDj1ncdZW18Mk40tTOzSChbaHmyCFJCsijA/SKaHTi8m/dObbcFK3FTacnP2p4ftXjDIrdNkq37TL+PkgDxYX38H6E3FsPFtT7JSCDj2rlEwc2kLVypSiSo9zzXRnx8TnYvSiAy2ojzVlJrnS02RDabpyiO0PT8RQSeAS/2xkUWU0B3ozJBU6QPatbQJOFjila9jIUV5Y75r0Fj3K8/allpqEU5WBTx07ZdMzIyDI2h4nFMv2AjltLrjgDKFml232a5SVY8k4xxxUuMaPsje1bKEkUtt2WO1FR9O0kKB+KchLT2AhRzR92Y5cTjzv05pMVbJtvfVFmNHBPcj2qfdT2iW/YUSoiR5jPO0CkCXbI13sTbzqEiSlO1QxzTjtbl5A2mJXQ3qmvpZ1RYX5aXbRKWG5CljsCauv1K6cWTqFoZOuNIsx/NUgONeSB6uOc1zqn2l6HcHratsiOv9LmOxq2vg56uSAJHTm8Sd5R6IvmHPFMWubfbsVCXb5I3vVnbftz1snJxMRkKSv5qBL5anrZd1skEJzwK6CdcejxUp7WFiR+nPmNo9zVONX2p2cytbjJakt8YI5pmUNEncbFsjuI46iSGwvylnsocVYPpmt+JpVSnbMJy1f/c4jJ/vVdHWZIc8txs70HOasR0W622vSluRbr9b0TGf07SO1Qrq9j+Lb2PQuWmZ0mutxkWzV7JgyVq27yNuDSX1A6VwNKX223bS17dftTi0rJK84FSHZNI9JurnUNVxnvt26N/ELe4J5HNMPqSFHXCrBpyUXLJFPlhW7IwKlcTxM+QuVUB/Lz4VQ7mGdXaqhapkWrTTMlKIzASHFg8mmrrtqGhxiFCUlxtobdw5pBk6Rl/iyJ0KQoI/m5o25DWF4W4Vkdya9IdDcNPin2tGAz+UjdJtMbSov+WtLkY4OBTkXDHxWhyGCk8V12rI0tMqYZe2NksH4rEtEUuLijB4ouuMPipMbdkuORsSthrzBo+pkA9q0Lbwe1OxmPxmmFxwaySotutLz+lYNeODAr0kLYUPcCmspKdMov5Q9W9PZ1F8LF7/ABTpBHb8wrLSR3Pap5RygH7VUbwQXYP6Lkw1ryQOBVuR2xXi/q3GWPy10F+zQ0PcNlI/+oHNeGiLPGCBs83vVCe2w4q/X/UBj56f2p74cqg3eEhyqbH9Dkm34Ynu+mSo981r3YH6RWx/h6vEI3UJPyJYYiMIfWAvj9qV41rehyRMiuKV/l9qJwGwlYNOWGpwkIA9NJC2OvTV9MoJjyEhKxxT6jrUSEJAyORUaQWo8eQHUHDnxTytUx0Sm3HDweKABwIW6mT5i1EpPCmz2po323XCyzlXSxo+qbdV62l9k5+KeEvDp8wHalIyfvSNeJ8ldu86E3uQ0rKkfNB+fYWhv33TjV204iQpPlTkjeUJqNtO3y5aD6kQ9QNbmpLLwSEjgEZ5qZWpyZ0QXKOAU7dqk/Bpq6x0nHvNo+rigJfHr4+1DfyGdHtN3ONqXp3bb9KWwbfJjJL6VHjcRzVP/ELom2x9Tm56PJdjKOXxjhP7UjdHNca11D06VpYSHEQoa8Eg/FSnNkQ06FktXZIKFJIS4fmmrk9bHqVplTZGlWbxbXnW1hlxPGTwSabbuidWxbYHU2l1TAV/GbTnipTttlVetYGAyspjb8pCeMjNW+0RaobPTqTbn7WysIawFuIye1RMSXfcq2tkzKcaq+9FCdMw9auIMOAwthtRwp45CgKlC1WQ2+AGXnlOunlalc5NP+5QGWJMltphDZ3HGwYpvOI2E5rv3SvAUYsFeofkzm3K8tZc/tp+BDkQQHCptwpB/kHakqRCTvJAxTldKKTpYRkEYro9M2vJQdw3nYwFFHGeDxS28lOaJOpTtNWlVrfsEZyXoRXGBg0SdaxSu4BgiiLqRmp8JSJ1U3sSnG+aKuox2pScA3GijoFTq2y0pkxPWkEYNado2LGfajTuADRRRwD+1PNbiybBl1/BBJcS7Ijg+k1ekcHFUR8ELKzOfcwdtXt/nNeQOv0lzNq/yaTF/oU78fjCl9JretKCdq8k/Fc8UuINkbwea6seLPSiNRdArpJUjcqGwpwf2rlHCCXdOp/xIKs1lMf0PMJySA4kZ5xRiO2VI3AcUVGHlFR5xxW+BvXK8vd6c0UvYlitCTkEgZAp12ssuwAGfU6D6s+1JMWEWGC4BlOOa9iXNhuSlpk7FlWDntRBDoXbHBGMxj1KTyUit9qurkhOxfoUg8g8GjlumMQVNuyMqCh/tpL1Zb5CVKvtuGEFPKW+1AA/m5aZ1kC0KwUDn70ShXANSiVIBaWPLKT9/ekvQFyauWm3mVqHmpByKLyH1sPKb5yF8UABmOs6e1S/aZI2w5I3Mq9io+1HtjjIcQscjjb+9Yahtz190gxLiDdNh/mEjvW21Sm7vYo8kfx2Bh8e+aAB49BVNWzqvIsr6Ei3y2j/AORqddYdMrm9pWZb4cTz0rGWvtmqzaduDtn6lW24IJCFOpSR/Wuhynmn9JWyWknL6E5IqPY3vQ7AqlpPppa9Jvx5VzdUbir0hojgE0/9c3lzSejm2A6GJLw/Qn3Bqcb3oO03bTDi22UCaGy4heOciqW6ku1zu+sZtkuy1KdikpQFfAqbwMa4ZsXZ6GeScp1NITJNycdBdkq2qWc5pGkyWsE780mXGVKgzVNTAQAfTmkly5hxRAPFenuMrhZVFw9HMMmDVjTDsiYncfXRN6WlX81EX5AOTRJUn71e1440oB918EHCqJOOnnmi65OPei65A2nmrCqgejSzc44CnvRNxfNa1vii636nQr0WFdPkwdXhR5om65z3r157KjRN1eamQiWNVZ44vPArBwpLRx3xWOTuFZuBIQkDus4o75KuqUv0iVCPnRfDwOW9wWGTKU3gY71c0d81W3we2Q2zpWJKkkF1IIzVkk/pB+1eM+s8j7/LXTX7NHR4gNLqdZzfulN4tIGfPjqRj+lcab5alaf1TfbKQQIrqk4/rXb2S2HWy2oZSoEEfPFcm/FXo53SHXWc55HlR7m4VggYHeqCqfaOaIAYO0K+9HorLh/MQO1FUpA3KB9IOKONy1xcBCNwo29sSx36XmNTVmC+fUeOa13qxR4F3cQ+55LZGUOfek2235qLKQ79KEK77sVIrTNp1laUiUtIV2B9xRBCJpqS4uIq33VGY6uEST7UbXdHbMiXa5H/AMi1rbJbkntn4rUnTEmzTPLZl/Uxgf0LPalC5xYU6xORcELQnd5f8tAA2Olk5waqksZPlLUcD7U7NWOJg3bjgHmo40JJXB6joQjlJXgipH6lpTI2Op/LIxyKAB2dP57a07ZACkvelQPxSdPt50f1CU0riFcDuSPakbQsvYhvcvIGKk7WNgVq3S0d6KPz4o3BY7jFAA3Hra4ytq4kflNubwftV9em09jU/R20y0qz5QAP9KpHZpCL3ol1sAFyIny1p+SKtR4Wby1N0i9alEfkfyH2picG/IqEtPyWAjIbVDTsVlXl7cVQXqPCesniguKJSdgcTlKfmugSPLQUoQkA8dqpV4sLcqB1gt17SnYlwJQVj3oqfwkpBy/JeRhap083eratSEBMkDKQKh5+I5EkLYXneg4Oan1ay7BakIPJA5FMzXVpYkwhKiMJQrGVKSO5rsfRPVKhZ9i70/RleW41NfcgRQ6s9qKuEilBMZW8qUMgH3rU7GJVnHBruNdsXFSXyZqLS9iatRrQpRpSVF+RRdcfngVMrtQ/CyInrziiyyaUjFURWlUMnuKlQsTJVdkRLWCa0LRzSo5FIOMUWcjKqTCyLJsLEghjChR60QlXDUUKJzhboH/NaTGVuz8VKPQLSLuqOsMMBnzWWlgqGMjvVT1DnQxcCycn8Mm0/lNJHSLovY27F0itjCRgqbBPFSIn9Iohb4TcK1x4TCQhDbYGBR8DCcV4rzL3ffO1/L2aNR7Y6MXDtbKsZIqo/jf6af8Ac/So6rhsb5cEcBI5q3SjxyOPem9qvT8bUmj7hZ5SApp9pQAIzzjimExRw2SVCOGCCFp/UD3BpetjbRbQp1O6lbqdoub086s3awXBtQKnVONKIwCkkkURs+z8PQoo3KJ5B9qci9iZC4bPEnR0+WgA1utEKXaL2G8qLHsBSlAYIjBxAAbxyfilAutqjAhOVpPfHelCRzsabTdGUSjL8v32k0bl2qEzYJLSGvzEtn835rDT4Fwt20ubHE9k570vXSCY2gJrsghBS2cfegArNp51UfqKVo5AcP8A7qRtbyUv2kOLODUaacPmarXJ7fmHj+tPXWrwXaG2gcFRFAAb0OVrjg57Gpv0NfAHnIbuChaSnn71C2jgIcIrxu3Jp96YmmNcN23JUf7UABxtKtJdUn7a5xCm+rntk1PHh5uYsXU2VB34Zkn0/wBahPqvGMjRkPUTB2ymHAVAdyBTr6U6kbd1Lp67tEEuLSlaQaTL0BHQjYAPM9/aq2+MCwCZ08t94bR+Yy7kkVY2K99VbGXwcBSQf+Kj3rvpsak6KXJkL2qjtF0Y98Cml7FsqFp2UJmj21k5O3FE5WHYzkZwZzRPp/IU5YXILg2qYUU/vzShc0pjTkIJ5Uat+LslDIi4/siZMU63sYkmwrTLUkI9JNE37G6DgIOBUsfgy5DIV5YAxndWlVhA/UkV6C47mXGiKkc6yEvuNEPu2Z3H6DRNy0PDPoNS89ZAc/l9vtRB2xKPAa7/AGq6r5eMiMtr0ROu2upzlBouqG4n+U1KMnT5Qkko/wCKRnrGSrAT/wAVYV8tB/I53tDBXCUeSmizkBXxT7XZHcHajNElWlwnBRipkOSjruTHIZD2Mh2CsNEpSSrsBV1fBt02ctVtc1HcI5C3P0lQquWkdGStT65iWuO2oo3jeQK6V6F05H0vomHamUgKSgZIHviuT/U3qVOhYdb8v2azhIOxd7HIn9dba1gEKya2Y4zXBm/BpU/OjFWSR8V4vZtz8V6sHGayASU0YZUHxndDGdX6HXrGxxAbzEHmL2DlSBXPGFJcWxw0W32lbHGiMEYrt9PiRpcRyPLZDrLqdiwRkba5peJroY9096or1dZYxVZJ68rShPDdOVsTIjW1w1qtTat/ocGSn4pz22xB9ogN8AZFN63riNJS61KDqCNwRntSwnWaFNpTCSEPZ2hA96cEi/Z7WqDJUtxK047CivUe9iP08f2FQcVlOD8UnIvGpEShJfZK0DkoA7ii3UPVunNQdNjb4yAzdEK9SSMUAEN6WaUJSHyP1KJpc1LIW/MaZHI4rGxwXEWttYQMjvzWyWhDs9BURuFAA6rCkotqc/FOazObZaT96b9sQpNsCsenHelW1OAyBg+9ABJF2ji7aKlxD6h5JwPviox6LX96Fqh20SlkKiO5byfvUnWd1Sm1sLHpWjFV6u81zSvW1UgZaYU6NyvbvSZMCOwui5f1uhLa/uyS0M/2ozqRgP6NvEdwbkqjqGD+1MfohdfxXpRBktL81KmgQQftT9ui92lLipz0/kqB/tTO0LOdenHBG17eYCThKHVAD+tKN/8AOav0UkggrFNaFOQ112vUYLOVvnAA781Ko6bap1JdYb8SE4W/MBzipmNkRqtjJsYuqlODSHCmLFFtYEh9LSnEjAJxmh9Gy0sIP5gx3FNTqnBk2PX2nrG7N8pe5IfTuxs/epztdo0Zb7OyqRemJDy0Z27gT2re/wDI6q4JJmOn0/bZJzI0MBlYVsb5/aiLsBzBAaGP2p5z/ITMcVEYJZ/xgcURbQJAJSoFNXmPyath3xZm76Lca1wkhmuWvcOUZog/YHFn0Ngf0p/KiYcDSEblK7Ae9LkLp1frmgLDCmUnsSKkz5uFENykLxqbLXpIhV7T60AqABPuKTl2JSz6W8uLOABU63zpvcrO2jcgurV7D3pR0d0vmyb4zKuEIttJIUAoUifVlf2XJSLKrjrHYk0HegnStmxxhfp8cF9z1J3DtVg0pG7Pb7VqhQ2oUJuM0kJSgYwKM7QTmuR8pyNmdfK+b2bzCxVj1qJ4Tk7TWY7YrDurtXoquXklvwzI9q8r09q8pQZ4sAoIIyMU0dX6RsutNLybHdoyHG3UFKNwHpOKd9a1pQQTjBHY0pMJnJDrl0q1H0U1lJjIjuu2mUsqbfSMhsE9s009GToEJtyZJWHpKxlsKOQDXWvqL07sHUfRciy3uI275iSEOEZKT+9cuet3QnVXRvUzjrcV6VZlLKkuoBIQKUmEL+m9RMMqW9cyFrV+lHtRHU2mbFqtxTcRCIcg+vej3qK4F6kL2KQ8Fsq/4pxW/UD0VxSXlkkjjB5paYTCkzQeqLOlS7fIU+0PbOaQWUXj63ypkVSFZxnFSHC1e+yhRDoWP8KjmtSb9CukpSX2UIURgHHvStiNBm3Wic1pvCXAtZGdoNGbEXW3PKktFC898UxlanummtUBDrhcjqVwM54p5saqYuCw8GNuR3AobBokm3PNMOIWXgeO2agvq/FdkamMiO2VpJzwKcr9+djzi4lw7MYAzWtVyiTVNuS2wsg85pX2U1sHdouZ4I9bou/Sh62XCSlh2KNiEuKxxVkbjKamaWnRoDyH3VpUjOc1y2t2pLjY3m0aclLituuDeG1Yq8mgb+I/TiK8uWVyFIBWVGqzJ3H0TMeKtehr6Q6Eaes2v5OqtQOhT7iysNnt3qbY+prPEUmNZEt5TxjHaoP1x1BKlBEaSAtPBOajh3qFKisuuRJO1/Hcn3qpTlOWi5jixUdMdHWDw8aw6l9QzqeJdVsJWcgoV2rRp7wy3S1ym5uotaSB5R4R5hwRTatPiM1dFhO25Tbr6hkApqN9UdW+qVykvNspktNuEhO4mpmvHsa/jxT8F+dNae0nH0wqEmaxLcQjBJUCaiS4W65u6okx7NDKmkKIAA4ppeHDT+ogyq86yvqmm3OQhxdWihvWOOtItXkvrV3WkZrQ8Zy0seLivkz/AC/CwyXtjL6d6Cf883G9IJcB4bUO1SdcbpBsVvK1lJUBhDae5rC43Jy323LMfc+oenaOxpofSOxEO6g1E4XF922M9/6UV98rXuQ3hYEMdeBatTMm+yvxO4+W03nKG3OKdqWkpQNoSMdsdqrNqvUGsNR6riosLymGQsYaRxgferDaebnN6Yis3BRVI2DcqobWyRJefArt7vfmtlYNgJTtzzWdJ1oWwUKFCgEChQoUAArwpBTiva94zQCaMdo249qbuqtI2LV9pdtN+gtSYziSkpUkGnJgVgtKfUpXYCj2Ec1uv3g/vukLm/qDp6yqVCWSsxEDhAqqzj86NcHIlybciy2iUrSsbcYruN9Oh9paH0eY2vgJV2xVfusvhN0R1LZXJhsIt04evewNu4/elJgOWS7g6lz8l4498GvXLnJKE+SshYPcVLnUjwv9Ren8195qCuZb0k7S2nKiKhpxt+DLUxMiuRHBwQ8MUrYO0MSpT8uW25KVu2gd6WhqREWIlppOcU1iQ9na5zXgWtvhSc/ehsHaL8i/PyQF5Kce1eRrvI3klw80grWoke1BC1JV3o/uP0CSWh9Wa7lu8xy+slkLBNXCb1TYGekkeda7wkyAgBTIVVHLM0/OuQjscrKeKXoDt7ssxxh+U4Uk/wAMngUxbDuXkOiTreycLpqMSYbk9EjefdOe1MWVqJSnS55hH2psC8qQosJdJDn6hntWDsoLZJDRIHuBUWOOlLwWf8psfll1um2KU4qIlxR9yKym69vV5mBMS3ICUnjjFRyqcpDQXwlPvmpI0QvSl0hJFw88yc4Slj3pdmFNLYurITfkdmko+utY36LbnL65BipUNyEKxxVq3dXWDp/paJYrfMXPuqglKldzmoo6cdLbozqmPdrSmSmIsjIe+KsvA6RWEXVu8TWEuyeDhQp3Gqiv7Cc23x4HVo+XIuWlo0yezlagD6hTA6nWPVVyvrCrQtaoyjjaOyalyOyiLHSyyhKUgYCR2rYW0bgCkEmn5STKqXcMrRuio1ngNSpbYcmKGSojsae6ewHxXobxWQTTW38Ct6QAkZzWVeAc17R72EnsFChQoBgoUKFAAK9Irysj2oAPO3OaxIB/Y16e1AdqADWEEH7DtXq2krwT3rOhQBoT5tshzmvIlxWnmiMEKTmoT6jeFbp3rpTkldtbZkHJBQMc1PhFYFI5obAc3ddeBPUEQLl6cnBSEk4bxnioH1D4feqGnlqSuxyJCEfzBJ5rswgJLJSRnPtiiL1shygpEqCy4k/KRQAcQntGayiqIk6clJKe+UGk9613hpWHbU+g/wCg12vk9PNIz1KL1ljEnv6BSLI6G9OpLhW7Y4uf9Ao96C0ceLWu72yV9azbXt6E8eg1LWk9GXXVOgp2qJUNzzUpO1BSa6VjoT02S2U/gMXBGP0Cli2dL9IWu0LtkS1sIYX3SEjFBvYZxxt+mtZP3F4R7BJdBUQPQfmpN050Z6l3uB5bdlfjhfYqSeK6hxOmmkLZ6otmjbs/4BTjj2m3RWQiPBab49kiiXh7QruetFDunXg0us2ImRql4lJ5KDVj9G+GPp9pjypCICXHkDOTzzU1JQsI8sAAfYVsQgJGB3qVLLslHtEJaewhCtEKFGSxHjoQhHCcDFKATwB8Vlg0AOaii3Nv2YBvnJrMj3r2hSe1BN7AM45oUKFKCAKFChQAChQoUAH/2Q==',
+  };
+  const TWEET_CHECK_SVG = '<svg viewBox="0 0 24 24" class="tw-check"><path fill="#1d9bf0" d="M12 0l2.3 2.1 3.1-.9.9 3.1 3.1.9-.4 3.2L24 12l-2.9 2.6.4 3.2-3.1.9-.9 3.1-3.1-.9L12 24l-2.3-2.1-3.1.9-.9-3.1-3.1-.9.4-3.2L0 12l2.9-2.6-.4-3.2 3.1-.9.9-3.1 3.1.9z"/><path fill="#fff" d="M9.6 16.2 6 12.6l1.4-1.4 2.2 2.2 5-5L16 9.8z"/></svg>';
+  // Imagens padrão (Unsplash) usadas até você anexar as suas em cada página.
+  const TWEET_DEFAULT_IMAGES = [
+    'https://images.unsplash.com/photo-1608303588026-884930af2559?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080',
+    'https://images.unsplash.com/photo-1729855637715-99192904aac5?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080',
+    'https://images.unsplash.com/photo-1512531123205-560f5974e686?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080',
+    'https://images.unsplash.com/photo-1591759220700-f791b2ea6db4?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080',
+  ];
+
+  let tweetIdCounter = 1;
+  function nextTweetId() { return 'tw-' + (tweetIdCounter++); }
+
+  const state = {
+    logoDataUrl: null,
+    logoImg: null,
+    // Zoom das 3 fotos de fundo do modelo Padrão Tecnológico (slides 1, 2 e 5
+    // — os únicos com foto). 1 = tamanho normal (cover); acima disso amplia
+    // a imagem dentro do quadro, cortando as bordas — útil pra recentralizar
+    // o que importa na foto quando o enquadramento padrão corta errado.
+    carousel1Zoom: { 1: 1, 2: 1, 5: 1 },
+    // Posição das mesmas 3 fotos (x/y em % de deslocamento), ajustada
+    // arrastando a imagem direto no preview — ver script injetado no
+    // CAROUSEL_MODEL_APOSENTADORIA_HTML e o listener de 'message' abaixo.
+    carousel1Pos: { 1: { x: 0, y: 0 }, 2: { x: 0, y: 0 }, 5: { x: 0, y: 0 } },
+    // Filtro atual do Banco de Mídia (não faz parte do projeto salvo — é só
+    // estado de navegação da biblioteca curada, não conteúdo do usuário).
+    mediaBankFilter: { category: 'todas', query: '' },
+    // Materiais — imagens próprias enviadas pelo usuário (aba "Materiais"),
+    // guardadas como data URL direto no projeto.
+    materials: [],
+    // Texto / Script — roteiro/conteúdo em texto livre (aba "Texto / Script").
+    scriptText: '',
+    tweetCarousel: {
+      slides: [
+        {
+          id: nextTweetId(),
+          text: 'O carro parado na garagem não é o único que perde valor com o tempo.\n\nSeu dinheiro parado na poupança também está perdendo poder de compra todo mês — só que ninguém fala sobre isso.',
+          imageUrl: TWEET_DEFAULT_IMAGES[0], imageDataUrl: null, imageZoom: 1, imagePos: { x: 0, y: 0 }, credit: 'Fonte: inserir fonte da informação aqui',
+        },
+        {
+          id: nextTweetId(),
+          text: 'Em 2021 te venderam a ideia de que esperar era a jogada mais segura.\n\nHoje, quem começou um plano de consórcio naquela época já está com a carta em mãos — e quem esperou, ainda está esperando.',
+          imageUrl: TWEET_DEFAULT_IMAGES[1], imageDataUrl: null, imageZoom: 1, imagePos: { x: 0, y: 0 }, credit: 'Fonte: inserir fonte da informação aqui',
+        },
+        {
+          id: nextTweetId(),
+          text: 'Não é sobre ter sorte no sorteio.\n\nÉ sobre ter uma estratégia clara pra usar o consórcio a seu favor — com lances planejados e visão de longo prazo.',
+          imageUrl: TWEET_DEFAULT_IMAGES[2], imageDataUrl: null, imageZoom: 1, imagePos: { x: 0, y: 0 }, credit: 'Fonte: inserir fonte da informação aqui',
+        },
+        {
+          id: nextTweetId(),
+          text: 'A pergunta não é "quando vou conseguir comprar".\n\nA pergunta é: você tem um plano rodando agora, ou ainda está só pensando nele?',
+          imageUrl: TWEET_DEFAULT_IMAGES[3], imageDataUrl: null, imageZoom: 1, imagePos: { x: 0, y: 0 }, credit: 'Fonte: inserir fonte da informação aqui',
+        },
+      ],
+    },
+  };
+
+  // ---- Logo ----
+  const fileLogo = document.getElementById('fileLogo');
+  const logoThumb = document.getElementById('logoThumb');
+  const logoFilename = document.getElementById('logoFilename');
+
+  fileLogo.addEventListener('change', function () {
+    const file = fileLogo.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function () {
+      state.logoDataUrl = reader.result;
+      const img = new Image();
+      img.onload = function () { state.logoImg = img; };
+      img.src = reader.result;
+      logoThumb.src = reader.result;
+      logoFilename.textContent = file.name;
+      renderCarouselTab();
+    };
+    reader.readAsDataURL(file);
+  });
+
+  // ---------------------------------------------------------------------
+  // Carousel Studio — aba. Modelo 1 (Padrão Tecnológico) renderiza o HTML
+  // embutido num <iframe srcdoc>, injetando o logo compartilhado da aba
+  // Roteiro. Modelo 2 (Estilo Tweet/X) é montado ao vivo no próprio
+  // documento (não num iframe) porque cada página é editável — texto e
+  // imagem por página, vindos do state.tweetCarousel.
+  // ---------------------------------------------------------------------
+  function logoMarkHtml() {
+    if (state.logoDataUrl) {
+      return '<img src="' + state.logoDataUrl + '" class="logo-mark" alt="B4 Business" style="width:100%;height:100%;object-fit:contain;">';
+    }
+    return '<div style="width:100%;height:100%;border-radius:10px;background:linear-gradient(135deg,#17e6c9,#0b8f79);display:flex;align-items:center;justify-content:center;font-family:\'Sora\',sans-serif;font-weight:800;color:#04342c;font-size:15px;">B4</div>';
+  }
+
+  const csFrameModel1 = document.getElementById('csFrameModel1');
+
+  function renderCarouselTab() {
+    const mark = logoMarkHtml();
+    if (CAROUSEL_MODEL_APOSENTADORIA_HTML) {
+      csFrameModel1.srcdoc = CAROUSEL_MODEL_APOSENTADORIA_HTML
+        .replaceAll('{{LOGO_MARK}}', mark)
+        .replaceAll('{{ZOOM_1}}', state.carousel1Zoom[1])
+        .replaceAll('{{ZOOM_2}}', state.carousel1Zoom[2])
+        .replaceAll('{{ZOOM_5}}', state.carousel1Zoom[5])
+        .replaceAll('{{POSX_1}}', state.carousel1Pos[1].x).replaceAll('{{POSY_1}}', state.carousel1Pos[1].y)
+        .replaceAll('{{POSX_2}}', state.carousel1Pos[2].x).replaceAll('{{POSY_2}}', state.carousel1Pos[2].y)
+        .replaceAll('{{POSX_5}}', state.carousel1Pos[5].x).replaceAll('{{POSY_5}}', state.carousel1Pos[5].y);
+    }
+  }
+  renderCarouselTab();
+
+  // Recebe a posição arrastada dentro do iframe do Padrão Tecnológico (ver
+  // script injetado no template) e guarda no state — sem re-renderizar o
+  // iframe aqui, pra não interromper o próprio arrasto em andamento (o
+  // preview já está mostrando a posição nova ao vivo, dentro do iframe).
+  window.addEventListener('message', function (e) {
+    const data = e.data;
+    if (!data || data.type !== 'b4-photo-pos') return;
+    const slide = Number(data.slide);
+    if (!state.carousel1Pos[slide]) return;
+    state.carousel1Pos[slide] = { x: Number(data.x) || 0, y: Number(data.y) || 0 };
+  });
+
+  // ---- Sliders de zoom das fotos do Padrão Tecnológico ----
+  ['1', '2', '5'].forEach(function (slideNum) {
+    const range = document.getElementById('cs1Zoom' + slideNum);
+    const label = document.getElementById('cs1Zoom' + slideNum + 'Label');
+    if (!range) return;
+    range.addEventListener('input', function () {
+      state.carousel1Zoom[slideNum] = Number(range.value) / 100;
+      if (label) label.textContent = range.value + '%';
+      renderCarouselTab();
+    });
+  });
+
+  // ---- Botões "Centralizar" — reseta a posição arrastada da foto ----
+  ['1', '2', '5'].forEach(function (slideNum) {
+    const resetBtn = document.getElementById('cs1Reset' + slideNum);
+    if (!resetBtn) return;
+    resetBtn.addEventListener('click', function () {
+      state.carousel1Pos[slideNum] = { x: 0, y: 0 };
+      renderCarouselTab();
+    });
+  });
+
+  const csSwitchButtons = [document.getElementById('csBtnModel1'), document.getElementById('csBtnModel2')];
+  const csWraps = { model1: document.getElementById('csModel1Wrap'), model2: document.getElementById('csModel2Wrap') };
+  csSwitchButtons.forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      csSwitchButtons.forEach(function (b) { b.classList.remove('active'); });
+      btn.classList.add('active');
+      const target = btn.getAttribute('data-cs-target');
+      Object.keys(csWraps).forEach(function (key) {
+        csWraps[key].style.display = key === target ? 'block' : 'none';
+      });
+    });
+  });
+
+  // ---- Estilo Tweet/X — editor de páginas + preview ao vivo ----
+  function escapeHtml(str) {
+    return String(str == null ? '' : str)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+
+  function tweetSlideImageSrc(slide) {
+    return slide.imageDataUrl || slide.imageUrl || '';
+  }
+
+  // Regra de "texto se adapta ao espaço amarelo": sem medir o DOM (o card é
+  // renderizado escalado várias vezes na esteira), estimamos o tamanho da
+  // fonte pelo comprimento do texto. A imagem agora tem altura fixa (metade
+  // da proporção 4:5 do card — "zona vermelha"), então o texto sempre tem a
+  // mesma área grande sobrando acima dela ("zona amarela") pra crescer;
+  // sem imagem, o texto usa o cartão inteiro e aceita ainda mais caracteres
+  // antes de encolher.
+  function tweetBodyFontSize(text, hasImage) {
+    const len = (text || '').length;
+    const steps = hasImage
+      ? [[100, 46], [180, 40], [280, 34], [420, 28], [Infinity, 24]]
+      : [[300, 46], [500, 40], [750, 34], [1100, 28], [Infinity, 24]];
+    for (let i = 0; i < steps.length; i++) {
+      if (len <= steps[i][0]) return steps[i][1];
+    }
+    return 24;
+  }
+
+  function renderTweetSlideCardHtml(slide, index, total) {
+    const imgSrc = tweetSlideImageSrc(slide);
+    const zoom = slide.imageZoom || 1;
+    const pos = slide.imagePos || { x: 0, y: 0 };
+    const imageHtml = imgSrc ? '<img data-tweet-slide-id="' + slide.id + '" src="' + imgSrc + '" alt="Imagem da página ' + (index + 1) + '" style="transform:scale(' + zoom + ') translate(' + pos.x + '%, ' + pos.y + '%);">' : '';
+    const dotsHtml = Array.from({ length: total }).map(function (_, i) {
+      return '<div class="tw-dot' + (i === index ? ' active' : '') + '"></div>';
+    }).join('');
+    const bodyHtml = escapeHtml(slide.text || 'Escreva o texto desta página ao lado...').replace(/\n/g, '<br>');
+    const fontSize = tweetBodyFontSize(slide.text, !!imgSrc);
+    const creditText = escapeHtml(slide.credit || 'Fonte: inserir fonte da informação aqui');
+    return (
+      '<div class="tw-card">' +
+        '<div class="tw-header">' +
+          '<img class="tw-avatar" src="' + TWEET_PROFILE.avatar + '" alt="Matheus Serpa">' +
+          '<div class="tw-namecol">' +
+            '<div class="tw-name-row">' + escapeHtml(TWEET_PROFILE.name) + ' ' + TWEET_CHECK_SVG + '</div>' +
+            '<div class="tw-handle">' + escapeHtml(TWEET_PROFILE.handle) + '</div>' +
+          '</div>' +
+        '</div>' +
+        '<div class="tw-body-wrap' + (imgSrc ? '' : ' no-image') + '">' +
+          '<div class="tw-body" style="font-size:' + fontSize + 'px;">' + bodyHtml + '</div>' +
+          (imgSrc ? '' : '<div class="tw-credit below-text">' + creditText + '</div>') +
+        '</div>' +
+        (imgSrc ?
+          '<div class="tw-image-wrap">' +
+            imageHtml +
+            '<div class="tw-credit on-image">' + creditText + '</div>' +
+            (total > 1 ? '<div class="tw-dots">' + dotsHtml + '</div>' : '') +
+          '</div>'
+          : '') +
+        (total > 1 && imgSrc ? '<div class="tw-arrow left">‹</div><div class="tw-arrow right">›</div>' : '') +
+      '</div>'
+    );
+  }
+
+  const csTweetRail = document.getElementById('csTweetRail');
+  const csTweetEditor = document.getElementById('csTweetEditor');
+
+  function renderTweetRail() {
+    const slides = state.tweetCarousel.slides;
+    csTweetRail.innerHTML = slides.map(function (slide, i) {
+      return '<div class="tw-frame">' + renderTweetSlideCardHtml(slide, i, slides.length) + '</div>';
+    }).join('');
+    attachTweetImageDrag();
+  }
+
+  // ---- Arrastar imagem de fundo de cada página do carrossel Estilo Tweet/X ----
+  function attachTweetImageDrag() {
+    const CLAMP = 45;
+    csTweetRail.querySelectorAll('.tw-image-wrap img[data-tweet-slide-id]').forEach(function (imgEl) {
+      let dragging = false, startX = 0, startY = 0, baseX = 0, baseY = 0, frameRect = null;
+      imgEl.addEventListener('pointerdown', function (e) {
+        const id = imgEl.getAttribute('data-tweet-slide-id');
+        const slide = state.tweetCarousel.slides.find(function (s) { return s.id === id; });
+        if (!slide) return;
+        dragging = true;
+        startX = e.clientX; startY = e.clientY;
+        const pos = slide.imagePos || { x: 0, y: 0 };
+        baseX = pos.x; baseY = pos.y;
+        frameRect = imgEl.parentElement.getBoundingClientRect();
+        try { imgEl.setPointerCapture(e.pointerId); } catch (err) {}
+        imgEl.style.cursor = 'grabbing';
+        e.preventDefault();
+      });
+      imgEl.addEventListener('pointermove', function (e) {
+        if (!dragging) return;
+        const id = imgEl.getAttribute('data-tweet-slide-id');
+        const slide = state.tweetCarousel.slides.find(function (s) { return s.id === id; });
+        if (!slide) return;
+        const zoom = slide.imageZoom || 1;
+        const dxPct = ((e.clientX - startX) / (frameRect.width * zoom)) * 100;
+        const dyPct = ((e.clientY - startY) / (frameRect.height * zoom)) * 100;
+        const nx = Math.max(-CLAMP, Math.min(CLAMP, baseX + dxPct));
+        const ny = Math.max(-CLAMP, Math.min(CLAMP, baseY + dyPct));
+        slide.imagePos = { x: nx, y: ny };
+        imgEl.style.transform = 'scale(' + zoom + ') translate(' + nx + '%, ' + ny + '%)';
+      });
+      function endDrag() {
+        if (!dragging) return;
+        dragging = false;
+        imgEl.style.cursor = 'grab';
+      }
+      imgEl.addEventListener('pointerup', endDrag);
+      imgEl.addEventListener('pointercancel', endDrag);
+    });
+  }
+
+  function renderTweetEditor() {
+    const slides = state.tweetCarousel.slides;
+    csTweetEditor.innerHTML = '';
+    slides.forEach(function (slide, i) {
+      const hasImg = !!tweetSlideImageSrc(slide);
+      const zoomPct = Math.round((slide.imageZoom || 1) * 100);
+      const row = document.createElement('div');
+      row.className = 'cs-tweet-slide-edit';
+      row.innerHTML =
+        '<div class="cs-tweet-row"><b>Página ' + (i + 1) + '</b>' +
+        (slides.length > 1 ? '<button type="button" class="btn btn-sm btn-tweet-remove" data-id="' + slide.id + '">Remover</button>' : '') +
+        '</div>' +
+        '<textarea data-id="' + slide.id + '" placeholder="Texto desta página...">' + escapeHtml(slide.text || '') + '</textarea>' +
+        '<div class="cs-tweet-row">' +
+          '<img class="cs-tweet-thumb" src="' + tweetSlideImageSrc(slide) + '" alt="">' +
+          '<input type="file" accept="image/*" class="tweet-image-input" data-id="' + slide.id + '">' +
+          (hasImg ? '<button type="button" class="btn btn-sm btn-tweet-remove-img" data-id="' + slide.id + '" title="Remover imagem desta página">Remover imagem</button>' : '') +
+        '</div>' +
+        '<div class="cs-tweet-row" style="' + (hasImg ? '' : 'display:none;') + '" data-zoom-row="' + slide.id + '">' +
+          '<label style="font-size:11.5px;color:var(--text-dim);flex:0 0 auto;">Zoom da imagem</label>' +
+          '<input type="range" class="tweet-zoom-input" data-id="' + slide.id + '" min="100" max="250" step="5" value="' + zoomPct + '" style="flex:1;">' +
+          '<span class="tweet-zoom-label" style="font-size:11.5px;color:var(--text-dim);flex:0 0 auto;">' + zoomPct + '%</span>' +
+          '<button type="button" class="btn btn-sm tweet-reset-pos" data-id="' + slide.id + '" title="Centralizar a posição da imagem arrastada">Centralizar</button>' +
+        '</div>' +
+        '<label style="font-size:10.5px;color:var(--text-dim);display:block;margin:6px 0 3px;">Crédito (de onde veio essa informação)</label>' +
+        '<input type="text" class="tweet-credit-input" data-id="' + slide.id + '" placeholder="Ex: Fonte: IBGE, 2024 / Foto: Nome do fotógrafo" value="' + escapeHtml(slide.credit || '') + '" style="width:100%;background:var(--panel-2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:inherit;font-size:11.5px;padding:7px 8px;">';
+      csTweetEditor.appendChild(row);
+    });
+
+    csTweetEditor.querySelectorAll('textarea').forEach(function (ta) {
+      ta.addEventListener('input', function () {
+        const slide = state.tweetCarousel.slides.find(function (s) { return s.id === ta.getAttribute('data-id'); });
+        if (slide) { slide.text = ta.value; renderTweetRail(); }
+      });
+    });
+    csTweetEditor.querySelectorAll('.tweet-credit-input').forEach(function (inp) {
+      inp.addEventListener('input', function () {
+        const slide = state.tweetCarousel.slides.find(function (s) { return s.id === inp.getAttribute('data-id'); });
+        if (slide) { slide.credit = inp.value; renderTweetRail(); }
+      });
+    });
+    csTweetEditor.querySelectorAll('.tweet-zoom-input').forEach(function (range) {
+      range.addEventListener('input', function () {
+        const id = range.getAttribute('data-id');
+        const slide = state.tweetCarousel.slides.find(function (s) { return s.id === id; });
+        if (!slide) return;
+        slide.imageZoom = Number(range.value) / 100;
+        const row = range.closest('.cs-tweet-row');
+        const lbl = row ? row.querySelector('.tweet-zoom-label') : null;
+        if (lbl) lbl.textContent = range.value + '%';
+        renderTweetRail();
+      });
+    });
+    csTweetEditor.querySelectorAll('.tweet-reset-pos').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        const id = btn.getAttribute('data-id');
+        const slide = state.tweetCarousel.slides.find(function (s) { return s.id === id; });
+        if (!slide) return;
+        slide.imagePos = { x: 0, y: 0 };
+        renderTweetRail();
+      });
+    });
+    csTweetEditor.querySelectorAll('.tweet-image-input').forEach(function (input) {
+      input.addEventListener('change', function () {
+        const file = input.files[0];
+        if (!file) return;
+        const id = input.getAttribute('data-id');
+        const reader = new FileReader();
+        reader.onload = function () {
+          const slide = state.tweetCarousel.slides.find(function (s) { return s.id === id; });
+          if (slide) {
+            slide.imageDataUrl = reader.result;
+            if (!slide.imageZoom) slide.imageZoom = 1;
+            renderTweetEditor(); renderTweetRail();
+          }
+        };
+        reader.readAsDataURL(file);
+      });
+    });
+    csTweetEditor.querySelectorAll('.btn-tweet-remove').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        const id = btn.getAttribute('data-id');
+        state.tweetCarousel.slides = state.tweetCarousel.slides.filter(function (s) { return s.id !== id; });
+        renderTweetEditor(); renderTweetRail();
+      });
+    });
+    csTweetEditor.querySelectorAll('.btn-tweet-remove-img').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        const id = btn.getAttribute('data-id');
+        const slide = state.tweetCarousel.slides.find(function (s) { return s.id === id; });
+        if (slide) {
+          slide.imageUrl = null;
+          slide.imageDataUrl = null;
+          renderTweetEditor(); renderTweetRail();
+        }
+      });
+    });
+  }
+
+  document.getElementById('btnAddTweetSlide').addEventListener('click', function () {
+    const nextImg = TWEET_DEFAULT_IMAGES[state.tweetCarousel.slides.length % TWEET_DEFAULT_IMAGES.length];
+    state.tweetCarousel.slides.push({ id: nextTweetId(), text: '', imageUrl: nextImg, imageDataUrl: null, imageZoom: 1, imagePos: { x: 0, y: 0 }, credit: 'Fonte: inserir fonte da informação aqui' });
+    renderTweetEditor(); renderTweetRail();
+  });
+
+  // ---------------------------------------------------------------------
+  // Carousel Studio — geração automática de páginas (Estilo Tweet/X):
+  // o usuário cola um texto único, escolhe quantas páginas quer, e a gente
+  // quebra o texto em frases/parágrafos e distribui em N páginas com
+  // tamanho parecido, sem cortar frase no meio.
+  // ---------------------------------------------------------------------
+  function autogenSplitSentences(text) {
+    const normalized = (text || '').replace(/\r\n/g, '\n').trim();
+    if (!normalized) return [];
+    // Quebra em parágrafos (linha em branco) primeiro, pra não misturar
+    // ideias de parágrafos diferentes numa mesma frase.
+    const paragraphs = normalized.split(/\n\s*\n/).map(function (p) { return p.trim(); }).filter(Boolean);
+    const sentences = [];
+    paragraphs.forEach(function (p) {
+      const parts = p.split(/(?<=[.!?…])(?=\s|\n|$)/g).map(function (s) { return s.trim(); }).filter(Boolean);
+      if (parts.length) {
+        sentences.push.apply(sentences, parts);
+      } else {
+        sentences.push(p);
+      }
+    });
+    return sentences.length ? sentences : [normalized];
+  }
+
+  function autogenDistributeIntoPages(sentences, pageCount) {
+    const total = sentences.length;
+    const n = Math.max(1, Math.min(pageCount, total));
+    if (n <= 1) return [sentences.join(' ')];
+    const lens = sentences.map(function (s) { return s.length; });
+    const totalLen = lens.reduce(function (a, b) { return a + b; }, 0);
+    const target = totalLen / n;
+    const pages = [];
+    let start = 0;
+    for (let groupIdx = 0; groupIdx < n; groupIdx++) {
+      const isLastGroup = groupIdx === n - 1;
+      if (isLastGroup) {
+        pages.push(sentences.slice(start).join(' '));
+        break;
+      }
+      // Nunca pode consumir tanto que sobrem menos frases do que grupos
+      // restantes (cada grupo precisa de pelo menos 1 frase).
+      const remainingGroupsAfter = n - groupIdx - 1;
+      const maxEnd = total - remainingGroupsAfter;
+      let cum = 0, i = start;
+      while (i < maxEnd) { cum += lens[i]; i++; if (cum >= target) break; }
+      const end = Math.max(start + 1, Math.min(i, maxEnd));
+      pages.push(sentences.slice(start, end).join(' '));
+      start = end;
+    }
+    return pages;
+  }
+
+  // ---------------------------------------------------------------------
+  // Briefing estruturado colado (ex: tabela com colunas "#", "Papel" e
+  // "Texto do slide", geralmente vindo de Notion/Sheets/Docs, com título
+  // do carrossel e paleta de cores nas linhas antes da tabela) — a gente
+  // reconhece esse formato, ignora tudo que não é o texto de cada slide
+  // (título, paleta, números de linha, coluna "Papel") e usa só a coluna
+  // de texto, já uma página por linha. Se não achar uma tabela assim, cai
+  // no modo genérico (quebra por frase/parágrafo + quantidade de páginas).
+  // ---------------------------------------------------------------------
+  function splitRowCells(line) {
+    if (line.indexOf('\t') !== -1) {
+      return line.split('\t').map(function (c) { return c.trim(); });
+    }
+    const trimmed = line.trim();
+    if (/^\|.*\|$/.test(trimmed)) {
+      const parts = trimmed.split('|').map(function (c) { return c.trim(); });
+      return parts.slice(1, parts.length - 1);
+    }
+    // Sem tabulação nem "|": tenta separar por 2+ espaços seguidos (colunas
+    // alinhadas manualmente). Linhas de texto corrido normal não têm isso.
+    return line.split(/\s{2,}/).map(function (c) { return c.trim(); });
+  }
+
+  // Extrai um "(Fonte: ...)" no final do texto do slide e move pro campo de
+  // crédito da página (que já existe no editor), em vez de deixar essa
+  // informação repetida dentro do texto visível do slide.
+  function extractTrailingFonte(text) {
+    const m = text.match(/\s*\(\s*Fonte:\s*([^)]+)\)\s*$/i);
+    if (!m) return { text: text, credit: null };
+    return { text: text.slice(0, m.index).trim(), credit: 'Fonte: ' + m[1].trim() };
+  }
+
+  function parseSlideTableBrief(rawText) {
+    const lines = rawText.replace(/\r\n/g, '\n').split('\n');
+    let headerIdx = -1;
+    for (let i = 0; i < lines.length; i++) {
+      if (!lines[i].trim()) continue;
+      const cells = splitRowCells(lines[i]).filter(function (c) { return c !== ''; });
+      if (cells.length >= 2 && cells.some(function (c) { return /^texto(\s+do\s+slide)?$/i.test(c); })) {
+        headerIdx = i;
+        break;
+      }
+    }
+    if (headerIdx === -1) return null; // não é um briefing em formato de tabela — segue fluxo normal
+
+    const entries = [];
+    for (let i = headerIdx + 1; i < lines.length; i++) {
+      const line = lines[i];
+      if (!line.trim()) continue;
+      if (/^[\s|:\-]+$/.test(line)) continue; // linha separadora de tabela markdown (---|---|---)
+      const cells = splitRowCells(line);
+      if (cells.length < 2) continue;
+      const rawCellText = (cells[cells.length - 1] || '').trim();
+      if (!rawCellText) continue;
+      entries.push(extractTrailingFonte(rawCellText));
+    }
+    return entries.length ? entries : null;
+  }
+
+  // Gera as páginas do modelo Estilo Tweet/X a partir de um texto único +
+  // quantidade de páginas desejada. Usado tanto pelo card "Gerar carrossel
+  // automaticamente" (aba Carousel Studio) quanto pelo botão "Gerar
+  // carrossel" da aba Texto / Script — mesma lógica, duas entradas.
+  function runAutogenCarousel(rawText, requestedCountRaw) {
+    rawText = (rawText || '').trim();
+    if (!rawText) { alert('Cole ou escreva o texto do carrossel antes de gerar as páginas.'); return false; }
+
+    const tableEntries = parseSlideTableBrief(rawText);
+
+    let pageEntries;
+    if (tableEntries) {
+      pageEntries = tableEntries;
+    } else {
+      let requestedCount = parseInt(requestedCountRaw, 10);
+      if (!requestedCount || requestedCount < 1) requestedCount = 1;
+      if (requestedCount > 15) requestedCount = 15;
+      const sentences = autogenSplitSentences(rawText);
+      const pageTexts = autogenDistributeIntoPages(sentences, requestedCount);
+      pageEntries = pageTexts.map(function (text) { return { text: text, credit: null }; });
+    }
+
+    const hasExistingContent = state.tweetCarousel.slides.some(function (s) { return (s.text || '').trim(); });
+    if (hasExistingContent) {
+      const ok = confirm('Isso vai substituir as ' + state.tweetCarousel.slides.length + ' página(s) atuais deste modelo pelas novas páginas geradas. Continuar?');
+      if (!ok) return false;
+    }
+
+    state.tweetCarousel.slides = pageEntries.map(function (entry, i) {
+      return {
+        id: nextTweetId(),
+        text: entry.text,
+        imageUrl: TWEET_DEFAULT_IMAGES[i % TWEET_DEFAULT_IMAGES.length],
+        imageDataUrl: null, imageZoom: 1, imagePos: { x: 0, y: 0 },
+        credit: entry.credit || 'Fonte: inserir fonte da informação aqui',
+      };
+    });
+
+    renderTweetEditor(); renderTweetRail();
+    if (tableEntries) {
+      showMbToast('Carrossel gerado com ' + pageEntries.length + ' página(s) a partir da tabela colada — título, paleta e textos extras foram ignorados automaticamente.');
+    } else {
+      const requestedCount = Math.max(1, Math.min(parseInt(requestedCountRaw, 10) || 1, 15));
+      if (pageEntries.length < requestedCount) {
+        showMbToast('Gerado com ' + pageEntries.length + ' página(s) — não havia texto suficiente pra ' + requestedCount + '.');
+      } else {
+        showMbToast('Carrossel gerado com ' + pageEntries.length + ' página(s). Ajuste o texto e o crédito de cada uma se precisar.');
+      }
+    }
+    return true;
+  }
+
+  document.getElementById('btnAutogenCarousel').addEventListener('click', function () {
+    const textEl = document.getElementById('csAutogenText');
+    const countEl = document.getElementById('csAutogenCount');
+    runAutogenCarousel(textEl.value, countEl.value);
+  });
+
+  renderTweetEditor();
+  renderTweetRail();
+
+  // ---------------------------------------------------------------------
+  // Banco de Mídia — biblioteca curada de fotos gratuitas (ver MEDIA_BANK
+  // no topo do arquivo). Busca/filtra localmente (sem servidor) e manda
+  // pro Videos Studio (nova parte animada com B-roll) ou pro Carousel
+  // Studio Estilo Tweet/X (nova página) com um clique, ou baixa o arquivo
+  // original direto pro computador.
+  // ---------------------------------------------------------------------
+  let mbToastTimer = null;
+  function showMbToast(msg) {
+    let toastEl = document.getElementById('mbToast');
+    if (!toastEl) {
+      toastEl = document.createElement('div');
+      toastEl.id = 'mbToast';
+      toastEl.className = 'mb-toast';
+      document.body.appendChild(toastEl);
+    }
+    toastEl.textContent = msg;
+    toastEl.classList.add('show');
+    if (mbToastTimer) clearTimeout(mbToastTimer);
+    mbToastTimer = setTimeout(function () { toastEl.classList.remove('show'); }, 2600);
+  }
+
+  function downloadRemoteFile(url, filename) {
+    fetch(url, { mode: 'cors' })
+      .then(function (res) {
+        if (!res.ok) throw new Error('status ' + res.status);
+        return res.blob();
+      })
+      .then(function (blob) {
+        const blobUrl = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = blobUrl; a.download = filename;
+        document.body.appendChild(a); a.click(); a.remove();
+        setTimeout(function () { URL.revokeObjectURL(blobUrl); }, 10000);
+      })
+      .catch(function () {
+        // Se o navegador bloquear o fetch cross-origin, abre a imagem numa
+        // aba nova — dá pra salvar com clique direito > Salvar imagem como.
+        window.open(url, '_blank');
+        showMbToast('Abrindo em nova aba — clique com o botão direito e "Salvar imagem como".');
+      });
+  }
+
+  const mediaBankGrid = document.getElementById('mediaBankGrid');
+  const mediaBankChips = document.getElementById('mediaBankChips');
+  const mediaBankSearch = document.getElementById('mediaBankSearch');
+
+  function renderMediaBankChips() {
+    const cats = ['todas'].concat(Object.keys(MEDIA_BANK_CATEGORIES));
+    mediaBankChips.innerHTML = cats.map(function (cat) {
+      const label = cat === 'todas' ? 'Todas' : MEDIA_BANK_CATEGORIES[cat];
+      const active = state.mediaBankFilter.category === cat ? ' active' : '';
+      return '<button type="button" class="mb-chip' + active + '" data-cat="' + cat + '">' + label + '</button>';
+    }).join('');
+    mediaBankChips.querySelectorAll('.mb-chip').forEach(function (chip) {
+      chip.addEventListener('click', function () {
+        state.mediaBankFilter.category = chip.getAttribute('data-cat');
+        renderMediaBankChips();
+        renderMediaBankGrid();
+      });
+    });
+  }
+
+  function renderMediaBankGrid() {
+    const cat = state.mediaBankFilter.category;
+    const query = (state.mediaBankFilter.query || '').trim().toLowerCase();
+    const items = MEDIA_BANK.filter(function (item) {
+      if (cat !== 'todas' && item.category !== cat) return false;
+      if (!query) return true;
+      const haystack = (item.label + ' ' + MEDIA_BANK_CATEGORIES[item.category]).toLowerCase();
+      return haystack.indexOf(query) !== -1;
+    });
+    if (!items.length) {
+      mediaBankGrid.innerHTML = '<div class="mb-empty">Nada encontrado pra essa busca. Tente outra palavra-chave ou categoria.</div>';
+      return;
+    }
+    mediaBankGrid.innerHTML = items.map(function (item) {
+      return (
+        '<div class="mb-card">' +
+          '<div class="mb-thumb-wrap"><img src="' + item.url + '" alt="' + escapeHtmlAttr(item.label) + '" loading="lazy"></div>' +
+          '<div class="mb-body">' +
+            '<div class="mb-credit">' + escapeHtmlAttr(item.label) + '<br>' + escapeHtmlAttr(item.credit) + '</div>' +
+            '<div class="mb-actions">' +
+              '<button type="button" class="btn btn-sm" data-mb-action="download" data-mb-id="' + item.id + '">Baixar</button>' +
+              '<button type="button" class="btn btn-sm" data-mb-action="carousel" data-mb-id="' + item.id + '">Usar no Carousel (Tweet/X)</button>' +
+            '</div>' +
+          '</div>' +
+        '</div>'
+      );
+    }).join('');
+    mediaBankGrid.querySelectorAll('[data-mb-action]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        const id = btn.getAttribute('data-mb-id');
+        const item = MEDIA_BANK.find(function (m) { return m.id === id; });
+        if (!item) return;
+        const action = btn.getAttribute('data-mb-action');
+        if (action === 'download') {
+          downloadRemoteFile(item.url, item.id + '.jpg');
+        } else if (action === 'carousel') {
+          state.tweetCarousel.slides.push({
+            id: nextTweetId(), text: '', imageUrl: item.url, imageDataUrl: item.url,
+            imageZoom: 1, imagePos: { x: 0, y: 0 }, credit: 'Foto: ' + item.credit,
+          });
+          renderTweetEditor(); renderTweetRail();
+          document.getElementById('tabBtnCarousel').click();
+          document.getElementById('csBtnModel2').click();
+          showMbToast('Adicionado como nova página no Carousel Estilo Tweet/X.');
+        }
+      });
+    });
+  }
+
+  function escapeHtmlAttr(str) {
+    return String(str == null ? '' : str)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+
+  mediaBankSearch.addEventListener('input', function () {
+    state.mediaBankFilter.query = mediaBankSearch.value;
+    renderMediaBankGrid();
+  });
+
+  renderMediaBankChips();
+  renderMediaBankGrid();
+
+  // ---------------------------------------------------------------------
+  // Materiais — upload de imagens próprias, guardadas no projeto
+  // ---------------------------------------------------------------------
+  let materialIdCounter = 1;
+  function nextMaterialId() { return 'mat-' + (materialIdCounter++); }
+
+  const fileMaterials = document.getElementById('fileMaterials');
+  const materialsGrid = document.getElementById('materialsGrid');
+
+  function renderMaterialsGrid() {
+    if (!materialsGrid) return;
+    if (!state.materials.length) {
+      materialsGrid.innerHTML = '<div class="note">Nenhuma imagem enviada ainda.</div>';
+      return;
+    }
+    materialsGrid.innerHTML = state.materials.map(function (m) {
+      return '' +
+        '<div class="mb-card" data-material-id="' + escapeHtmlAttr(m.id) + '">' +
+        '  <div class="mb-thumb-wrap"><img src="' + escapeHtmlAttr(m.dataUrl) + '" alt="' + escapeHtmlAttr(m.name) + '"></div>' +
+        '  <div class="mb-actions" style="display:flex;flex-direction:column;gap:6px;padding:8px;">' +
+        '    <div class="filename" style="font-size:11px;" title="' + escapeHtmlAttr(m.name) + '">' + escapeHtmlAttr(m.name) + '</div>' +
+        '    <button type="button" class="btn btn-sm btn-use-material" data-material-id="' + escapeHtmlAttr(m.id) + '">Usar como página (Tweet/X)</button>' +
+        '    <button type="button" class="btn btn-sm btn-danger btn-remove-material" data-material-id="' + escapeHtmlAttr(m.id) + '">Remover</button>' +
+        '  </div>' +
+        '</div>';
+    }).join('');
+
+    materialsGrid.querySelectorAll('.btn-use-material').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        const id = btn.getAttribute('data-material-id');
+        const material = state.materials.find(function (m) { return m.id === id; });
+        if (!material) return;
+        state.tweetCarousel.slides.push({
+          id: nextTweetId(), text: '', imageUrl: material.dataUrl, imageDataUrl: material.dataUrl,
+          imageZoom: 1, imagePos: { x: 0, y: 0 }, credit: 'Material próprio: ' + material.name,
+        });
+        renderTweetEditor(); renderTweetRail();
+        document.getElementById('tabBtnCarousel').click();
+        document.getElementById('csBtnModel2').click();
+      });
+    });
+
+    materialsGrid.querySelectorAll('.btn-remove-material').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        const id = btn.getAttribute('data-material-id');
+        state.materials = state.materials.filter(function (m) { return m.id !== id; });
+        renderMaterialsGrid();
+      });
+    });
+  }
+
+  if (fileMaterials) {
+    fileMaterials.addEventListener('change', function () {
+      const files = Array.from(fileMaterials.files || []);
+      if (!files.length) return;
+      let pending = files.length;
+      files.forEach(function (file) {
+        const reader = new FileReader();
+        reader.onload = function () {
+          state.materials.push({ id: nextMaterialId(), name: file.name, dataUrl: reader.result });
+          pending -= 1;
+          if (pending === 0) renderMaterialsGrid();
+        };
+        reader.readAsDataURL(file);
+      });
+      fileMaterials.value = '';
+    });
+  }
+
+  renderMaterialsGrid();
+
+  // ---------------------------------------------------------------------
+  // Texto / Script — roteiro em texto livre, guardado no projeto
+  // ---------------------------------------------------------------------
+  const scriptTextArea = document.getElementById('scriptTextArea');
+  const scriptTextCount = document.getElementById('scriptTextCount');
+  const scriptAutogenCount = document.getElementById('scriptAutogenCount');
+  const btnGenerateFromScript = document.getElementById('btnGenerateFromScript');
+
+  function updateScriptTextCount() {
+    if (!scriptTextCount) return;
+    const len = state.scriptText.length;
+    scriptTextCount.textContent = len + ' caractere' + (len === 1 ? '' : 's');
+  }
+
+  if (scriptTextArea) {
+    scriptTextArea.addEventListener('input', function () {
+      state.scriptText = scriptTextArea.value;
+      updateScriptTextCount();
+    });
+  }
+  updateScriptTextCount();
+
+  // Gera o carrossel direto a partir do script desta aba — mesma lógica do
+  // card "Gerar carrossel automaticamente" da aba Carousel Studio, só que
+  // sem precisar trocar de aba antes. Depois de gerar, leva o usuário até
+  // o resultado (aba Carousel Studio, modelo Estilo Tweet/X).
+  if (btnGenerateFromScript) {
+    btnGenerateFromScript.addEventListener('click', function () {
+      const ok = runAutogenCarousel(scriptTextArea ? scriptTextArea.value : '', scriptAutogenCount ? scriptAutogenCount.value : 5);
+      if (!ok) return;
+      // Mantém o card de geração da aba Carousel Studio em sincronia, caso
+      // o usuário volte lá pra gerar de novo com outro texto/quantidade.
+      const csAutogenText = document.getElementById('csAutogenText');
+      const csAutogenCount = document.getElementById('csAutogenCount');
+      if (csAutogenText) csAutogenText.value = scriptTextArea ? scriptTextArea.value : '';
+      if (csAutogenCount && scriptAutogenCount) csAutogenCount.value = scriptAutogenCount.value;
+      document.getElementById('tabBtnCarousel').click();
+      document.getElementById('csBtnModel2').click();
+    });
+  }
+
+  // ---------------------------------------------------------------------
+  // Salvar / abrir projeto
+  // ---------------------------------------------------------------------
+  document.getElementById('btnSaveProject').addEventListener('click', function () {
+    const data = {
+      version: 2,
+      logoDataUrl: state.logoDataUrl || null,
+      carousel1Zoom: { 1: state.carousel1Zoom[1], 2: state.carousel1Zoom[2], 5: state.carousel1Zoom[5] },
+      carousel1Pos: {
+        1: { x: state.carousel1Pos[1].x, y: state.carousel1Pos[1].y },
+        2: { x: state.carousel1Pos[2].x, y: state.carousel1Pos[2].y },
+        5: { x: state.carousel1Pos[5].x, y: state.carousel1Pos[5].y },
+      },
+      tweetCarousel: {
+        slides: state.tweetCarousel.slides.map(function (s) {
+          return {
+            id: s.id, text: s.text, imageUrl: s.imageUrl || null,
+            imageDataUrl: s.imageDataUrl || null, imageZoom: s.imageZoom || 1,
+            imagePos: { x: (s.imagePos && s.imagePos.x) || 0, y: (s.imagePos && s.imagePos.y) || 0 },
+            credit: s.credit || 'Fonte: inserir fonte da informação aqui',
+          };
+        }),
+      },
+      materials: state.materials.map(function (m) {
+        return { id: m.id, name: m.name, dataUrl: m.dataUrl };
+      }),
+      scriptText: state.scriptText || '',
+    };
+    const blob = new Blob([JSON.stringify(data)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'projeto-b4-carousel-studio.json';
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(function () { URL.revokeObjectURL(url); }, 10000);
+  });
+
+  const fileOpenProject = document.getElementById('fileOpenProject');
+  document.getElementById('btnOpenProject').addEventListener('click', function () { fileOpenProject.click(); });
+  fileOpenProject.addEventListener('change', function () {
+    const file = fileOpenProject.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function () {
+      try {
+        const data = JSON.parse(reader.result);
+        state.logoDataUrl = data.logoDataUrl || null;
+        state.logoImg = null;
+        state.carousel1Zoom = {
+          1: (data.carousel1Zoom && data.carousel1Zoom[1]) || 1,
+          2: (data.carousel1Zoom && data.carousel1Zoom[2]) || 1,
+          5: (data.carousel1Zoom && data.carousel1Zoom[5]) || 1,
+        };
+        state.carousel1Pos = {
+          1: { x: (data.carousel1Pos && data.carousel1Pos[1] && data.carousel1Pos[1].x) || 0, y: (data.carousel1Pos && data.carousel1Pos[1] && data.carousel1Pos[1].y) || 0 },
+          2: { x: (data.carousel1Pos && data.carousel1Pos[2] && data.carousel1Pos[2].x) || 0, y: (data.carousel1Pos && data.carousel1Pos[2] && data.carousel1Pos[2].y) || 0 },
+          5: { x: (data.carousel1Pos && data.carousel1Pos[5] && data.carousel1Pos[5].x) || 0, y: (data.carousel1Pos && data.carousel1Pos[5] && data.carousel1Pos[5].y) || 0 },
+        };
+        ['1', '2', '5'].forEach(function (n) {
+          const range = document.getElementById('cs1Zoom' + n);
+          const label = document.getElementById('cs1Zoom' + n + 'Label');
+          const pct = Math.round(state.carousel1Zoom[n] * 100);
+          if (range) range.value = pct;
+          if (label) label.textContent = pct + '%';
+        });
+        renderCarouselTab();
+        if (state.logoDataUrl) {
+          const limg = new Image();
+          limg.onload = function () { state.logoImg = limg; };
+          limg.src = state.logoDataUrl;
+          logoThumb.src = state.logoDataUrl;
+          logoFilename.textContent = 'Logo carregado do projeto.';
+        } else {
+          logoThumb.removeAttribute('src');
+          logoFilename.textContent = 'Nenhum logo enviado (PNG com fundo transparente).';
+        }
+        const savedTweetSlides = (data.tweetCarousel && data.tweetCarousel.slides) || [];
+        state.tweetCarousel.slides = savedTweetSlides.length
+          ? savedTweetSlides.map(function (s) {
+              return {
+                id: s.id || nextTweetId(), text: s.text || '',
+                imageUrl: s.imageUrl || TWEET_DEFAULT_IMAGES[0],
+                imageDataUrl: s.imageDataUrl || null, imageZoom: s.imageZoom || 1,
+                imagePos: { x: (s.imagePos && s.imagePos.x) || 0, y: (s.imagePos && s.imagePos.y) || 0 },
+                credit: s.credit || 'Fonte: inserir fonte da informação aqui',
+              };
+            })
+          : state.tweetCarousel.slides;
+        renderTweetEditor();
+        renderTweetRail();
+
+        state.materials = Array.isArray(data.materials)
+          ? data.materials.map(function (m) {
+              return { id: m.id || nextMaterialId(), name: m.name || 'Material', dataUrl: m.dataUrl };
+            }).filter(function (m) { return !!m.dataUrl; })
+          : [];
+        renderMaterialsGrid();
+
+        state.scriptText = data.scriptText || '';
+        if (scriptTextArea) scriptTextArea.value = state.scriptText;
+        updateScriptTextCount();
+      } catch (e) {
+        alert('Arquivo de projeto inválido: ' + e.message);
+      }
+      fileOpenProject.value = '';
+    };
+    reader.readAsText(file);
+  });
+
+  // ---------------------------------------------------------------------
+  // Abas
+  // ---------------------------------------------------------------------
+  const tabButtons = [
+    document.getElementById('tabBtnCarousel'),
+    document.getElementById('tabBtnMedia'),
+    document.getElementById('tabBtnMaterials'),
+    document.getElementById('tabBtnScript'),
+  ];
+  const tabPanels = {
+    carousel: document.getElementById('tabPanelCarousel'),
+    media: document.getElementById('tabPanelMedia'),
+    materials: document.getElementById('tabPanelMaterials'),
+    script: document.getElementById('tabPanelScript'),
+  };
+  tabButtons.forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      tabButtons.forEach(function (b) { b.classList.remove('active'); });
+      btn.classList.add('active');
+      const tab = btn.getAttribute('data-tab');
+      Object.keys(tabPanels).forEach(function (key) {
+        tabPanels[key].style.display = key === tab ? 'block' : 'none';
+      });
+    });
+  });
+})();
+</script>
+</body>
+</html>
