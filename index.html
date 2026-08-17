@@ -320,9 +320,17 @@
   .tw-name-row { display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 32px; color: #0f1419; }
   .tw-check { width: 26px; height: 26px; flex: 0 0 auto; }
   .tw-handle { font-size: 26px; color: #697077; }
-  .tw-body-wrap { flex: 1 1 auto; overflow: hidden; padding-bottom: 32px; display: flex; align-items: center; }
+  /* Alinhado ao topo (em vez de centralizado) — assim o perfil "acompanha"
+     a altura do texto: o espaçamento entre cabeçalho e texto fica sempre
+     o mesmo, e é o espaço sobrando (abaixo do texto / acima da imagem)
+     que varia conforme o tamanho do conteúdo, não o contrário. */
+  .tw-body-wrap { flex: 1 1 auto; overflow: hidden; padding-bottom: 32px; display: flex; align-items: flex-start; }
   .tw-body-wrap.no-image { padding-bottom: 0; }
   .tw-text-col { width: 100%; }
+  /* Indicador de continuidade: some quando ainda há mais páginas pra ler.
+     Fica colado no canto inferior direito do bloco de texto, na ponta da
+     folha — sutil, sem competir com os pontos de posição sobre a imagem. */
+  .tw-continue { text-align: right; margin-top: 16px; font-size: 30px; font-weight: 800; letter-spacing: 5px; color: rgba(15, 20, 25, .32); }
   /* Título opcional (1ª linha antes de uma linha em branco no texto da
      página — ver convenção documentada na aba Texto / Script): maior e
      mais forte que o corpo, pensado pra capa e CTA. */
@@ -365,7 +373,11 @@
   .b4-logo-mark img, .b4-logo-mark > div { width: 100%; height: 100%; }
   .b4-logo span:last-child { font-family: 'Sora', 'Inter', sans-serif; font-weight: 800; font-size: 20px; letter-spacing: .04em; }
   .b4-page-index { font-size: 18px; color: #00C9A7; letter-spacing: .08em; font-weight: 600; }
-  .b4-text-col { flex: 1 1 auto; overflow: hidden; display: flex; flex-direction: column; justify-content: center; padding-bottom: 24px; }
+  /* Alinhado ao topo (mesma regra do Estilo Tweet/X): o cabeçalho/logo
+     acompanha a altura do texto com espaçamento fixo, em vez do texto
+     flutuar centralizado no espaço disponível. */
+  .b4-text-col { flex: 1 1 auto; overflow: hidden; display: flex; flex-direction: column; justify-content: flex-start; padding-bottom: 24px; }
+  .b4-continue { text-align: right; margin-top: 14px; font-size: 26px; font-weight: 800; letter-spacing: 4px; color: rgba(0, 201, 167, .38); }
   .b4-title { font-family: 'Sora', 'Inter', sans-serif; font-weight: 800; line-height: 1.18; color: #FFFFFF; margin-bottom: 16px; white-space: pre-wrap; }
   .b4-body { line-height: 1.5; color: #FFFFFF; white-space: pre-wrap; }
   /* Negrito sutil: peso um pouco maior + leve toque teal (desaturado, não
@@ -550,6 +562,17 @@
         — título do carrossel, paleta de cores, número/papel da linha e um
         eventual "(Fonte: ...)" no final do texto, que vira o crédito da
         página em vez de aparecer no corpo do slide.
+        <br><br>
+        Se você colar um <b>briefing detalhado por slide</b> (blocos como
+        <code>Slide 1 — Capa · Texto</code> seguidos de campos
+        <code>Título:</code>, <code>Subtexto:</code>/<code>Texto:</code> e
+        <code>Negrito: "termo1", "termo2"</code>), o app também reconhece
+        automaticamente: usa só o conteúdo de cada campo, uma página por
+        slide, já aplica o negrito nos termos listados, e descarta tudo que
+        é anotação de produção — número do slide, categoria/pilar (Capa,
+        Contexto, CTA...), tipo de mídia (Foto/Texto) e observações de
+        referência de imagem entre parênteses — nada disso aparece pro
+        público final.
         <br><br>
         <b>Título e negrito dentro do texto de cada página</b> (funciona
         colando texto corrido ou dentro de uma célula da tabela): coloque
@@ -903,6 +926,8 @@
       ? '<div class="tw-title" style="font-size:' + titleFontSize + 'px;">' + applyInlineBold(escapeHtml(parsed.title)) + '</div>'
       : '';
     const creditText = escapeHtml(slide.credit || 'Fonte: inserir fonte da informação aqui');
+    const hasMore = index < total - 1;
+    const continueHtml = hasMore ? '<div class="tw-continue">&bull;&bull;&bull;</div>' : '';
     return (
       '<div class="tw-card">' +
         '<div class="tw-header">' +
@@ -916,6 +941,7 @@
           '<div class="tw-text-col">' +
             titleHtml +
             '<div class="tw-body" style="font-size:' + fontSize + 'px;">' + bodyHtml + '</div>' +
+            continueHtml +
           '</div>' +
           (imgSrc ? '' : '<div class="tw-credit below-text">' + creditText + '</div>') +
         '</div>' +
@@ -967,6 +993,8 @@
     // detalhada da fonte do dado continua guardada no campo de crédito de
     // cada página (visível no editor), pra usar na legenda do post.
     const creditText = escapeHtml(slide.credit || 'Fonte: inserir fonte da informação aqui');
+    const hasMore = index < total - 1;
+    const continueHtml = hasMore ? '<div class="b4-continue">&bull;&bull;&bull;</div>' : '';
     return (
       '<div class="b4-card">' +
         '<div class="b4-topbar">' +
@@ -976,6 +1004,7 @@
         '<div class="b4-text-col' + (imgSrc ? '' : ' full') + '">' +
           titleHtml +
           '<div class="b4-body" style="font-size:' + fontSize + 'px;">' + bodyHtml + '</div>' +
+          continueHtml +
         '</div>' +
         (imgSrc ?
           '<div class="b4-image-wrap">' + imageHtml + '</div>'
@@ -1244,6 +1273,104 @@
     return { text: text.slice(0, m.index).trim(), credit: 'Fonte: ' + m[1].trim() };
   }
 
+  // Reconhece um briefing "detalhado" por slide — o formato de produção
+  // usado em roteiros mais completos, com um cabeçalho por página
+  // ("Slide 1 — Capa · Texto", "Slide 6 — Educação 1 · Foto (imóvel /
+  // carta de crédito)") seguido de campos rotulados (Título, Subtítulo/
+  // Subtexto, Texto, Negrito). Nada disso é pra aparecer pro público final
+  // no carrossel — só o conteúdo de fato (título/subtexto/texto), já com
+  // os termos listados em "Negrito:" convertidos pra **negrito**. O
+  // número do slide, a categoria/pilar (Capa, Contexto, Conflito...), o
+  // tipo de mídia (Foto/Texto) e qualquer anotação de referência de imagem
+  // entre parênteses são descartados automaticamente.
+  const SLIDE_BRIEF_HEADER_RE = /^slide\s+\d+\b/i;
+  const SLIDE_BRIEF_LABEL_RE = /^(t[íi]tulo(?:\s*\/\s*n[úu]mero)?|subt[íi]tulo|subtexto|texto)\b[^:]*:\s*(.*)$/i;
+  const SLIDE_BRIEF_NEGRITO_RE = /^negrito\s*:\s*(.*)$/i;
+
+  function escapeRegExp(str) {
+    return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  }
+
+  // Envolve, dentro de `str`, a primeira ocorrência literal de cada termo
+  // de `terms` com `**...**` — sem duplicar se o termo já estiver marcado.
+  function applyBoldTerms(str, terms) {
+    let out = str;
+    (terms || []).forEach(function (term) {
+      const t = (term || '').trim();
+      if (!t || out.indexOf('**' + t + '**') !== -1) return;
+      const re = new RegExp('(' + escapeRegExp(t) + ')', 'i');
+      if (re.test(out)) out = out.replace(re, '**$1**');
+    });
+    return out;
+  }
+
+  function parseSlideLabeledBrief(rawText) {
+    const lines = rawText.replace(/\r\n/g, '\n').split('\n');
+    const headerIdxs = [];
+    for (let i = 0; i < lines.length; i++) {
+      if (SLIDE_BRIEF_HEADER_RE.test(lines[i].trim())) headerIdxs.push(i);
+    }
+    if (headerIdxs.length === 0) return null; // não é esse formato — segue fluxo normal
+
+    const entries = [];
+    for (let b = 0; b < headerIdxs.length; b++) {
+      const start = headerIdxs[b] + 1;
+      const end = b + 1 < headerIdxs.length ? headerIdxs[b + 1] : lines.length;
+      const block = lines.slice(start, end);
+
+      let title = null, subtext = null, texto = null;
+      const boldTerms = [];
+      let i = 0;
+      while (i < block.length) {
+        const raw = block[i];
+        const trimmed = raw.trim();
+        if (!trimmed) { i++; continue; }
+
+        const negritoMatch = trimmed.match(SLIDE_BRIEF_NEGRITO_RE);
+        if (negritoMatch) {
+          const re = /"([^"]+)"/g;
+          let m;
+          while ((m = re.exec(negritoMatch[1]))) boldTerms.push(m[1]);
+          i++; continue;
+        }
+
+        const labelMatch = trimmed.match(SLIDE_BRIEF_LABEL_RE);
+        if (labelMatch) {
+          const label = labelMatch[1].toLowerCase().replace(/\s+/g, '');
+          let value = labelMatch[2].trim();
+          i++;
+          if (!value) {
+            const valueLines = [];
+            while (i < block.length) {
+              const t = block[i].trim();
+              if (!t || SLIDE_BRIEF_NEGRITO_RE.test(t) || SLIDE_BRIEF_LABEL_RE.test(t)) break;
+              valueLines.push(t);
+              i++;
+            }
+            value = valueLines.join(' ').trim();
+          }
+          if (label.indexOf('título') === 0 || label.indexOf('titulo') === 0) title = value;
+          else if (label.indexOf('subt') === 0) subtext = value;
+          else if (label === 'texto') texto = value;
+          continue;
+        }
+
+        i++; // linha não reconhecida dentro do bloco — ignora (anotação solta)
+      }
+
+      let bodyText = (subtext || texto || '').trim();
+      let titleText = title ? title.trim() : null;
+      if (!titleText && !bodyText) continue;
+
+      if (titleText) titleText = applyBoldTerms(titleText, boldTerms);
+      if (bodyText) bodyText = applyBoldTerms(bodyText, boldTerms);
+
+      const text = titleText && bodyText ? (titleText + '\n\n' + bodyText) : (titleText || bodyText);
+      entries.push({ text: text, credit: null });
+    }
+    return entries.length ? entries : null;
+  }
+
   function parseSlideTableBrief(rawText) {
     const lines = rawText.replace(/\r\n/g, '\n').split('\n');
     let headerIdx = -1;
@@ -1280,10 +1407,13 @@
     if (!rawText) { alert('Cole ou escreva o texto do carrossel antes de gerar as páginas.'); return false; }
 
     const tableEntries = parseSlideTableBrief(rawText);
+    const labeledEntries = !tableEntries ? parseSlideLabeledBrief(rawText) : null;
 
     let pageEntries;
     if (tableEntries) {
       pageEntries = tableEntries;
+    } else if (labeledEntries) {
+      pageEntries = labeledEntries;
     } else {
       let requestedCount = parseInt(requestedCountRaw, 10);
       if (!requestedCount || requestedCount < 1) requestedCount = 1;
@@ -1312,6 +1442,8 @@
     renderTweetEditor(); renderTweetRail();
     if (tableEntries) {
       showMbToast('Carrossel gerado com ' + pageEntries.length + ' página(s) a partir da tabela colada — título, paleta e textos extras foram ignorados automaticamente.');
+    } else if (labeledEntries) {
+      showMbToast('Carrossel gerado com ' + pageEntries.length + ' página(s) a partir do briefing detalhado — número do slide, categoria e anotações de produção foram removidos automaticamente, mantendo só o texto final pro público.');
     } else {
       const requestedCount = Math.max(1, Math.min(parseInt(requestedCountRaw, 10) || 1, 15));
       if (pageEntries.length < requestedCount) {
