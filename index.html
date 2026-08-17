@@ -364,13 +364,13 @@
 <div class="app">
   <div class="sidebar" style="flex:1 1 auto;max-width:900px;margin:0 auto;border-right:none;">
     <div class="tabs">
-      <button class="tab-btn active" id="tabBtnCarousel" data-tab="carousel">Carousel Studio</button>
+      <button class="tab-btn active" id="tabBtnScript" data-tab="script">Texto / Script</button>
+      <button class="tab-btn" id="tabBtnCarousel" data-tab="carousel">Carousel Studio</button>
       <button class="tab-btn" id="tabBtnMedia" data-tab="media">Banco de Mídia</button>
       <button class="tab-btn" id="tabBtnMaterials" data-tab="materials">Materiais</button>
-      <button class="tab-btn" id="tabBtnScript" data-tab="script">Texto / Script</button>
     </div>
 
-    <div id="tabPanelCarousel" class="tab-panel">
+    <div id="tabPanelCarousel" class="tab-panel" style="display:none;">
       <h2>Carousel Studio</h2>
 
       <h2>Logo B4</h2>
@@ -385,11 +385,11 @@
       </div>
 
       <div class="cs-switcher">
-        <button class="cs-switch-btn active" id="csBtnModel1" data-cs-target="model1">Padrão Tecnológico</button>
-        <button class="cs-switch-btn" id="csBtnModel2" data-cs-target="model2">Estilo Tweet/X</button>
+        <button class="cs-switch-btn active" id="csBtnModel2" data-cs-target="model2">Estilo Tweet/X</button>
+        <button class="cs-switch-btn" id="csBtnModel1" data-cs-target="model1">Padrão Tecnológico (opcional)</button>
       </div>
 
-      <div id="csModel1Wrap">
+      <div id="csModel1Wrap" style="display:none;">
         <div class="cs-iframe-wrap">
           <iframe id="csFrameModel1" class="cs-iframe" title="Modelo — Padrão Tecnológico"></iframe>
         </div>
@@ -432,7 +432,7 @@
         </div>
       </div>
 
-      <div id="csModel2Wrap" style="display:none;">
+      <div id="csModel2Wrap">
         <div class="card cs-autogen-card" style="margin-bottom:14px;">
           <div style="font-size:13px;font-weight:700;margin-bottom:8px;">Gerar carrossel automaticamente</div>
           <div style="font-size:11.5px;color:var(--text-dim);margin-bottom:10px;">
@@ -507,7 +507,7 @@
       <div class="mb-grid" id="materialsGrid"></div>
     </div>
 
-    <div id="tabPanelScript" class="tab-panel" style="display:none;">
+    <div id="tabPanelScript" class="tab-panel">
       <h2>Texto / Script</h2>
       <div class="note" style="margin-bottom:12px;">
         Cole aqui o roteiro/script do vídeo (ou o texto do conteúdo), escolha
