@@ -313,7 +313,11 @@
      inteira: altura fixa em metade da proporção 4:5 do card, ou seja, a
      imagem sozinha fica no formato ~8:5 — "zona vermelha" — cantos
      arredondados). Sem imagem, o texto usa livremente o cartão inteiro. */
-  .tw-card { width: 1080px; height: 1350px; transform: scale(.2796); transform-origin: top left; box-sizing: border-box; padding: 64px; display: flex; flex-direction: column; background: #ffffff; font-family: 'Inter', Arial, sans-serif; color: #0f1419; }
+  /* O grupo perfil + texto (+ imagem, quando houver) é tratado como um
+     bloco só e centralizado dentro do quadrado 4:5 — em vez de ficar
+     sempre colado no topo/base, sobra o mesmo respiro acima e abaixo
+     quando o conteúdo não preenche o cartão inteiro. */
+  .tw-card { width: 1080px; height: 1350px; transform: scale(.2796); transform-origin: top left; box-sizing: border-box; padding: 64px; display: flex; flex-direction: column; justify-content: center; background: #ffffff; font-family: 'Inter', Arial, sans-serif; color: #0f1419; }
   .tw-header { display: flex; align-items: flex-start; gap: 20px; padding-bottom: 32px; flex: 0 0 auto; }
   .tw-avatar { width: 88px; height: 88px; border-radius: 50%; object-fit: cover; flex: 0 0 auto; background: #eee; }
   .tw-namecol { display: flex; flex-direction: column; gap: 4px; padding-top: 6px; }
@@ -324,7 +328,7 @@
      a altura do texto: o espaçamento entre cabeçalho e texto fica sempre
      o mesmo, e é o espaço sobrando (abaixo do texto / acima da imagem)
      que varia conforme o tamanho do conteúdo, não o contrário. */
-  .tw-body-wrap { flex: 1 1 auto; overflow: hidden; padding-bottom: 32px; display: flex; align-items: flex-start; }
+  .tw-body-wrap { flex: 0 1 auto; overflow: hidden; padding-bottom: 32px; display: flex; align-items: flex-start; }
   .tw-body-wrap.no-image { padding-bottom: 0; }
   .tw-text-col { width: 100%; }
   /* Indicador de continuidade: some quando ainda há mais páginas pra ler.
@@ -367,6 +371,11 @@
     background: radial-gradient(ellipse 900px 700px at 12% 0%, #16324f 0%, transparent 55%), linear-gradient(160deg, #0D1B2A 0%, #0f2438 50%, #0D1B2A 100%);
     font-family: 'Inter', Arial, sans-serif; color: #FFFFFF;
   }
+  /* Agrupa logo + texto + imagem num bloco só, que fica centralizado
+     verticalmente dentro do espaço acima do rodapé — mesma regra de
+     "centralizar dentro do quadrado 4:5" do Estilo Tweet/X, mas mantendo
+     o rodapé (@perfil / crédito) sempre colado na base do cartão. */
+  .b4-content { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; justify-content: center; }
   .b4-topbar { display: flex; align-items: center; justify-content: space-between; flex: 0 0 auto; padding-bottom: 34px; }
   .b4-logo { display: flex; align-items: center; gap: 14px; }
   .b4-logo-mark { display: block; width: 46px; height: 46px; flex: 0 0 auto; overflow: hidden; border-radius: 8px; }
@@ -375,8 +384,9 @@
   .b4-page-index { font-size: 18px; color: #00C9A7; letter-spacing: .08em; font-weight: 600; }
   /* Alinhado ao topo (mesma regra do Estilo Tweet/X): o cabeçalho/logo
      acompanha a altura do texto com espaçamento fixo, em vez do texto
-     flutuar centralizado no espaço disponível. */
-  .b4-text-col { flex: 1 1 auto; overflow: hidden; display: flex; flex-direction: column; justify-content: flex-start; padding-bottom: 24px; }
+     flutuar centralizado no espaço disponível. O bloco inteiro (ver
+     .b4-content acima) é que fica centralizado no cartão. */
+  .b4-text-col { flex: 0 1 auto; overflow: hidden; display: flex; flex-direction: column; justify-content: flex-start; padding-bottom: 24px; }
   .b4-continue { text-align: right; margin-top: 14px; font-size: 26px; font-weight: 800; letter-spacing: 4px; color: rgba(0, 201, 167, .38); }
   .b4-title { font-family: 'Sora', 'Inter', sans-serif; font-weight: 800; line-height: 1.18; color: #FFFFFF; margin-bottom: 16px; white-space: pre-wrap; }
   .b4-body { line-height: 1.5; color: #FFFFFF; white-space: pre-wrap; }
@@ -997,18 +1007,20 @@
     const continueHtml = hasMore ? '<div class="b4-continue">&bull;&bull;&bull;</div>' : '';
     return (
       '<div class="b4-card">' +
-        '<div class="b4-topbar">' +
-          '<div class="b4-logo"><span class="b4-logo-mark">' + logoMarkHtml() + '</span><span>B4 BUSINESS</span></div>' +
-          '<div class="b4-page-index">' + String(index + 1).padStart(2, '0') + ' / ' + String(total).padStart(2, '0') + '</div>' +
+        '<div class="b4-content">' +
+          '<div class="b4-topbar">' +
+            '<div class="b4-logo"><span class="b4-logo-mark">' + logoMarkHtml() + '</span><span>B4 BUSINESS</span></div>' +
+            '<div class="b4-page-index">' + String(index + 1).padStart(2, '0') + ' / ' + String(total).padStart(2, '0') + '</div>' +
+          '</div>' +
+          '<div class="b4-text-col' + (imgSrc ? '' : ' full') + '">' +
+            titleHtml +
+            '<div class="b4-body" style="font-size:' + fontSize + 'px;">' + bodyHtml + '</div>' +
+            continueHtml +
+          '</div>' +
+          (imgSrc ?
+            '<div class="b4-image-wrap">' + imageHtml + '</div>'
+            : '') +
         '</div>' +
-        '<div class="b4-text-col' + (imgSrc ? '' : ' full') + '">' +
-          titleHtml +
-          '<div class="b4-body" style="font-size:' + fontSize + 'px;">' + bodyHtml + '</div>' +
-          continueHtml +
-        '</div>' +
-        (imgSrc ?
-          '<div class="b4-image-wrap">' + imageHtml + '</div>'
-          : '') +
         '<div class="b4-footer">' +
           '<span class="b4-handle">@b4businessoficial</span>' +
           '<span class="b4-credit">' + creditText + '</span>' +
