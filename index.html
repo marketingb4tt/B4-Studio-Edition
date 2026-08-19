@@ -447,13 +447,15 @@
     <div id="tabPanelCarousel" class="tab-panel" style="display:none;">
       <h2>Carousel Studio</h2>
 
-      <h2>Logo B4</h2>
-      <div class="card">
-        <div class="thumb-row">
-          <img id="logoThumb" class="thumb" style="width:80px;height:56px;object-fit:contain;" />
-          <div>
-            <input type="file" id="fileLogo" accept="image/*" />
-            <div class="filename" id="logoFilename">Nenhum logo enviado (PNG com fundo transparente).</div>
+      <div id="csLogoSection" style="display:none;">
+        <h2>Logo B4</h2>
+        <div class="card">
+          <div class="thumb-row">
+            <img id="logoThumb" class="thumb" style="width:80px;height:56px;object-fit:contain;" />
+            <div>
+              <input type="file" id="fileLogo" accept="image/*" />
+              <div class="filename" id="logoFilename">Nenhum logo enviado (PNG com fundo transparente).</div>
+            </div>
           </div>
         </div>
       </div>
@@ -787,6 +789,7 @@
 
   const csSwitchButtons = [document.getElementById('csBtnModel1'), document.getElementById('csBtnModel2')];
   const csWraps = { model1: document.getElementById('csModel1Wrap'), model2: document.getElementById('csModel2Wrap') };
+  const csLogoSection = document.getElementById('csLogoSection');
 
   // Estilo do carrossel é um estado único (state.carouselStyle) com duas UIs
   // que o controlam em sincronia: o switcher dentro de Carousel Studio e a
@@ -803,6 +806,10 @@
     scriptStyleButtons.forEach(function (b) {
       b.classList.toggle('active', b.getAttribute('data-cs-target') === state.carouselStyle);
     });
+    // Logo só é usado no Padrão Tecnológico — no Estilo Tweet/X (modelo
+    // principal) esse card fica escondido, sem sentido pra quem só usa o
+    // Tweet/X nunca precisar ver isso.
+    if (csLogoSection) csLogoSection.style.display = state.carouselStyle === 'model1' ? 'block' : 'none';
   }
 
   csSwitchButtons.forEach(function (btn) {
