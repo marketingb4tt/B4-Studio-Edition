@@ -8,15 +8,20 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
+  /* Paleta alinhada ao site oficial da B4 (b4business.com.br): navy quase
+     preto, azul-ciano de destaque, cantos retos/discretos em vez de muito
+     arredondados. Isso é só o visual do APP (abas, cards, botões) — as
+     cores do cartão do carrossel em si (Estilo Tweet/X e Padrão
+     Tecnológico) continuam as da identidade B4 Business já validada. */
   :root {
-    --bg: #0d0d12;
-    --panel: #16161d;
-    --panel-2: #1d1d27;
-    --border: #2a2a36;
-    --text: #f2f2f5;
-    --text-dim: #9797a6;
-    --accent: #17E6C9;
-    --accent-2: #0B8F79;
+    --bg: #050B14;
+    --panel: #0A1524;
+    --panel-2: #0F1D30;
+    --border: rgba(255,255,255,0.09);
+    --text: #F5FBFF;
+    --text-dim: #7C93A6;
+    --accent: #06C8F4;
+    --accent-2: #0499B8;
     --danger: #ff6b6b;
     --ok: #4ade80;
   }
@@ -31,7 +36,7 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 14px 22px;
+    padding: 16px 24px;
     border-bottom: 1px solid var(--border);
     background: var(--panel);
     flex-wrap: wrap;
@@ -87,13 +92,13 @@
     .tab-btn { flex: 1 1 140px; }
     .grid-3 { grid-template-columns: 1fr; }
   }
-  h2 { font-size: 13px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-dim); margin: 22px 0 10px; }
+  h2 { font-size: 12px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-dim); margin: 20px 0 8px; font-weight: 700; }
   h2:first-child { margin-top: 0; }
   .card {
     background: var(--panel);
     border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 14px;
+    border-radius: 4px;
+    padding: 16px;
   }
   .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
   .field { margin-bottom: 10px; }
@@ -103,30 +108,32 @@
     background: var(--panel-2);
     border: 1px solid var(--border);
     color: var(--text);
-    border-radius: 8px;
-    padding: 8px 10px;
+    border-radius: 4px;
+    padding: 9px 11px;
     font-family: inherit;
     font-size: 13px;
   }
+  select:focus, input[type=text]:focus, textarea:focus { outline: none; border-color: var(--accent); }
   textarea { resize: vertical; min-height: 70px; line-height: 1.4; }
   input[type=file] { font-size: 12px; color: var(--text-dim); }
   .btn {
-    background: var(--panel-2);
+    background: transparent;
     border: 1px solid var(--border);
     color: var(--text);
-    border-radius: 8px;
-    padding: 8px 14px;
-    font-size: 13px;
-    font-weight: 600;
+    border-radius: 4px;
+    padding: 9px 16px;
+    font-size: 12.5px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
     cursor: pointer;
     font-family: inherit;
   }
-  .btn:hover { border-color: var(--accent); }
+  .btn:hover { border-color: var(--accent); color: var(--accent); }
   .btn:disabled { opacity: 0.45; cursor: not-allowed; }
-  .btn-primary { background: var(--accent); color: #16130a; border-color: var(--accent); }
-  .btn-primary:hover { filter: brightness(1.05); }
+  .btn-primary { background: var(--accent); color: #03101C; border-color: var(--accent); text-transform: uppercase; }
+  .btn-primary:hover { filter: brightness(1.08); color: #03101C; }
   .btn-danger { color: var(--danger); }
-  .btn-sm { padding: 4px 9px; font-size: 12px; }
+  .btn-sm { padding: 5px 10px; font-size: 11.5px; }
   .part-card { margin-bottom: 14px; }
   .part-card-head {
     display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;
@@ -170,7 +177,7 @@
   .overlay-badge-layer { position: absolute; inset: 0; pointer-events: none; z-index: 5; }
   .overlay-badge {
     position: absolute; transform: translate(-50%, -50%);
-    background: var(--accent); color: #0b0b12; font-family: 'Sora', Arial, sans-serif;
+    background: var(--accent); color: #03101C; font-family: 'Sora', Arial, sans-serif;
     font-weight: 800; font-size: 13px; letter-spacing: .02em; text-transform: uppercase;
     padding: 7px 14px; border-radius: 999px; white-space: nowrap; cursor: grab;
     box-shadow: 0 6px 16px rgba(0,0,0,.4); pointer-events: auto; touch-action: none;
@@ -189,7 +196,7 @@
   .et-seg {
     position: relative; height: 100%; flex: 0 0 auto; display: flex; align-items: center; justify-content: center;
     overflow: hidden; cursor: grab; border-right: 1px solid var(--bg);
-    font-size: 10px; font-weight: 700; color: #0b0b12; user-select: none; touch-action: none;
+    font-size: 10px; font-weight: 700; color: #03101C; user-select: none; touch-action: none;
   }
   .et-seg:last-child { border-right: none; }
   .et-seg.animado { background: #4be9d3; }
@@ -203,7 +210,7 @@
   .et-trim-handle.left { left: 0; } .et-trim-handle.right { right: 0; }
   .et-trim-handle::after {
     content: ''; position: absolute; top: 50%; left: 50%; width: 3px; height: 16px;
-    background: #0b0b12; transform: translate(-50%, -50%); border-radius: 2px;
+    background: #03101C; transform: translate(-50%, -50%); border-radius: 2px;
   }
   .et-drop-indicator {
     position: absolute; top: -3px; bottom: -3px; width: 3px; background: var(--text);
@@ -237,36 +244,40 @@
   .controls input[type=range] { flex: 1; }
   .time-label { font-size: 12px; color: var(--text-dim); font-variant-numeric: tabular-nums; white-space: nowrap; }
   .export-box { width: 100%; max-width: 340px; display: flex; flex-direction: column; gap: 8px; }
-  .note { font-size: 11.5px; color: var(--text-dim); line-height: 1.5; background: var(--panel); border: 1px solid var(--border); border-radius: 10px; padding: 10px 12px; }
+  .note { font-size: 11px; color: var(--text-dim); line-height: 1.5; background: transparent; border-left: 2px solid var(--border); border-radius: 0; padding: 2px 0 2px 10px; }
   .note b { color: var(--text); }
-  .tabs { display: flex; gap: 6px; margin-bottom: 16px; }
+  .tabs { display: flex; gap: 4px; margin-bottom: 18px; border-bottom: 1px solid var(--border); }
   .tab-btn {
     flex: 1;
-    background: var(--panel);
-    border: 1px solid var(--border);
+    background: transparent;
+    border: none;
+    border-bottom: 2px solid transparent;
     color: var(--text-dim);
-    border-radius: 8px;
-    padding: 9px 10px;
-    font-size: 13px;
+    border-radius: 0;
+    padding: 10px 10px;
+    font-size: 12.5px;
     font-weight: 700;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
     cursor: pointer;
     font-family: inherit;
   }
-  .tab-btn.active { color: #16130a; background: var(--accent); border-color: var(--accent); }
-  .cs-switcher { display: flex; gap: 8px; background: var(--panel); border: 1px solid var(--border); padding: 6px; border-radius: 12px; margin-bottom: 14px; }
+  .tab-btn.active { color: var(--accent); background: transparent; border-bottom-color: var(--accent); }
+  .cs-switcher { display: flex; gap: 6px; background: var(--panel); border: 1px solid var(--border); padding: 4px; border-radius: 4px; margin-bottom: 14px; }
   .cs-switch-btn {
     flex: 1;
     padding: 10px 12px;
-    border-radius: 8px;
+    border-radius: 3px;
     border: none;
     cursor: pointer;
     font-family: inherit;
-    font-weight: 600;
-    font-size: 12.5px;
+    font-weight: 700;
+    font-size: 12px;
+    letter-spacing: 0.02em;
     color: var(--text-dim);
     background: transparent;
   }
-  .cs-switch-btn.active { background: linear-gradient(135deg,#17e6c9,#0b8f79); color: #04342c; }
+  .cs-switch-btn.active { background: linear-gradient(135deg,#06C8F4,#0499B8); color: #03101C; }
   .cs-switch-btn:disabled { opacity: .45; cursor: not-allowed; }
   .mb-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
   .mb-chip {
@@ -274,9 +285,9 @@
     border-radius: 999px; padding: 5px 12px; font-size: 12px; font-weight: 600;
     cursor: pointer; font-family: inherit;
   }
-  .mb-chip.active { background: var(--accent); color: #16130a; border-color: var(--accent); }
+  .mb-chip.active { background: var(--accent); color: #03101C; border-color: var(--accent); }
   .mb-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; margin-top: 12px; }
-  .mb-card { background: var(--panel); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; display: flex; flex-direction: column; }
+  .mb-card { background: var(--panel); border: 1px solid var(--border); border-radius: 4px; overflow: hidden; display: flex; flex-direction: column; }
   .mb-thumb-wrap { position: relative; width: 100%; aspect-ratio: 3 / 4; background: var(--panel-2); overflow: hidden; }
   .mb-thumb-wrap img, .mb-thumb-wrap video { width: 100%; height: 100%; object-fit: cover; display: block; }
   .mb-video-badge {
@@ -291,7 +302,7 @@
   .mb-empty { grid-column: 1 / -1; text-align: center; color: var(--text-dim); font-size: 13px; padding: 30px 10px; }
   .mb-toast {
     position: fixed; bottom: 22px; left: 50%; transform: translateX(-50%);
-    background: var(--accent); color: #16130a; font-weight: 700; font-size: 13px;
+    background: var(--accent); color: #03101C; font-weight: 700; font-size: 13px;
     padding: 10px 18px; border-radius: 999px; box-shadow: 0 10px 30px rgba(0,0,0,.4);
     z-index: 999; opacity: 0; pointer-events: none; transition: opacity .2s ease;
   }
@@ -299,11 +310,11 @@
   .cs-iframe-wrap { width: 100%; border-radius: 12px; overflow: hidden; border: 1px solid var(--border); background: #05090f; }
   .cs-iframe { width: 100%; height: 640px; border: none; display: block; }
   .cs-tweet-editor { display: flex; flex-direction: column; gap: 10px; margin-bottom: 12px; }
-  .cs-tweet-slide-edit { background: var(--panel); border: 1px solid var(--border); border-radius: 10px; padding: 12px; display: flex; flex-direction: column; gap: 8px; }
+  .cs-tweet-slide-edit { background: var(--panel); border: 1px solid var(--border); border-radius: 4px; padding: 14px; display: flex; flex-direction: column; gap: 8px; }
   .cs-tweet-slide-edit textarea { width: 100%; min-height: 70px; background: var(--panel-2); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-family: inherit; font-size: 12.5px; padding: 8px; resize: vertical; }
   .cs-tweet-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
   .cs-tweet-thumb { width: 52px; height: 52px; border-radius: 8px; object-fit: cover; background: var(--panel-2); flex: 0 0 auto; }
-  .cs-tweet-rail-wrap { border-radius: 12px; overflow: hidden; border: 1px solid var(--border); background: #05090f; padding: 16px; margin-top: 4px; }
+  .cs-tweet-rail-wrap { border-radius: 4px; overflow: hidden; border: 1px solid var(--border); background: #05090f; padding: 16px; margin-top: 4px; }
   .cs-tweet-rail { display: flex; gap: 20px; overflow-x: auto; padding-bottom: 8px; }
   .tw-frame { flex: 0 0 auto; width: 302px; height: 378px; overflow: hidden; position: relative; border-radius: 6px; box-shadow: 0 8px 30px rgba(0,0,0,.45); background: #fff; }
   /* Regras de borda do card Tweet/X (padrão pra todos os posts deste modelo):
@@ -404,7 +415,7 @@
   .b4-credit { color: #B0B0B0; max-width: 60%; text-align: right; line-height: 1.4; }
   .chat-messages { display: flex; flex-direction: column; gap: 8px; margin-top: 14px; max-height: 50vh; overflow-y: auto; padding-right: 2px; }
   .bubble { padding: 10px 12px; border-radius: 10px; font-size: 13px; line-height: 1.5; white-space: pre-wrap; }
-  .bubble.user { background: var(--accent); color: #16130a; align-self: flex-end; max-width: 85%; font-weight: 600; }
+  .bubble.user { background: var(--accent); color: #03101C; align-self: flex-end; max-width: 85%; font-weight: 600; }
   .bubble.assistant { background: var(--panel-2); border: 1px solid var(--border); align-self: flex-start; max-width: 92%; }
   ::-webkit-scrollbar { width: 10px; }
   ::-webkit-scrollbar-thumb { background: #2a2a36; border-radius: 6px; }
@@ -452,28 +463,23 @@
         <button class="cs-switch-btn" id="csBtnModel1" data-cs-target="model1">Padrão Tecnológico</button>
       </div>
 
-      <div class="note" style="margin-bottom:14px;">
-        Os dois modelos usam o <b>mesmo conteúdo</b> (texto, título, negrito,
-        imagem e crédito de cada página) — só muda o visual. Troque de
-        modelo a qualquer momento sem perder o que já foi escrito; edite o
-        texto mais abaixo, e veja o resultado nos dois estilos aqui em cima.
+      <div class="card cs-autogen-card" style="margin-bottom:16px;">
+        <div style="font-size:13px;font-weight:700;margin-bottom:10px;">Gerar carrossel automaticamente</div>
+        <textarea id="csAutogenText" placeholder="Cole aqui o texto completo do carrossel..." style="width:100%;min-height:110px;background:var(--panel-2);border:1px solid var(--border);border-radius:4px;color:var(--text);font-family:inherit;font-size:12.5px;padding:9px 11px;resize:vertical;"></textarea>
+        <div class="cs-tweet-row" style="margin-top:10px;">
+          <label style="font-size:11.5px;color:var(--text-dim);flex:0 0 auto;">Páginas</label>
+          <input type="number" id="csAutogenCount" min="1" max="15" value="5" style="width:60px;background:var(--panel-2);border:1px solid var(--border);border-radius:4px;color:var(--text);font-family:inherit;font-size:12.5px;padding:7px 8px;">
+          <button type="button" class="btn btn-primary" id="btnAutogenCarousel" style="margin-left:auto;">Gerar páginas</button>
+        </div>
       </div>
 
       <div id="csModel2Wrap" style="margin-bottom:20px;">
         <div class="cs-tweet-rail-wrap">
           <div class="cs-tweet-rail" id="csTweetRail"></div>
         </div>
-        <div class="note" style="margin-top:12px;">
-          Perfil fixo neste modelo: foto, nome e selo de verificado de
-          <b>Matheus Serpa | Consórcio</b> (@matheushserpa), a partir do print
-          que você enviou. Sem imagem enviada numa página, uso uma foto de
-          banco (Unsplash) como referência até você trocar.
-        </div>
-        <div class="note" style="margin-top:8px;">
-          Pra ajustar o zoom da imagem de cada página, use o controle no
-          editor abaixo. Pra reposicionar, arraste a imagem direto dentro do
-          card no preview (segure e arraste); o botão <b>Centralizar</b>
-          volta a posição pro centro.
+        <div class="note" style="margin-top:10px;">
+          Perfil fixo: Matheus Serpa | Consórcio. Arraste a imagem pra
+          reposicionar; zoom e crédito ficam no editor abaixo.
         </div>
       </div>
 
@@ -481,31 +487,12 @@
         <div class="cs-tweet-rail-wrap">
           <div class="cs-tweet-rail" id="csBrandRail"></div>
         </div>
-        <div class="note" style="margin-top:12px;">
-          Identidade visual oficial da <b>B4 Business</b>: fundo navy
-          (<code>#0D1B2A</code>), acentos teal (<code>#00C9A7</code>), logo
-          B4 no topo (envie no card <b>Logo B4</b> acima) e crédito da fonte
-          em cinza claro no rodapé. Usa o mesmo texto/título/negrito/imagem
-          de cada página do editor abaixo — gere ou edite ali, o preview
-          atualiza nos dois modelos ao mesmo tempo.
+        <div class="note" style="margin-top:10px;">
+          Identidade oficial B4 Business — mesmo texto/imagem do editor
+          abaixo, logo enviado no card <b>Logo B4</b>.
         </div>
       </div>
 
-      <div class="card cs-autogen-card" style="margin-bottom:14px;">
-        <div style="font-size:13px;font-weight:700;margin-bottom:8px;">Gerar carrossel automaticamente</div>
-        <div style="font-size:11.5px;color:var(--text-dim);margin-bottom:10px;">
-          Cole ou escreva aqui o texto completo do carrossel, escolha em quantas
-          páginas ele deve ser dividido e o app quebra o texto sozinho, criando
-          cada página já com o texto pronto (dá pra ajustar cada uma depois).
-          Isso substitui as páginas atuais.
-        </div>
-        <textarea id="csAutogenText" placeholder="Cole aqui o texto completo do carrossel..." style="width:100%;min-height:110px;background:var(--panel-2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:inherit;font-size:12.5px;padding:8px 10px;resize:vertical;"></textarea>
-        <div class="cs-tweet-row" style="margin-top:10px;">
-          <label style="font-size:11.5px;color:var(--text-dim);flex:0 0 auto;">Quantidade de páginas</label>
-          <input type="number" id="csAutogenCount" min="1" max="15" value="5" style="width:70px;background:var(--panel-2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:inherit;font-size:12.5px;padding:6px 8px;">
-          <button type="button" class="btn" id="btnAutogenCarousel" style="margin-left:auto;">Gerar páginas</button>
-        </div>
-      </div>
       <div class="cs-tweet-editor" id="csTweetEditor"></div>
       <button class="btn" id="btnAddTweetSlide">+ Adicionar página</button>
     </div>
@@ -513,14 +500,8 @@
     <div id="tabPanelMedia" class="tab-panel" style="display:none;">
       <h2>Banco de Mídia</h2>
       <div class="note" style="margin-bottom:12px;">
-        Fotos gratuitas (Unsplash e Pixabay, uso livre — sem direitos
-        autorais) direto aqui dentro. Busque por tema, baixe o arquivo
-        original ou mande com um clique pra virar imagem de página no
-        Carousel Studio (Estilo Tweet/X).
-        <b>Não é possível baixar fotos do Instagram, TikTok, YouTube ou
-        Pinterest por aqui</b> — isso violaria os Termos de Uso dessas
-        plataformas (a maioria proíbe até coleta automática/scraping) e
-        quase sempre envolveria reusar conteúdo de terceiros sem licença.
+        Fotos gratuitas (Unsplash/Pixabay). Busque, baixe ou mande direto
+        pro carrossel com um clique.
       </div>
       <div class="card">
         <div class="field" style="margin-bottom:0;">
@@ -561,40 +542,15 @@
       </div>
 
       <div class="note" style="margin-bottom:12px;">
-        Cole aqui o roteiro/script do vídeo (ou o texto do conteúdo), escolha
-        em quantas páginas o carrossel deve ser dividido e clique em
-        <b>Gerar carrossel</b> — o app quebra o texto sozinho e já monta cada
-        página no modelo escolhido acima (isso substitui as páginas atuais).
-        O texto fica salvo junto com o projeto mesmo sem gerar.
+        Cole o roteiro, escolha o nº de páginas e clique em <b>Gerar
+        carrossel</b> — substitui as páginas atuais.
         <br><br>
-        Se você colar um briefing com tabela (colunas como
-        <b>#, Papel, Texto do slide</b>), o app reconhece o formato
-        automaticamente: usa só o texto de cada linha, uma página por linha
-        (a quantidade acima é ignorada nesse caso), e já limpa textos extras
-        — título do carrossel, paleta de cores, número/papel da linha e um
-        eventual "(Fonte: ...)" no final do texto, que vira o crédito da
-        página em vez de aparecer no corpo do slide.
+        Também reconhece automaticamente <b>tabela</b> (colunas #, Papel,
+        Texto do slide) e <b>briefing detalhado</b> (Slide N, Título/Texto,
+        Negrito: "..."), já limpando o que não é pro público final.
         <br><br>
-        Se você colar um <b>briefing detalhado por slide</b> (blocos como
-        <code>Slide 1 — Capa · Texto</code> seguidos de campos
-        <code>Título:</code>, <code>Subtexto:</code>/<code>Texto:</code> e
-        <code>Negrito: "termo1", "termo2"</code>), o app também reconhece
-        automaticamente: usa só o conteúdo de cada campo, uma página por
-        slide, já aplica o negrito nos termos listados, e descarta tudo que
-        é anotação de produção — número do slide, categoria/pilar (Capa,
-        Contexto, CTA...), tipo de mídia (Foto/Texto) e observações de
-        referência de imagem entre parênteses — nada disso aparece pro
-        público final.
-        <br><br>
-        <b>Título e negrito dentro do texto de cada página</b> (funciona
-        colando texto corrido ou dentro de uma célula da tabela): coloque
-        <code>**palavra**</code> em qualquer trecho pra ele sair em
-        <b>negrito</b> — use nos dados de impacto, termo-chave do pilar ou
-        verbo de virada, sem negritar a frase inteira. Pra dar um título
-        (maior e mais forte que o resto, pensado pra capa e CTA), escreva a
-        primeira linha curta, pule uma linha em branco, e siga com o resto
-        do texto — a primeira linha vira título automaticamente. Sem linha
-        em branco, o texto inteiro é tratado como corpo normal.
+        <code>**palavra**</code> = negrito. 1ª linha curta + linha em
+        branco = vira título.
       </div>
       <div class="card">
         <textarea id="scriptTextArea" placeholder="Cole ou escreva aqui o texto/script do conteúdo..." style="width:100%;min-height:320px;background:var(--panel-2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:inherit;font-size:12.5px;padding:10px 12px;resize:vertical;"></textarea>
@@ -609,16 +565,11 @@
       </div>
 
       <div class="card" id="scriptComplianceCard" style="margin-top:12px;">
-        <div style="font-size:13px;font-weight:700;margin-bottom:6px;">Correção de texto — vocabulário de marca</div>
-        <div style="font-size:11.5px;color:var(--text-dim);margin-bottom:8px;">
-          Checagem automática antes de gerar: termos como "investimento",
-          "rendimento garantido", "renda passiva", "juros", "lucro fixo" ou
-          "aplicação financeira" são permitidos quando o texto fala do
-          consórcio/imóvel pro cliente final, mas <b>proibidos</b> quando o
-          texto toca na mecânica do Método MAIS, na participação no
-          ecossistema Gfi Hub ou na remuneração de quem indica/vende. Isso
-          aqui não bloqueia gerar o carrossel — é um alerta pra você revisar
-          o contexto antes de publicar.
+        <div style="font-size:13px;font-weight:700;margin-bottom:6px;">Vocabulário de marca</div>
+        <div style="font-size:11px;color:var(--text-dim);margin-bottom:8px;">
+          Alerta (não bloqueia) se o texto usar termos como "investimento" ou
+          "renda passiva" fora do contexto de consórcio/imóvel pro cliente
+          final — revise antes de publicar.
         </div>
         <div id="scriptComplianceResult" style="font-size:12px;line-height:1.6;"></div>
       </div>
@@ -831,7 +782,7 @@
     if (state.logoDataUrl) {
       return '<img src="' + state.logoDataUrl + '" class="logo-mark" alt="B4 Business" style="width:100%;height:100%;object-fit:contain;">';
     }
-    return '<div style="width:100%;height:100%;border-radius:10px;background:linear-gradient(135deg,#17e6c9,#0b8f79);display:flex;align-items:center;justify-content:center;font-family:\'Sora\',sans-serif;font-weight:800;color:#04342c;font-size:15px;">B4</div>';
+    return '<div style="width:100%;height:100%;border-radius:10px;background:linear-gradient(135deg,#06C8F4,#0499B8);display:flex;align-items:center;justify-content:center;font-family:\'Sora\',sans-serif;font-weight:800;color:#03101C;font-size:15px;">B4</div>';
   }
 
   const csSwitchButtons = [document.getElementById('csBtnModel1'), document.getElementById('csBtnModel2')];
