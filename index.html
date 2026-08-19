@@ -316,6 +316,9 @@
   .cs-tweet-thumb { width: 52px; height: 52px; border-radius: 8px; object-fit: cover; background: var(--panel-2); flex: 0 0 auto; }
   .cs-tweet-rail-wrap { border-radius: 4px; overflow: hidden; border: 1px solid var(--border); background: #05090f; padding: 16px; margin-top: 4px; }
   .cs-tweet-rail { display: flex; gap: 20px; overflow-x: auto; padding-bottom: 8px; }
+  .tw-frame-item { flex: 0 0 auto; width: 302px; display: flex; flex-direction: column; gap: 8px; }
+  .tw-frame-actions { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+  .tw-frame-label { font-size: 11px; color: var(--text-dim); }
   .tw-frame { flex: 0 0 auto; width: 302px; height: 378px; overflow: hidden; position: relative; border-radius: 6px; box-shadow: 0 8px 30px rgba(0,0,0,.45); background: #fff; }
   /* Regras de borda do card Tweet/X (padrão pra todos os posts deste modelo):
      64px de margem segura nos 4 lados. De cima pra baixo: cabeçalho (perfil),
@@ -479,9 +482,12 @@
         <div class="cs-tweet-rail-wrap">
           <div class="cs-tweet-rail" id="csTweetRail"></div>
         </div>
-        <div class="note" style="margin-top:10px;">
-          Perfil fixo: Matheus Serpa | Consórcio. Arraste a imagem pra
-          reposicionar; zoom e crédito ficam no editor abaixo.
+        <div class="cs-tweet-row" style="margin-top:10px;">
+          <div class="note" style="flex:1;">
+            Perfil fixo: Matheus Serpa | Consórcio. Arraste a imagem pra
+            reposicionar; zoom e crédito ficam no editor abaixo.
+          </div>
+          <button type="button" class="btn" data-export-all="model2" style="flex:0 0 auto;">Baixar todas (PNG)</button>
         </div>
       </div>
 
@@ -489,9 +495,12 @@
         <div class="cs-tweet-rail-wrap">
           <div class="cs-tweet-rail" id="csBrandRail"></div>
         </div>
-        <div class="note" style="margin-top:10px;">
-          Identidade oficial B4 Business — mesmo texto/imagem do editor
-          abaixo, logo enviado no card <b>Logo B4</b>.
+        <div class="cs-tweet-row" style="margin-top:10px;">
+          <div class="note" style="flex:1;">
+            Identidade oficial B4 Business — mesmo texto/imagem do editor
+            abaixo, logo enviado no card <b>Logo B4</b>.
+          </div>
+          <button type="button" class="btn" data-export-all="model1" style="flex:0 0 auto;">Baixar todas (PNG)</button>
         </div>
       </div>
 
@@ -579,6 +588,7 @@
   </div>
 </div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script>
 (function () {
   'use strict';
@@ -995,14 +1005,27 @@
   const csBrandRail = document.getElementById('csBrandRail');
   const csTweetEditor = document.getElementById('csTweetEditor');
 
+  // Rótulo + botão de exportar PNG abaixo de cada página da esteira — mesmo
+  // markup nos dois modelos, só muda data-export-style.
+  function frameActionsHtml(i, style) {
+    return (
+      '<div class="tw-frame-actions">' +
+        '<span class="tw-frame-label">Página ' + (i + 1) + '</span>' +
+        '<button type="button" class="btn btn-sm" data-export-slide="' + i + '" data-export-style="' + style + '">' +
+          (typeof navigator !== 'undefined' && navigator.share ? 'Compartilhar' : 'PNG') +
+        '</button>' +
+      '</div>'
+    );
+  }
+
   function renderTweetRail() {
     const slides = state.tweetCarousel.slides;
     csTweetRail.innerHTML = slides.map(function (slide, i) {
-      return '<div class="tw-frame">' + renderTweetSlideCardHtml(slide, i, slides.length) + '</div>';
+      return '<div class="tw-frame-item"><div class="tw-frame">' + renderTweetSlideCardHtml(slide, i, slides.length) + '</div>' + frameActionsHtml(i, 'model2') + '</div>';
     }).join('');
     if (csBrandRail) {
       csBrandRail.innerHTML = slides.map(function (slide, i) {
-        return '<div class="tw-frame">' + renderBrandSlideCardHtml(slide, i, slides.length) + '</div>';
+        return '<div class="tw-frame-item"><div class="tw-frame">' + renderBrandSlideCardHtml(slide, i, slides.length) + '</div>' + frameActionsHtml(i, 'model1') + '</div>';
       }).join('');
     }
     attachTweetImageDrag();
@@ -1057,6 +1080,122 @@
     wireImageDrag(csTweetRail, 'data-tweet-slide-id');
     wireImageDrag(csBrandRail, 'data-brand-slide-id');
   }
+
+  // ---------------------------------------------------------------------
+  // Baixar / compartilhar página como PNG — renderiza o card em tamanho
+  // real (1080x1350, sem a escala usada só pra caber na esteira) fora da
+  // tela, espera as imagens carregarem e usa o html2canvas pra virar PNG.
+  // Em celular com suporte a Web Share (arquivo), abre direto o menu de
+  // compartilhar do sistema; nos outros casos baixa o arquivo.
+  // ---------------------------------------------------------------------
+  function buildFullSizeCardEl(style, index) {
+    const slide = state.tweetCarousel.slides[index];
+    const total = state.tweetCarousel.slides.length;
+    if (!slide) return null;
+    const html = style === 'model1'
+      ? renderBrandSlideCardHtml(slide, index, total)
+      : renderTweetSlideCardHtml(slide, index, total);
+    const holder = document.createElement('div');
+    holder.style.cssText = 'position:fixed;left:-99999px;top:0;pointer-events:none;';
+    holder.innerHTML = html;
+    document.body.appendChild(holder);
+    const cardEl = holder.firstElementChild;
+    if (cardEl) cardEl.style.transform = 'none'; // sem a escala de preview — captura em 1080x1350 real
+    return { holder: holder, cardEl: cardEl };
+  }
+
+  function waitImagesLoaded(el) {
+    const imgs = Array.from(el.querySelectorAll('img'));
+    return Promise.all(imgs.map(function (img) {
+      if (img.complete && img.naturalWidth > 0) return Promise.resolve();
+      return new Promise(function (resolve) {
+        img.addEventListener('load', resolve, { once: true });
+        img.addEventListener('error', resolve, { once: true });
+        setTimeout(resolve, 4000); // trava de segurança se a imagem nunca carregar
+      });
+    }));
+  }
+
+  async function renderSlideToPngBlob(style, index) {
+    if (typeof html2canvas === 'undefined') {
+      throw new Error('Biblioteca de exportação (html2canvas) não carregou — verifique a conexão e tente de novo.');
+    }
+    const built = buildFullSizeCardEl(style, index);
+    if (!built || !built.cardEl) throw new Error('Página não encontrada.');
+    try {
+      await waitImagesLoaded(built.cardEl);
+      const canvas = await html2canvas(built.cardEl, { backgroundColor: null, useCORS: true, scale: 1, width: 1080, height: 1350 });
+      return await new Promise(function (resolve) { canvas.toBlob(resolve, 'image/png'); });
+    } finally {
+      built.holder.remove();
+    }
+  }
+
+  async function exportSlidePng(style, index) {
+    const btn = document.querySelector('[data-export-slide="' + index + '"][data-export-style="' + style + '"]');
+    const originalLabel = btn ? btn.textContent : '';
+    if (btn) { btn.disabled = true; btn.textContent = '...'; }
+    try {
+      const blob = await renderSlideToPngBlob(style, index);
+      const filename = 'b4-carrossel-pagina-' + (index + 1) + '.png';
+      const file = new File([blob], filename, { type: 'image/png' });
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        try {
+          await navigator.share({ files: [file], title: 'Carrossel B4' });
+          return;
+        } catch (err) {
+          if (err && err.name === 'AbortError') return; // usuário cancelou o compartilhamento
+          // qualquer outro erro de share cai pro download normal abaixo
+        }
+      }
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = filename;
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(function () { URL.revokeObjectURL(url); }, 4000);
+      showMbToast('Página ' + (index + 1) + ' baixada em PNG.');
+    } catch (err) {
+      alert('Não deu pra gerar o PNG desta página: ' + (err && err.message ? err.message : err));
+    } finally {
+      if (btn) { btn.disabled = false; btn.textContent = originalLabel; }
+    }
+  }
+
+  async function exportAllPng(style) {
+    const total = state.tweetCarousel.slides.length;
+    if (!total) return;
+    const btn = document.querySelector('[data-export-all="' + style + '"]');
+    const originalLabel = btn ? btn.textContent : '';
+    for (let i = 0; i < total; i++) {
+      if (btn) { btn.disabled = true; btn.textContent = 'Baixando ' + (i + 1) + '/' + total + '...'; }
+      try {
+        const blob = await renderSlideToPngBlob(style, i);
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url; a.download = 'b4-carrossel-pagina-' + (i + 1) + '.png';
+        document.body.appendChild(a); a.click(); a.remove();
+        setTimeout(function (u) { URL.revokeObjectURL(u); }, 4000, url);
+      } catch (err) {
+        alert('Parou na página ' + (i + 1) + ': ' + (err && err.message ? err.message : err));
+        break;
+      }
+      await new Promise(function (r) { setTimeout(r, 350); }); // espaça os downloads pro navegador não bloquear
+    }
+    if (btn) { btn.disabled = false; btn.textContent = originalLabel; }
+    showMbToast('Download das páginas concluído.');
+  }
+
+  document.addEventListener('click', function (e) {
+    const slideBtn = e.target.closest('[data-export-slide]');
+    if (slideBtn) {
+      exportSlidePng(slideBtn.getAttribute('data-export-style'), parseInt(slideBtn.getAttribute('data-export-slide'), 10));
+      return;
+    }
+    const allBtn = e.target.closest('[data-export-all]');
+    if (allBtn) {
+      exportAllPng(allBtn.getAttribute('data-export-all'));
+    }
+  });
 
   function renderTweetEditor() {
     const slides = state.tweetCarousel.slides;
